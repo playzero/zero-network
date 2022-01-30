@@ -124,7 +124,7 @@ sp-tracing = { version = "4.0.0", git = "https://github.com/paritytech/substrate
 sp-blockchain = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
 futures = "0.3.16"
 tempfile = "3.1.0"
-assert_cmd = "2.0.2"
+assert_cmd = "2.0.4"
 nix = "0.23"
 serde_json = "1.0"
 regex = "1"
