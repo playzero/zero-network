@@ -1,0 +1,38 @@
+[package]
+name = "node-rpc"
+version = "3.0.0-dev"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2021"
+license = "Apache-2.0"
+homepage = "https://substrate.io"
+repository = "https://github.com/paritytech/substrate/"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+jsonrpc-core = "18.0.0"
+node-primitives = { version = "2.0.0", path = "../primitives" }
+
+pallet-contracts-rpc = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+pallet-mmr-rpc = { version = "3.0.0", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+pallet-transaction-payment-rpc = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-client-api = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-consensus-babe-rpc = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-consensus-epochs = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-chain-spec = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-finality-grandpa = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-finality-grandpa-rpc = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-rpc-api = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-rpc = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-sync-state-rpc = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sp-api = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sp-block-builder = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sp-blockchain = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sp-keystore = { version = "0.10.0", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sp-consensus = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sp-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sp-runtime = { version = "4.0.0", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+sc-transaction-pool-api = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+substrate-frame-rpc-system = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
