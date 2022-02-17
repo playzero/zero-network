@@ -3,11 +3,17 @@ resolver = "2"
 
 members = [
 
-	# "bin/zero-template/node",
-	# "bin/zero-template/pallets/template",
-	# "bin/zero-template/runtime",
+	"bin/zero-dev/node",
+	"bin/zero-dev/pallets/template",
+	"bin/zero-dev/runtime",
 
-	"bin/zero/cli",
+	"orml/currencies",
+	"orml/traits",
+	"orml/tokens",
+	"gamedao-protocol/flow",
+	"primitives",
+
+	# "bin/zero/cli",
 
 	# "bin/zero/bench",
 	# "bin/zero/test-runner-example",
