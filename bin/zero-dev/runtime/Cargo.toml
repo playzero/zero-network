@@ -47,6 +47,7 @@ primitives = { package = "zero-primitives", path = "../../../primitives", defaul
 
 gamedao-protocol-support = { package = "gamedao-protocol-support", path = "../../../gamedao-protocol/support", default-features = false }
 pallet-flow = { path = "../../../gamedao-protocol/flow", default-features = false }
+pallet-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
 
 # Used for the node template's RPCs
 frame-system-rpc-runtime-api = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -56,8 +57,6 @@ pallet-transaction-payment-rpc-runtime-api = { default-features = false, git = "
 frame-benchmarking = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", optional = true }
 frame-system-benchmarking = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", optional = true }
 hex-literal = { version = "0.3.4", optional = true }
-
-pallet-template = { version = "3.0.0", default-features = false, path = "../pallets/template" }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -77,7 +76,6 @@ std = [
 	"pallet-grandpa/std",
 	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
-	"pallet-template/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
@@ -94,13 +92,14 @@ std = [
 	"sp-version/std",
 
 	"pallet-flow/std",
+	"pallet-sense/std",
+	"gamedao-protocol-support/std",
 
 	"orml-tokens/std",
 	"orml-traits/std",
 	"orml-currencies/std",
 
 	"primitives/std",
-	"gamedao-protocol-support/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -109,7 +108,8 @@ runtime-benchmarks = [
 	"frame-system/runtime-benchmarks",
 	"hex-literal",
 	"pallet-balances/runtime-benchmarks",
-	"pallet-template/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
+
+	'pallet-sense/runtime-benchmarks',
 ]
