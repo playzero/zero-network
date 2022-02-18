@@ -48,8 +48,6 @@ pub use sp_runtime::{Perbill, Permill};
 pub use primitives::{TokenSymbol, CurrencyId, Hash, Amount, Balance, BlockNumber, AccountId, Signature, Index};
 use gamedao_protocol_support::ControlPalletStorage;
 
-/// Import the template pallet.
-pub use pallet_template;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -79,8 +77,8 @@ pub mod opaque {
 //   https://docs.substrate.io/v3/runtime/upgrades#runtime-versioning
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("node-template"),
-	impl_name: create_runtime_str!("node-template"),
+	spec_name: create_runtime_str!("node-dev"),
+	impl_name: create_runtime_str!("node-dev"),
 	authoring_version: 1,
 	// The version of the runtime specification. A full node will not attempt to use its native
 	//   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
@@ -281,11 +279,6 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 }
 
-/// Configure the pallet-template in pallets/template.
-impl pallet_template::Config for Runtime {
-	type Event = Event;
-}
-
 parameter_type_with_key! {
 	pub ExistentialDeposits: |currency_id: u32| -> Balance {
 		Zero::zero()
@@ -411,6 +404,12 @@ impl pallet_flow::Config for Runtime {
 	type CampaignFee = CampaignFee;
 }
 
+impl pallet_sense::Config for Runtime {
+	type Event = Event;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -426,12 +425,15 @@ construct_runtime!(
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
-		// Include the custom logic from the pallet-template in the runtime.
-		TemplateModule: pallet_template,
-		Flow: pallet_flow,
 		Council: pallet_collective::<Instance1>,
+
+		// ORML pallets:
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 		Currencies: orml_currencies::{Pallet, Call, Event<T>},
+		
+		// GameDAO protocol pallets:
+		Flow: pallet_flow,
+		Sense: pallet_sense,
 	}
 );
 
@@ -610,7 +612,7 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
 			list_benchmark!(list, extra, pallet_balances, Balances);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
-			list_benchmark!(list, extra, pallet_template, TemplateModule);
+			list_benchmark!(list, extra, pallet_sense, Sense);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -648,7 +650,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-			add_benchmark!(params, batches, pallet_template, TemplateModule);
+			add_benchmark!(params, batches, pallet_sense, Sense);
 
 			Ok(batches)
 		}

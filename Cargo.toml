@@ -4,13 +4,13 @@ resolver = "2"
 members = [
 
 	"bin/zero-dev/node",
-	"bin/zero-dev/pallets/template",
 	"bin/zero-dev/runtime",
 
 	"orml/currencies",
 	"orml/traits",
 	"orml/tokens",
 	"gamedao-protocol/flow",
+	"gamedao-protocol/sense",
 	"gamedao-protocol/support",
 	"primitives",
 
