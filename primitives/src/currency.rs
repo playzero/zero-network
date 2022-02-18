@@ -143,7 +143,6 @@ pub trait TokenInfo {
 
 pub type ForeignAssetId = u16;
 
-
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "std", serde(rename_all = "camelCase"))]
@@ -164,7 +163,18 @@ impl CurrencyId {
 
 /// H160 CurrencyId Type enum
 #[derive(
-	Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TryFromPrimitive, IntoPrimitive, TypeInfo,
+	Encode,
+	Decode,
+	Eq,
+	PartialEq,
+	Copy,
+	Clone,
+	RuntimeDebug,
+	PartialOrd,
+	Ord,
+	TryFromPrimitive,
+	IntoPrimitive,
+	TypeInfo,
 )]
 #[repr(u8)]
 pub enum CurrencyIdType {

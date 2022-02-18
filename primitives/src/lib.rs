@@ -20,16 +20,15 @@
 
 // pub mod currency;
 
+use codec::{Decode, Encode};
 use sp_runtime::{
 	generic,
-	traits::{ Verify, BlakeTwo256, IdentifyAccount },
-	OpaqueExtrinsic, MultiSignature,
+	traits::{BlakeTwo256, IdentifyAccount, Verify},
+	MultiSignature, OpaqueExtrinsic, RuntimeDebug,
 };
-use codec::{ Encode, Decode };
-use sp_runtime::RuntimeDebug;
 
 #[cfg(feature = "std")]
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -86,7 +85,6 @@ pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
 
-
 /// A timestamp: milliseconds since the unix epoch.
 /// `u64` is enough to represent a duration of half a billion years, when the
 /// time scale is milliseconds.
@@ -106,15 +104,15 @@ pub type NFTBalance = u128;
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TokenSymbol {
-	ZERO  = 0,
-	PLAY  = 1,
-	GAME  = 2,
-	DOT   = 3,
-	KSM   = 4,
-	DAI   = 5,
-	EUR   = 6,
-	HYPE  = 7,
-	FUEL  = 8,
+	ZERO = 0,
+	PLAY = 1,
+	GAME = 2,
+	DOT = 3,
+	KSM = 4,
+	DAI = 5,
+	EUR = 6,
+	HYPE = 7,
+	FUEL = 8,
 }
 
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
@@ -161,11 +159,10 @@ pub enum AuthoritysOriginId {
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum SenseProps {
-	XP    = 0,
-	REP   = 1,
+	XP = 0,
+	REP = 1,
 	TRUST = 2,
 }
-
 
 //
 //	g o v e r n a n c e
@@ -198,8 +195,6 @@ pub enum ProposalState {
 	TERM = 4,
 	DONE = 5,
 }
-
-
 
 //
 //
