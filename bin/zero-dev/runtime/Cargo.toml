@@ -43,6 +43,9 @@ orml-tokens = { path = "../../../orml/tokens", default-features = false }
 orml-traits = { path = "../../../orml/traits", default-features = false }
 orml-currencies = { path = "../../../orml/currencies", default-features = false }
 
+primitives = { package = "zero-primitives", path = "../../../primitives", default-features = false }
+
+gamedao-protocol-support = { package = "gamedao-protocol-support", path = "../../../gamedao-protocol/support", default-features = false }
 pallet-flow = { path = "../../../gamedao-protocol/flow", default-features = false }
 
 # Used for the node template's RPCs
@@ -95,6 +98,9 @@ std = [
 	"orml-tokens/std",
 	"orml-traits/std",
 	"orml-currencies/std",
+
+	"primitives/std",
+	"gamedao-protocol-support/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",

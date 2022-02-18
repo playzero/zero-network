@@ -11,6 +11,7 @@ members = [
 	"orml/traits",
 	"orml/tokens",
 	"gamedao-protocol/flow",
+	"gamedao-protocol/support",
 	"primitives",
 
 	# "bin/zero/cli",

@@ -45,30 +45,11 @@ use pallet_transaction_payment::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use primitives::{TokenSymbol, CurrencyId, Hash, Amount, Balance, BlockNumber, AccountId, Signature, Index};
+use gamedao_protocol_support::ControlPalletStorage;
+
 /// Import the template pallet.
 pub use pallet_template;
-
-/// An index to a block.
-pub type BlockNumber = u32;
-
-/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
-
-/// Some way of identifying an account on the chain. We intentionally make it equivalent
-/// to the public key of our transaction signing scheme.
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
-/// Balance of an account.
-pub type Balance = u128;
-
-/// Signed version of Balance
-pub type Amount = i128;
-
-/// Index of a transaction in the chain.
-pub type Index = u32;
-
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -311,16 +292,16 @@ parameter_type_with_key! {
 	};
 }
 
-pub const DAVE: AccountId = AccountId32::new([3u8; 32]);
+pub const MOCK_ACCOUNT: AccountId = AccountId32::new([3u8; 32]);
 
 parameter_types! {
-	pub DustReceiver: AccountId = DAVE;
+	pub DustReceiver: AccountId = MOCK_ACCOUNT;
 }
 
 pub struct MockDustRemovalWhitelist;
 impl Contains<AccountId> for MockDustRemovalWhitelist {
 	fn contains(a: &AccountId) -> bool {
-		*a == DAVE || *a == DustReceiver::get()
+		*a == MOCK_ACCOUNT || *a == DustReceiver::get()
 	}
 }
 
@@ -359,16 +340,16 @@ parameter_types! {
 
 	// TODO: more flexible account admin map
 	// pub const Admin: EnsureRootOrGameDAOAdmin = ();
-	pub GameDAOTreasury: AccountId = DAVE;
+	pub GameDAOTreasury: AccountId = MOCK_ACCOUNT;
 
-	pub const SeedNonce: u64 = 1;
+	// pub const SeedNonce: u64 = 1;
 
-	pub const MinLength: usize = 4;
-	pub const MaxLength: usize = 64;
+	pub const MinLength: u32 = 4;
+	pub const MaxLength: u32 = 64;
 
-	pub const MaxCampaignsPerAddress: usize = 3;
-	pub const MaxCampaignsPerBlock: usize = 3;
-	pub const MaxContributionsPerBlock: usize = 3;
+	pub const MaxCampaignsPerAddress: u32 = 3;
+	pub const MaxCampaignsPerBlock: u32 = 3;
+	pub const MaxContributionsPerBlock: u32 = 3;
 
 	pub const MinDuration: BlockNumber = 1 * DAYS;
 	pub const MaxDuration: BlockNumber = 100 * DAYS;
@@ -379,6 +360,22 @@ parameter_types! {
 	// TODO: fees
 	pub const CampaignFee: Balance = 25 * CENTS;
 
+	pub const GAMECurrencyId: CurrencyId = TokenSymbol::GAME as u32;
+
+}
+
+// This is a temporary mock, since pallet Control is not ready yet
+pub struct ControlPalletMock<AccountId, Hash> {
+	a: AccountId,
+	h: Hash,
+}
+
+impl ControlPalletStorage<AccountId, Hash> for ControlPalletMock<AccountId, Hash> {
+
+	fn body_controller(org: Hash) -> AccountId { MOCK_ACCOUNT }
+
+	fn body_treasury(org: Hash) -> AccountId { MOCK_ACCOUNT }
+
 }
 
 /// Configure the pallet-flow in pallets/flow.
@@ -387,19 +384,18 @@ impl pallet_flow::Config for Runtime {
 	// might need another instance of council as e.g. supervisor
 	// type ModuleAdmin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = ();
-
-	type CurrencyId = u32;
-	type Balance = Balance;
-	type Currency = Tokens;
-	type UnixTime = Timestamp;
-
-	type GameDAOTreasury = GameDAOTreasury;
-
-	type GameDAOAdminOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
 	type Event = Event;
-	type Nonce = SeedNonce;
+	type Currency = Tokens;
+	type FundingCurrencyId = GAMECurrencyId;
+	type UnixTime = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 
+	type Control = ControlPalletMock<AccountId, Hash>;
+
+	type GameDAOAdminOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+	type GameDAOTreasury = GameDAOTreasury;
+
+	// type Nonce = SeedNonce;
 	type MinLength = MinLength;
 	type MaxLength = MaxLength;
 
