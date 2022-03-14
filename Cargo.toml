@@ -10,6 +10,8 @@ members = [
 	"orml/traits",
 	"orml/tokens",
 	"gamedao-protocol/flow",
+	"gamedao-protocol/control",
+	"gamedao-protocol/signal",
 	"gamedao-protocol/sense",
 	"gamedao-protocol/support",
 	"primitives",

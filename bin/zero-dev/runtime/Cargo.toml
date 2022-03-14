@@ -47,6 +47,8 @@ primitives = { package = "zero-primitives", path = "../../../primitives", defaul
 
 gamedao-protocol-support = { package = "gamedao-protocol-support", path = "../../../gamedao-protocol/support", default-features = false }
 pallet-flow = { path = "../../../gamedao-protocol/flow", default-features = false }
+pallet-control = { path = "../../../gamedao-protocol/control", default-features = false }
+pallet-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
 pallet-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
 
 # Used for the node template's RPCs
@@ -92,6 +94,8 @@ std = [
 	"sp-version/std",
 
 	"pallet-flow/std",
+    "pallet-control/std",
+    "pallet-signal/std",
 	"pallet-sense/std",
 	"gamedao-protocol-support/std",
 

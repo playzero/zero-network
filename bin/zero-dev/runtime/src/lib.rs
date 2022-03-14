@@ -14,10 +14,11 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, u32_trait::{_1, _2}};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify},
+	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, NumberFor},
 	transaction_validity::{TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, MultiSignature, traits::Zero, AccountId32
+	ApplyExtrinsicResult, traits::Zero, AccountId32
 };
+use frame_system::{EnsureOneOf, EnsureRoot};
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -46,7 +47,6 @@ pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
 pub use primitives::{TokenSymbol, CurrencyId, Hash, Amount, Balance, BlockNumber, AccountId, Signature, Index};
-use gamedao_protocol_support::ControlPalletStorage;
 
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -280,7 +280,7 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 }
 
 parameter_type_with_key! {
-	pub ExistentialDeposits: |currency_id: u32| -> Balance {
+	pub ExistentialDeposits: |_currency_id: u32| -> Balance {
 		Zero::zero()
 	};
 }
@@ -319,15 +319,62 @@ impl orml_currencies::Config for Runtime {
 	type WeightInfo = ();
 }
 
-//	flow
-//	fundraising module
-//
-//	TODO
-//	type EnsureRootOrHalfCouncil = EnsureOneOf<
-// 		AccountId,
-// 		EnsureRoot<AccountId>,
-// 		pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>
-//	>;
+parameter_types! {
+    pub const GameCurrencyId: CurrencyId = TokenSymbol::GAME as u32;
+    pub const ZeroCurrencyId: CurrencyId = TokenSymbol::ZERO as u32;
+}
+
+parameter_types! {
+    pub const MaxProposalsPerBlock: u32 = 100;
+    pub const MaxProposalDuration: u32 = 864000;  // 864000, 60 * 60 * 24 * 30 / 3
+}
+
+impl pallet_signal::Config for Runtime {
+    type WeightInfo = ();
+	type Event = Event;
+    type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+    type Currency = Tokens;
+    type Randomness = RandomnessCollectiveFlip;
+    type Flow = Flow;
+    type Control = Control;
+    
+    type MaxProposalsPerBlock = MaxProposalsPerBlock;
+    type MaxProposalDuration = MaxProposalDuration;
+    type FundingCurrencyId = GameCurrencyId;
+}
+
+parameter_types! {
+    pub const MaxDAOsPerAccount: u32 = 10;
+    pub const MaxMembersPerDAO: u32 = 1000;
+    pub const MaxCreationsPerBlock: u32 = 100;
+    pub const CreationFee: Balance = 1 * DOLLARS;
+}
+
+impl pallet_control::Config for Runtime {
+    type WeightInfo = ();
+	type Event = Event;
+    type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+    type Currency = Tokens;
+    type Randomness = RandomnessCollectiveFlip;
+    type GameDAOTreasury = GameDAOTreasury;
+
+    type NetworkCurrencyId = ZeroCurrencyId;
+    type FundingCurrencyId = GameCurrencyId;
+    type DepositCurrencyId = GameCurrencyId;
+
+    type MaxDAOsPerAccount = MaxDAOsPerAccount;
+    type MaxMembersPerDAO = MaxMembersPerDAO;
+    type MaxCreationsPerBlock = MaxCreationsPerBlock;
+    type CreationFee = CreationFee;
+    
+}
+
+// TODO: move to runtime_common?
+pub type EnsureRootOrHalfGeneralCouncil = EnsureOneOf<
+	AccountId,
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>,
+>;
 
 parameter_types! {
 
@@ -351,27 +398,9 @@ parameter_types! {
 	pub const MinContribution: Balance = 1 * DOLLARS;
 
 	// TODO: fees
-	pub const CampaignFee: Balance = 25 * CENTS;
-
-	pub const GAMECurrencyId: CurrencyId = TokenSymbol::GAME as u32;
-
+    pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
 }
 
-// This is a temporary mock, since pallet Control is not ready yet
-pub struct ControlPalletMock<AccountId, Hash> {
-	a: AccountId,
-	h: Hash,
-}
-
-impl ControlPalletStorage<AccountId, Hash> for ControlPalletMock<AccountId, Hash> {
-
-	fn body_controller(org: Hash) -> AccountId { MOCK_ACCOUNT }
-
-	fn body_treasury(org: Hash) -> AccountId { MOCK_ACCOUNT }
-
-}
-
-/// Configure the pallet-flow in pallets/flow.
 impl pallet_flow::Config for Runtime {
 	// ensure root or half council as admin role for campaigns.
 	// might need another instance of council as e.g. supervisor
@@ -379,29 +408,24 @@ impl pallet_flow::Config for Runtime {
 	type WeightInfo = ();
 	type Event = Event;
 	type Currency = Tokens;
-	type FundingCurrencyId = GAMECurrencyId;
+	type FundingCurrencyId = GameCurrencyId;
 	type UnixTime = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
-
-	type Control = ControlPalletMock<AccountId, Hash>;
-
-	type GameDAOAdminOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+	type Control = Control;
+	type GameDAOAdminOrigin = EnsureRootOrHalfGeneralCouncil;
 	type GameDAOTreasury = GameDAOTreasury;
 
 	// type Nonce = SeedNonce;
+    type CampaignFee = CampaignFee;
 	type MinLength = MinLength;
 	type MaxLength = MaxLength;
-
 	type MaxCampaignsPerAddress = MaxCampaignsPerAddress;
 	type MaxCampaignsPerBlock = MaxCampaignsPerBlock;
 	type MaxContributionsPerBlock = MaxContributionsPerBlock;
-
 	type MinDuration = MinDuration;
 	type MaxDuration = MaxDuration;
 	type MinCreatorDeposit = MinCreatorDeposit;
 	type MinContribution = MinContribution;
-
-	type CampaignFee = CampaignFee;
 }
 
 impl pallet_sense::Config for Runtime {
@@ -434,6 +458,8 @@ construct_runtime!(
 		// GameDAO protocol pallets:
 		Flow: pallet_flow,
 		Sense: pallet_sense,
+        Control: pallet_control,
+        Signal: pallet_signal,
 	}
 );
 

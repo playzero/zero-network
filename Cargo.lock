@@ -1148,6 +1148,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "diff"
+version = "0.1.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e25ea47919b1560c4e3b7fe0aaab9becf5b84a10325ddf7db0f0ba5e1026499"
+
+[[package]]
 name = "difference"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1606,6 +1612,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "frame-support-test"
+version = "3.0.0"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13#afb74de23dfe2994e7ce38c0870efb9734e966f7"
+dependencies = [
+ "frame-support",
+ "frame-support-test-pallet",
+ "frame-system",
+ "parity-scale-codec",
+ "pretty_assertions 1.2.0",
+ "rustversion",
+ "scale-info",
+ "serde",
+ "sp-arithmetic",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-std",
+ "sp-version",
+ "trybuild",
+]
+
+[[package]]
+name = "frame-support-test-pallet"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13#afb74de23dfe2994e7ce38c0870efb9734e966f7"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+]
+
+[[package]]
 name = "frame-system"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13#afb74de23dfe2994e7ce38c0870efb9734e966f7"
@@ -1828,6 +1868,13 @@ dependencies = [
 [[package]]
 name = "gamedao-protocol-support"
 version = "1.0.1-dev"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-std",
+]
 
 [[package]]
 name = "gcc"
@@ -3641,10 +3688,12 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-collective",
+ "pallet-control",
  "pallet-flow",
  "pallet-grandpa",
  "pallet-randomness-collective-flip",
  "pallet-sense",
+ "pallet-signal",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-transaction-payment",
@@ -3770,6 +3819,27 @@ checksum = "19e64526ebdee182341572e50e9ad03965aa510cd94427a4549448f285e957a1"
 dependencies = [
  "hermit-abi",
  "libc",
+]
+
+[[package]]
+name = "num_enum"
+version = "0.5.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf5395665662ef45796a4ff5486c5d41d29e0c09640af4c5f17fd94ee2c119c9"
+dependencies = [
+ "num_enum_derive",
+]
+
+[[package]]
+name = "num_enum_derive"
+version = "0.5.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b0498641e53dd6ac1a4f22547548caa6864cc4933784319cd1775271c5a46ce"
+dependencies = [
+ "proc-macro-crate 1.1.0",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -3918,6 +3988,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-assets"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13#afb74de23dfe2994e7ce38c0870efb9734e966f7"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-aura"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13#afb74de23dfe2994e7ce38c0870efb9734e966f7"
@@ -3981,6 +4064,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-control"
+version = "1.0.1-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-support-test",
+ "frame-system",
+ "gamedao-protocol-support",
+ "hex-literal",
+ "num_enum",
+ "orml-currencies",
+ "orml-tokens",
+ "orml-traits",
+ "pallet-assets",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "sp-storage",
+ "zero-primitives",
+]
+
+[[package]]
 name = "pallet-elections-phragmen"
 version = "5.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13#afb74de23dfe2994e7ce38c0870efb9734e966f7"
@@ -4003,9 +4113,14 @@ version = "1.0.1-dev"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
+ "frame-support-test",
  "frame-system",
  "gamedao-protocol-support",
+ "orml-currencies",
+ "orml-tokens",
  "orml-traits",
+ "pallet-balances",
+ "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -4088,6 +4203,29 @@ dependencies = [
  "sp-staking",
  "sp-std",
  "sp-trie",
+]
+
+[[package]]
+name = "pallet-signal"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-support-test",
+ "frame-system",
+ "gamedao-protocol-support",
+ "orml-currencies",
+ "orml-tokens",
+ "orml-traits",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "zero-primitives",
 ]
 
 [[package]]
@@ -4555,6 +4693,18 @@ dependencies = [
  "ansi_term 0.11.0",
  "ctor",
  "difference",
+ "output_vt100",
+]
+
+[[package]]
+name = "pretty_assertions"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c038cb5319b9c704bf9c227c261d275bfec0ad438118a2787ce47944fb228b"
+dependencies = [
+ "ansi_term 0.12.1",
+ "ctor",
+ "diff",
  "output_vt100",
 ]
 
@@ -5121,6 +5271,12 @@ dependencies = [
  "schannel",
  "security-framework",
 ]
+
+[[package]]
+name = "rustversion"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2cc38e8fa666e2de3c4aba7edeb5ffc5246c1c2ed0e3d17e560aeeba736b23f"
 
 [[package]]
 name = "rw-stream-sink"
@@ -6103,18 +6259,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.132"
+version = "1.0.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b9875c23cf305cd1fd7eb77234cbb705f21ea6a72c637a5c6db5fe4b8e7f008"
+checksum = "ce31e24b01e1e524df96f1c2fdd054405f8d7376249a5110886fb4b658484789"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.132"
+version = "1.0.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecc0db5cb2556c0e558887d9bbdcf6ac4471e83ff66cf696e5419024d1606276"
+checksum = "08597e7152fcd306f41838ed3e37be9eaeed2b61c42e2117266a554fab4662f9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -7521,6 +7677,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
 
 [[package]]
+name = "trybuild"
+version = "1.0.56"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d60539445867cdd9680b2bfe2d0428f1814b7d5c9652f09d8d3eae9d19308db"
+dependencies = [
+ "glob",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "termcolor",
+ "toml",
+]
+
+[[package]]
 name = "tt-call"
 version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8208,7 +8378,7 @@ version = "1.28.0"
 dependencies = [
  "frame-system",
  "parity-scale-codec",
- "pretty_assertions",
+ "pretty_assertions 0.6.1",
  "serde",
  "sp-application-crypto",
  "sp-core",
