@@ -329,11 +329,11 @@ parameter_types! {
     pub const MaxProposalDuration: u32 = 864000;  // 864000, 60 * 60 * 24 * 30 / 3
 }
 
-impl pallet_signal::Config for Runtime {
+impl gamedao_signal::Config for Runtime {
     type WeightInfo = ();
 	type Event = Event;
     type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-    type Currency = Tokens;
+    type Currency = Currencies;
     type Randomness = RandomnessCollectiveFlip;
     type Flow = Flow;
     type Control = Control;
@@ -350,14 +350,15 @@ parameter_types! {
     pub const CreationFee: Balance = 1 * DOLLARS;
 }
 
-impl pallet_control::Config for Runtime {
+impl gamedao_control::Config for Runtime {
     type WeightInfo = ();
 	type Event = Event;
     type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-    type Currency = Tokens;
+    type Currency = Currencies;
     type Randomness = RandomnessCollectiveFlip;
     type GameDAOTreasury = GameDAOTreasury;
 
+    // TODO: use native currency instead?
     type NetworkCurrencyId = ZeroCurrencyId;
     type FundingCurrencyId = GameCurrencyId;
     type DepositCurrencyId = GameCurrencyId;
@@ -401,13 +402,13 @@ parameter_types! {
     pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
 }
 
-impl pallet_flow::Config for Runtime {
+impl gamedao_flow::Config for Runtime {
 	// ensure root or half council as admin role for campaigns.
 	// might need another instance of council as e.g. supervisor
 	// type ModuleAdmin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = ();
 	type Event = Event;
-	type Currency = Tokens;
+	type Currency = Currencies;
 	type FundingCurrencyId = GameCurrencyId;
 	type UnixTime = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
@@ -428,7 +429,7 @@ impl pallet_flow::Config for Runtime {
 	type MinContribution = MinContribution;
 }
 
-impl pallet_sense::Config for Runtime {
+impl gamedao_sense::Config for Runtime {
 	type Event = Event;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = ();
@@ -456,10 +457,10 @@ construct_runtime!(
 		Currencies: orml_currencies::{Pallet, Call, Event<T>},
 		
 		// GameDAO protocol pallets:
-		Flow: pallet_flow,
-		Sense: pallet_sense,
-        Control: pallet_control,
-        Signal: pallet_signal,
+		Flow: gamedao_flow,
+		Sense: gamedao_sense,
+        Control: gamedao_control,
+        Signal: gamedao_signal,
 	}
 );
 
@@ -638,7 +639,8 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
 			list_benchmark!(list, extra, pallet_balances, Balances);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
-			list_benchmark!(list, extra, pallet_sense, Sense);
+			list_benchmark!(list, extra, gamedao_sense, Sense);
+            list_benchmark!(list, extra, gamedao_flow, Flow);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -676,7 +678,8 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-			add_benchmark!(params, batches, pallet_sense, Sense);
+			add_benchmark!(params, batches, gamedao_sense, Sense);
+            add_benchmark!(params, batches, gamedao_flow, Flow);
 
 			Ok(batches)
 		}

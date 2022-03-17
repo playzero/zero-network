@@ -13,7 +13,7 @@ members = [
 	"gamedao-protocol/control",
 	"gamedao-protocol/signal",
 	"gamedao-protocol/sense",
-	"gamedao-protocol/support",
+	"gamedao-protocol/traits",
 	"primitives",
 
 	# "bin/zero/cli",
