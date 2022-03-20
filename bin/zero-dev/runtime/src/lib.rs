@@ -358,8 +358,6 @@ impl gamedao_control::Config for Runtime {
     type Randomness = RandomnessCollectiveFlip;
     type GameDAOTreasury = GameDAOTreasury;
 
-    // TODO: use native currency instead?
-    type NetworkCurrencyId = ZeroCurrencyId;
     type FundingCurrencyId = GameCurrencyId;
     type DepositCurrencyId = GameCurrencyId;
 
@@ -385,15 +383,15 @@ parameter_types! {
 
 	// pub const SeedNonce: u64 = 1;
 
-	pub const MinLength: u32 = 4;
-	pub const MaxLength: u32 = 64;
+	pub const MinNameLength: u32 = 4;
+	pub const MaxNameLength: u32 = 64;
 
 	pub const MaxCampaignsPerAddress: u32 = 3;
 	pub const MaxCampaignsPerBlock: u32 = 3;
 	pub const MaxContributionsPerBlock: u32 = 3;
 
-	pub const MinDuration: BlockNumber = 1 * DAYS;
-	pub const MaxDuration: BlockNumber = 100 * DAYS;
+	pub const MinCampaignDuration: BlockNumber = 1 * DAYS;
+	pub const MaxCampaignDuration: BlockNumber = 100 * DAYS;
 
 	pub const MinCreatorDeposit: Balance = 1 * DOLLARS;
 	pub const MinContribution: Balance = 1 * DOLLARS;
@@ -408,8 +406,10 @@ impl gamedao_flow::Config for Runtime {
 	// type ModuleAdmin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = ();
 	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
 	type Currency = Currencies;
-	type FundingCurrencyId = GameCurrencyId;
+	type ProtocolTokenId = GameCurrencyId;
 	type UnixTime = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 	type Control = Control;
@@ -418,13 +418,13 @@ impl gamedao_flow::Config for Runtime {
 
 	// type Nonce = SeedNonce;
     type CampaignFee = CampaignFee;
-	type MinLength = MinLength;
-	type MaxLength = MaxLength;
+	type MinNameLength = MinNameLength;
+	type MaxNameLength = MaxNameLength;
 	type MaxCampaignsPerAddress = MaxCampaignsPerAddress;
 	type MaxCampaignsPerBlock = MaxCampaignsPerBlock;
 	type MaxContributionsPerBlock = MaxContributionsPerBlock;
-	type MinDuration = MinDuration;
-	type MaxDuration = MaxDuration;
+	type MinCampaignDuration = MinCampaignDuration;
+	type MaxCampaignDuration = MaxCampaignDuration;
 	type MinCreatorDeposit = MinCreatorDeposit;
 	type MinContribution = MinContribution;
 }
@@ -640,7 +640,7 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_balances, Balances);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, gamedao_sense, Sense);
-            list_benchmark!(list, extra, gamedao_flow, Flow);
+            // list_benchmark!(list, extra, gamedao_flow, Flow);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -679,7 +679,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, gamedao_sense, Sense);
-            add_benchmark!(params, batches, gamedao_flow, Flow);
+            // add_benchmark!(params, batches, gamedao_flow, Flow);
 
 			Ok(batches)
 		}
