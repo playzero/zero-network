@@ -502,7 +502,7 @@ impl gamedao_flow::Config for Runtime {
 	type Currency = Currencies;
 	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
-	type UnixTime = Timestamp;
+	type Time = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 	type Control = Control;
 	type GameDAOAdminOrigin = EnsureRootOrHalfGeneralCouncil;
@@ -520,6 +520,7 @@ impl gamedao_flow::Config for Runtime {
 	type MaxCampaignDuration = MaxCampaignDuration;
 	type MinCreatorDeposit = MinCreatorDeposit;
 	type MinContribution = MinContribution;
+	type Moment = u64;
 }
 
 impl gamedao_sense::Config for Runtime {
