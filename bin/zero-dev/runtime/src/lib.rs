@@ -337,10 +337,13 @@ impl gamedao_signal::Config for Runtime {
     type Randomness = RandomnessCollectiveFlip;
     type Flow = Flow;
     type Control = Control;
+    // type Call = Call;
     
     type MaxProposalsPerBlock = MaxProposalsPerBlock;
     type MaxProposalDuration = MaxProposalDuration;
-    type FundingCurrencyId = GameCurrencyId;
+    type ProtocolTokenId = GameCurrencyId;
+    type Balance = Balance;
+    type CurrencyId = CurrencyId;
 }
 
 parameter_types! {
@@ -357,14 +360,16 @@ impl gamedao_control::Config for Runtime {
     type Currency = Currencies;
     type Randomness = RandomnessCollectiveFlip;
     type GameDAOTreasury = GameDAOTreasury;
+    // type Call = Call;
 
-    type FundingCurrencyId = GameCurrencyId;
-    type DepositCurrencyId = GameCurrencyId;
-
+    type ProtocolTokenId = GameCurrencyId;
+    type PaymentTokenId = GameCurrencyId;
     type MaxDAOsPerAccount = MaxDAOsPerAccount;
     type MaxMembersPerDAO = MaxMembersPerDAO;
     type MaxCreationsPerBlock = MaxCreationsPerBlock;
     type CreationFee = CreationFee;
+    type Balance = Balance;
+    type CurrencyId = CurrencyId;
     
 }
 
@@ -410,11 +415,12 @@ impl gamedao_flow::Config for Runtime {
 	type CurrencyId = CurrencyId;
 	type Currency = Currencies;
 	type ProtocolTokenId = GameCurrencyId;
-	type UnixTime = Timestamp;
+	type Time = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 	type Control = Control;
 	type GameDAOAdminOrigin = EnsureRootOrHalfGeneralCouncil;
 	type GameDAOTreasury = GameDAOTreasury;
+	// type Call = Call;
 
 	// type Nonce = SeedNonce;
     type CampaignFee = CampaignFee;
@@ -427,6 +433,7 @@ impl gamedao_flow::Config for Runtime {
 	type MaxCampaignDuration = MaxCampaignDuration;
 	type MinCreatorDeposit = MinCreatorDeposit;
 	type MinContribution = MinContribution;
+	type Moment = u64;
 }
 
 impl gamedao_sense::Config for Runtime {
@@ -459,8 +466,8 @@ construct_runtime!(
 		// GameDAO protocol pallets:
 		Flow: gamedao_flow,
 		Sense: gamedao_sense,
-        Control: gamedao_control,
-        Signal: gamedao_signal,
+        Control: gamedao_control::{Pallet, Storage, Event<T>},
+        Signal: gamedao_signal::{Pallet, Storage, Event<T>},
 	}
 );
 
@@ -640,6 +647,8 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_balances, Balances);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, gamedao_sense, Sense);
+            list_benchmark!(list, extra, gamedao_control, Control);
+            list_benchmark!(list, extra, gamedao_signal, Signal);
             // list_benchmark!(list, extra, gamedao_flow, Flow);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
@@ -679,6 +688,8 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, gamedao_sense, Sense);
+            add_benchmark!(params, batches, gamedao_control, Control);
+            add_benchmark!(params, batches, gamedao_signal, Signal);
             // add_benchmark!(params, batches, gamedao_flow, Flow);
 
 			Ok(batches)
