@@ -77,6 +77,7 @@ mod benchmarking;
 mod tests;
 mod types;
 pub mod weights;
+pub mod migration;
 
 use frame_support::traits::{BalanceStatus, Currency, OnUnbalanced, ReservableCurrency};
 use sp_runtime::traits::{AppendZerosInput, Saturating, StaticLookup, Zero};
@@ -87,6 +88,7 @@ pub use pallet::*;
 pub use types::{
 	Data, IdentityField, IdentityFields, IdentityInfo, Judgement, RegistrarIndex, RegistrarInfo,
 	Registration,
+	StorageVersion
 };
 
 type BalanceOf<T> =
@@ -201,6 +203,11 @@ pub mod pallet {
 		BoundedVec<Option<RegistrarInfo<BalanceOf<T>, T::AccountId>>, T::MaxRegistrars>,
 		ValueQuery,
 	>;
+
+	#[pallet::type_value]
+	pub fn DefaultStorageVersion<T: Config>() -> StorageVersion {StorageVersion::V1Initial}
+	#[pallet::storage]
+	pub(super) type PalletVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, DefaultStorageVersion<T>>;
 
 	#[pallet::error]
 	pub enum Error<T> {
