@@ -118,4 +118,6 @@ runtime-benchmarks = [
     "pallet-collective/runtime-benchmarks",
 	"gamedao-sense/runtime-benchmarks",
     "gamedao-flow/runtime-benchmarks",
+    "gamedao-signal/runtime-benchmarks",
+    "gamedao-control/runtime-benchmarks",
 ]

@@ -100,7 +100,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 pub const MILLISECS_PER_BLOCK: u64 = 6000;
 
 // NOTE: Currently it is not possible to change the slot duration after the chain has started.
-//       Attempting to do so will brick block production.
+//	   Attempting to do so will brick block production.
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 
 // Time is measured by number of blocks.
@@ -320,52 +320,58 @@ impl orml_currencies::Config for Runtime {
 }
 
 parameter_types! {
-    pub const GameCurrencyId: CurrencyId = TokenSymbol::GAME as u32;
-    pub const ZeroCurrencyId: CurrencyId = TokenSymbol::ZERO as u32;
+	pub const GameCurrencyId: CurrencyId = TokenSymbol::GAME as u32;
+	pub const PlayCurrencyId: CurrencyId = TokenSymbol::PLAY as u32;
 }
 
 parameter_types! {
-    pub const MaxProposalsPerBlock: u32 = 100;
-    pub const MaxProposalDuration: u32 = 864000;  // 864000, 60 * 60 * 24 * 30 / 3
+	pub const MaxProposalsPerBlock: u32 = 100;
+	pub const MaxProposalDuration: u32 = 864000;  // 864000, 60 * 60 * 24 * 30 / 3
 }
 
 impl gamedao_signal::Config for Runtime {
-    type WeightInfo = ();
+	type WeightInfo = ();
 	type Event = Event;
-    type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-    type Currency = Currencies;
-    type Randomness = RandomnessCollectiveFlip;
-    type Flow = Flow;
-    type Control = Control;
-    
-    type MaxProposalsPerBlock = MaxProposalsPerBlock;
-    type MaxProposalDuration = MaxProposalDuration;
-    type FundingCurrencyId = GameCurrencyId;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type Currency = Currencies;
+	type Randomness = RandomnessCollectiveFlip;
+	type Flow = Flow;
+	type Control = Control;
+	// type Call = Call;
+
+	type MaxProposalsPerBlock = MaxProposalsPerBlock;
+	type MaxProposalDuration = MaxProposalDuration;
+	type PaymentTokenId = PlayCurrencyId;
+	type ProtocolTokenId = GameCurrencyId;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
 }
 
 parameter_types! {
-    pub const MaxDAOsPerAccount: u32 = 10;
-    pub const MaxMembersPerDAO: u32 = 1000;
-    pub const MaxCreationsPerBlock: u32 = 100;
-    pub const CreationFee: Balance = 1 * DOLLARS;
+	pub const MaxDAOsPerAccount: u32 = 10;
+	pub const MaxMembersPerDAO: u32 = 1000;
+	pub const MaxCreationsPerBlock: u32 = 100;
+	pub const CreationFee: Balance = 1 * DOLLARS;
 }
 
 impl gamedao_control::Config for Runtime {
-    type WeightInfo = ();
+	type WeightInfo = ();
 	type Event = Event;
-    type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-    type Currency = Currencies;
-    type Randomness = RandomnessCollectiveFlip;
-    type GameDAOTreasury = GameDAOTreasury;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type Currency = Currencies;
+	type Randomness = RandomnessCollectiveFlip;
+	type GameDAOTreasury = GameDAOTreasury;
+	// type Call = Call;
 
-    type FundingCurrencyId = GameCurrencyId;
-    type DepositCurrencyId = GameCurrencyId;
+	type PaymentTokenId = PlayCurrencyId;
+	type ProtocolTokenId = GameCurrencyId;
+	type MaxDAOsPerAccount = MaxDAOsPerAccount;
+	type MaxMembersPerDAO = MaxMembersPerDAO;
+	type MaxCreationsPerBlock = MaxCreationsPerBlock;
+	type CreationFee = CreationFee;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
 
-    type MaxDAOsPerAccount = MaxDAOsPerAccount;
-    type MaxMembersPerDAO = MaxMembersPerDAO;
-    type MaxCreationsPerBlock = MaxCreationsPerBlock;
-    type CreationFee = CreationFee;
-    
 }
 
 // TODO: move to runtime_common?
@@ -397,7 +403,7 @@ parameter_types! {
 	pub const MinContribution: Balance = 1 * DOLLARS;
 
 	// TODO: fees
-    pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
+	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
 }
 
 impl gamedao_flow::Config for Runtime {
@@ -409,15 +415,17 @@ impl gamedao_flow::Config for Runtime {
 	type Balance = Balance;
 	type CurrencyId = CurrencyId;
 	type Currency = Currencies;
+	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
 	type UnixTime = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 	type Control = Control;
 	type GameDAOAdminOrigin = EnsureRootOrHalfGeneralCouncil;
 	type GameDAOTreasury = GameDAOTreasury;
+	// type Call = Call;
 
 	// type Nonce = SeedNonce;
-    type CampaignFee = CampaignFee;
+	type CampaignFee = CampaignFee;
 	type MinNameLength = MinNameLength;
 	type MaxNameLength = MaxNameLength;
 	type MaxCampaignsPerAddress = MaxCampaignsPerAddress;
@@ -459,8 +467,8 @@ construct_runtime!(
 		// GameDAO protocol pallets:
 		Flow: gamedao_flow,
 		Sense: gamedao_sense,
-        Control: gamedao_control,
-        Signal: gamedao_signal,
+		Control: gamedao_control::{Pallet, Storage, Event<T>},
+		Signal: gamedao_signal::{Pallet, Storage, Event<T>},
 	}
 );
 
@@ -640,7 +648,9 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_balances, Balances);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, gamedao_sense, Sense);
-            // list_benchmark!(list, extra, gamedao_flow, Flow);
+			list_benchmark!(list, extra, gamedao_control, Control);
+			list_benchmark!(list, extra, gamedao_signal, Signal);
+			// list_benchmark!(list, extra, gamedao_flow, Flow);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -679,7 +689,9 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, gamedao_sense, Sense);
-            // add_benchmark!(params, batches, gamedao_flow, Flow);
+			add_benchmark!(params, batches, gamedao_control, Control);
+			add_benchmark!(params, batches, gamedao_signal, Signal);
+			// add_benchmark!(params, batches, gamedao_flow, Flow);
 
 			Ok(batches)
 		}
