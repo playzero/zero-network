@@ -23,11 +23,9 @@ frame-benchmarking = { default-features = false, git = "https://github.com/parit
 frame-support = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 frame-system = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
-serde = "1.0.126"
-serde_json = "1.0.71"
-rustc-hex = { version="2.1.0", default-features = false }
-bs58 = { version = "0.4.0", default-features = false }
-hex = "0.4.3"
+serde = { version = "1.0.126", default-features = false, features = ['derive'] }
+serde_json = { version = "1.0.71", default-features = false, features = ['alloc'] }
+bs58 = { version = "0.4.0", default-features = false, features = ['alloc'] }
 
 [dev-dependencies]
 sp-core = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -45,11 +43,7 @@ std = [
 	"frame-support/std",
 	"frame-system/std",
 
-	"serde/std",
-	"serde_json/std",
-	"rustc-hex/std",
 	"bs58/std",
-	"hex/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",

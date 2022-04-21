@@ -1,15 +1,22 @@
-// use super::{Registration, BalanceOf, Config, IdentityInfo, Data, PalletVersion, StorageVersion};
 use super::*;
 use serde_json::{Value};
 use codec::{Decode};
 use frame_support::{BoundedVec};
 use sp_runtime::AccountId32;
 use sp_runtime::traits::SaturatedConversion;
+use sp_std::{num::ParseIntError};
 
 
 struct IdentityItem<T: Config> {
 	account_id: T::AccountId,
 	registration: Registration<BalanceOf<T>, T::MaxRegistrars, T::MaxAdditionalFields>
+}
+
+pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
+        .collect()
 }
 
 pub fn get_account_id<T: Config>(s: &str) -> T::AccountId {
@@ -31,8 +38,7 @@ pub fn get_account_id<T: Config>(s: &str) -> T::AccountId {
 pub fn parse_identity_field(f: &Value) -> Data {
 	match f {
 		Value::String(s) => {
-			// let parsed: BoundedVec<_, _> = ;
-			Data::Raw(hex::decode(s).unwrap().try_into().unwrap())
+			Data::Raw(decode_hex(s).unwrap().try_into().unwrap())
 		},
 		_ => {
 			Data::None
