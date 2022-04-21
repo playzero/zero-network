@@ -59,7 +59,8 @@ pub fn migrate_to_v2<T: Config>() -> frame_support::weights::Weight {
 
 	for i in &parsed {
 		let r = &i["identity"];
-		let acc_id = i["account_raw"].as_str().unwrap();
+		let f = &r["info"];
+		let acc_id = i["account_id"].as_str().unwrap();
 		let item: IdentityItem<T> = IdentityItem {
 			account_id: get_account_id::<T>(acc_id),
 			registration: Registration {
@@ -67,14 +68,14 @@ pub fn migrate_to_v2<T: Config>() -> frame_support::weights::Weight {
 				deposit: r["deposit"].as_u64().ok_or(0).unwrap().saturated_into::<BalanceOf<T>>(),
 				info: IdentityInfo {
 					additional: BoundedVec::default(),
-					display: parse_identity_field(&r["display"]),
+					display: parse_identity_field(&f["display"]),
 					pgp_fingerprint: Option::None,
-					legal: parse_identity_field(&r["legal"]),
-					web: parse_identity_field(&r["web"]),
-					riot: parse_identity_field(&r["riot"]),
-					email: parse_identity_field(&r["email"]),
-					image: parse_identity_field(&r["image"]),
-					twitter: parse_identity_field(&r["twitter"]),
+					legal: parse_identity_field(&f["legal"]),
+					web: parse_identity_field(&f["web"]),
+					riot: parse_identity_field(&f["riot"]),
+					email: parse_identity_field(&f["email"]),
+					image: parse_identity_field(&f["image"]),
+					twitter: parse_identity_field(&f["twitter"]),
 				}
 			}
 		};
@@ -82,5 +83,5 @@ pub fn migrate_to_v2<T: Config>() -> frame_support::weights::Weight {
 	}
 	<PalletVersion<T>>::set(StorageVersion::V2Imported);
 
-	(parsed.len() + 2) as u64
+	(parsed.len() + 2) as frame_support::weights::Weight
 }

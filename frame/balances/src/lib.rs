@@ -161,6 +161,9 @@ mod tests_local;
 mod tests_reentrancy;
 pub mod weights;
 
+pub mod migration;
+// pub use migration::migrate_to_v2;
+
 pub use self::imbalances::{NegativeImbalance, PositiveImbalance};
 use codec::{Codec, Decode, Encode, MaxEncodedLen};
 #[cfg(feature = "std")]
@@ -190,6 +193,15 @@ use sp_std::{cmp, fmt::Debug, mem, ops::BitOr, prelude::*, result};
 pub use weights::WeightInfo;
 
 pub use pallet::*;
+
+#[derive(Encode, Decode, Clone, RuntimeDebug, PartialEq, TypeInfo, MaxEncodedLen)]
+pub enum MigrateStorageVersion {
+    V1Initial,
+    V2Imported,
+}
+impl Default for MigrateStorageVersion {
+	fn default() -> Self {Self::V1Initial}
+}
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -540,6 +552,9 @@ pub mod pallet {
 	#[pallet::storage]
 	pub(super) type StorageVersion<T: Config<I>, I: 'static = ()> =
 		StorageValue<_, Releases, ValueQuery>;
+
+	#[pallet::storage]
+	pub(super) type PalletVersion<T: Config<I>, I: 'static = ()> = StorageValue<_, MigrateStorageVersion, ValueQuery, GetDefault>;
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
