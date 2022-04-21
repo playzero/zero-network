@@ -32,9 +32,9 @@ pub fn get_account_id<T: Config>(s: &str) -> T::AccountId {
 }
 
 pub fn parse_identity_field(f: &Value) -> Data {
-	match f {
+	match &f["raw"] {
 		Value::String(s) => {
-			Data::Raw(decode_hex(s).unwrap().try_into().unwrap())
+			Data::Raw(decode_hex(&s[2..]).unwrap().try_into().unwrap())
 		},
 		_ => {
 			Data::None
