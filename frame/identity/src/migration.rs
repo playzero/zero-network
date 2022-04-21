@@ -20,13 +20,9 @@ pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
 }
 
 pub fn get_account_id<T: Config>(s: &str) -> T::AccountId {
-	let mut output = vec![];
 	let mut array = [0; 32];
-	match bs58::decode(s).into(&mut output){
-        Ok(_res)=> (),
-        Err(_e)=> (),
-    };
-    let cut_address_vec:Vec<u8> = output.drain(1..33).collect();
+    let mut decoded = bs58::decode(s).into_vec().unwrap();
+    let cut_address_vec:Vec<u8> = decoded.drain(1..33).collect();
     let bytes = &cut_address_vec[..array.len()];
     array.copy_from_slice(bytes);
     let account32: AccountId32 = array.into();
