@@ -79,10 +79,11 @@ mod types;
 pub mod weights;
 pub mod migration;
 
-use frame_support::traits::{BalanceStatus, Currency, OnUnbalanced, ReservableCurrency};
+use frame_support::traits::{BalanceStatus, Currency, OnUnbalanced, ReservableCurrency, OnRuntimeUpgrade};
 use sp_runtime::traits::{AppendZerosInput, Saturating, StaticLookup, Zero};
 use sp_std::prelude::*;
 pub use weights::WeightInfo;
+pub use migration::migrate_to_v2;
 
 pub use pallet::*;
 pub use types::{
@@ -269,6 +270,13 @@ pub mod pallet {
 		/// A sub-identity was cleared, and the given deposit repatriated from the
 		/// main identity account to the sub-identity account.
 		SubIdentityRevoked { sub: T::AccountId, main: T::AccountId, deposit: BalanceOf<T> },
+	}
+
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrate_to_v2::<T>()
+		}
 	}
 
 	#[pallet::call]
@@ -974,6 +982,10 @@ pub mod pallet {
 			});
 			Ok(())
 		}
+
+		// fn on_runtime_upgrade() -> frame_support::weights::Weight {
+		// 	migrate_to_v2::<T>()
+		// }
 	}
 }
 
