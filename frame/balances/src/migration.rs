@@ -13,29 +13,23 @@ struct AccountItem {
 	pub reserved_balance: String,
 }
 
-trait AccountParse<T: Config<I>, I: 'static> {
-	fn balance(&self) -> T::Balance;
-	fn account(&self) -> T::AccountId;
+
+fn get_balance<T: Config<I> + fungible::Inspect<<T as frame_system::Config>::AccountId>, I: 'static>(item: &AccountItem) -> <T as fungible::Inspect<<T as frame_system::Config>::AccountId>>::Balance {
+	let free: u64 = item.free_balance.parse().unwrap();
+	let reserved: u64 = item.reserved_balance.parse().unwrap();
+	(free + reserved).saturated_into()
 }
 
-impl<T: Config<I>, I: 'static> AccountParse<T, I> for AccountItem {
-	fn balance(&self) -> T::Balance {
-		let free: u64 = self.free_balance.parse().unwrap();
-		let reserved: u64 = self.reserved_balance.parse().unwrap();
-		(free + reserved).saturated_into()
-	}
-
-	fn account(&self) -> T::AccountId {
-		let mut array = [0; 32];
-	    let mut decoded = bs58::decode(&self.account_id).into_vec().unwrap();
-	    let cut_address_vec:Vec<u8> = decoded.drain(1..33).collect();
-	    let bytes = &cut_address_vec[..array.len()];
-	    array.copy_from_slice(bytes);
-	    let account32: AccountId32 = array.into();
-	    let mut to32 = AccountId32::as_ref(&account32);
-	    let to_address: T::AccountId = T::AccountId::decode(&mut to32).unwrap_or_default();
-	    to_address
-	}
+fn get_account<T: Config<I>, I: 'static>(item: &AccountItem) -> T::AccountId {
+	let mut array = [0; 32];
+    let mut decoded = bs58::decode(&item.account_id).into_vec().unwrap();
+    let cut_address_vec:Vec<u8> = decoded.drain(1..33).collect();
+    let bytes = &cut_address_vec[..array.len()];
+    array.copy_from_slice(bytes);
+    let account32: AccountId32 = array.into();
+    let mut to32 = AccountId32::as_ref(&account32);
+    let to_address: T::AccountId = T::AccountId::decode(&mut to32).unwrap_or_default();
+    to_address
 }
 
 
@@ -50,8 +44,9 @@ pub fn migrate_to_v2<T: Config<I> + fungible::Mutate<T::AccountId>, I: 'static>(
 	let parsed: Vec<AccountItem> = serde_json::from_str(data).unwrap();
 
 	for acc in &parsed {
-		let account_id: T::AccountId = acc.account();
-		T::mint_into(&account_id, acc.balance());
+		let account_id = get_account::<T, I>(acc);
+		let balance = get_balance::<T, I>(&acc);
+		T::mint_into(&account_id, balance).unwrap();
 	}
 	<PalletVersion<T, I>>::set(MigrateStorageVersion::V2Imported);
 
