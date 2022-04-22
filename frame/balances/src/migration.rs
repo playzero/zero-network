@@ -16,8 +16,8 @@ struct AccountItem {
 
 
 fn get_balance<T: Config<I>, I: 'static>(item: &AccountItem) -> T::Balance {
-	let free: u64 = item.free_balance.parse().unwrap();
-	let reserved: u64 = item.reserved_balance.parse().unwrap();
+	let free: u128 = item.free_balance.parse().unwrap();
+	let reserved: u128 = item.reserved_balance.parse().unwrap();
 	(free + reserved).saturated_into()
 }
 
