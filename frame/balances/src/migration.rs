@@ -1,5 +1,6 @@
 use serde::{Deserialize};
 use codec::{Decode};
+use sp_std::ops::Add;
 use sp_runtime::AccountId32;
 use sp_runtime::traits::SaturatedConversion;
 use scale_info::prelude::string::String;
@@ -14,7 +15,7 @@ struct AccountItem {
 }
 
 
-fn get_balance<T: Config<I> + fungible::Inspect<<T as frame_system::Config>::AccountId>, I: 'static>(item: &AccountItem) -> <T as fungible::Inspect<<T as frame_system::Config>::AccountId>>::Balance {
+fn get_balance<T: Config<I>, I: 'static>(item: &AccountItem) -> T::Balance {
 	let free: u64 = item.free_balance.parse().unwrap();
 	let reserved: u64 = item.reserved_balance.parse().unwrap();
 	(free + reserved).saturated_into()
@@ -33,7 +34,7 @@ fn get_account<T: Config<I>, I: 'static>(item: &AccountItem) -> T::AccountId {
 }
 
 
-pub fn migrate_to_v2<T: Config<I> + fungible::Mutate<T::AccountId>, I: 'static>() -> frame_support::weights::Weight {
+pub fn migrate_to_v2<T: Config<I>, I: 'static>() -> frame_support::weights::Weight {
 	if <PalletVersion<T, I>>::get() == MigrateStorageVersion::V2Imported {
 		return 0 as frame_support::weights::Weight;
 	}
@@ -46,7 +47,8 @@ pub fn migrate_to_v2<T: Config<I> + fungible::Mutate<T::AccountId>, I: 'static>(
 	for acc in &parsed {
 		let account_id = get_account::<T, I>(acc);
 		let balance = get_balance::<T, I>(&acc);
-		T::mint_into(&account_id, balance).unwrap();
+		T::AccountStore::insert(&account_id, AccountData { free: balance, ..Default::default() }).unwrap();
+		<TotalIssuance<T, I>>::mutate(|t| *t += balance);
 	}
 	<PalletVersion<T, I>>::set(MigrateStorageVersion::V2Imported);
 

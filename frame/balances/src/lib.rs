@@ -162,7 +162,7 @@ mod tests_reentrancy;
 pub mod weights;
 
 pub mod migration;
-// pub use migration::migrate_to_v2;
+pub use migration::migrate_to_v2;
 
 pub use self::imbalances::{NegativeImbalance, PositiveImbalance};
 use codec::{Codec, Decode, Encode, MaxEncodedLen};
@@ -256,6 +256,13 @@ pub mod pallet {
 	#[pallet::generate_store(pub(super) trait Store)]
 	#[pallet::generate_storage_info]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
+
+	#[pallet::hooks]
+	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrate_to_v2::<T, I>()
+		}
+	}
 
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
