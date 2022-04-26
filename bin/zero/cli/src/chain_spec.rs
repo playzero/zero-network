@@ -63,10 +63,14 @@ pub struct Extensions {
 
 /// Specialized `ChainSpec`.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
-/// Flaming Fir testnet generator
-pub fn flaming_fir_config() -> Result<ChainSpec, String> {
-	ChainSpec::from_json_bytes(&include_bytes!("../res/flaming-fir.json")[..])
-}
+/// SUBZERO testnet generator
+pub fn subzero_config() -> Result<ChainSpec, String> {
+	ChainSpec::from_json_bytes(&include_bytes!("../../../res/alphaville.json")[..])
+
+// ZERO mainnet
+// pub fn zero_config() -> Result<ChainSpec, String> {
+// 	ChainSpec::from_json_bytes(&include_bytes!("../../../res/mainnet.json")[..])
+// }
 
 fn session_keys(
 	grandpa: GrandpaId,

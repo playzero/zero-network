@@ -1,7 +1,7 @@
 [package]
 name = "chain-spec-builder"
 version = "2.0.0"
-authors = ["Parity Technologies <admin@parity.io>"]
+authors = ["ZERO <play@zero.io>"]
 edition = "2021"
 build = "build.rs"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
