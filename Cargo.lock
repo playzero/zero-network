@@ -1288,6 +1288,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "enumflags2"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83c8d82922337cd23a15f88b70d8e4ef5f11da38dd7cdb55e84dd5de99695da0"
+dependencies = [
+ "enumflags2_derive",
+]
+
+[[package]]
+name = "enumflags2_derive"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "946ee94e3dbf58fdd324f9ce245c7b238d46a66f00e86a020b71996349e46cce"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "env_logger"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1859,7 +1879,7 @@ dependencies = [
  "orml-tokens",
  "orml-traits",
  "pallet-assets",
- "pallet-balances",
+ "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -1868,7 +1888,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "sp-storage",
- "zero-primitives",
 ]
 
 [[package]]
@@ -1879,11 +1898,12 @@ dependencies = [
  "frame-support",
  "frame-support-test",
  "frame-system",
+ "gamedao-control",
  "gamedao-traits",
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-balances",
+ "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
@@ -1892,7 +1912,6 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "zero-primitives",
 ]
 
 [[package]]
@@ -1919,11 +1938,14 @@ dependencies = [
  "frame-support",
  "frame-support-test",
  "frame-system",
+ "gamedao-control",
+ "gamedao-flow",
  "gamedao-traits",
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-balances",
+ "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -1931,7 +1953,6 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
- "zero-primitives",
 ]
 
 [[package]]
@@ -3752,14 +3773,17 @@ dependencies = [
  "orml-tokens",
  "orml-traits",
  "pallet-aura",
- "pallet-balances",
+ "pallet-balances 4.0.0-dev",
+ "pallet-bounties",
  "pallet-collective",
  "pallet-grandpa",
+ "pallet-identity",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
+ "pallet-treasury",
  "parity-scale-codec",
  "scale-info",
  "sp-api",
@@ -3970,7 +3994,7 @@ dependencies = [
  "orml-tokens",
  "orml-traits",
  "orml-utilities",
- "pallet-balances",
+ "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -4095,6 +4119,23 @@ dependencies = [
 [[package]]
 name = "pallet-balances"
 version = "4.0.0-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-transaction-payment",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-balances"
+version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13#afb74de23dfe2994e7ce38c0870efb9734e966f7"
 dependencies = [
  "frame-benchmarking",
@@ -4103,6 +4144,23 @@ dependencies = [
  "log",
  "parity-scale-codec",
  "scale-info",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-bounties"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13#afb74de23dfe2994e7ce38c0870efb9734e966f7"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-treasury",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
  "sp-runtime",
  "sp-std",
 ]
@@ -4161,6 +4219,23 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-identity"
+version = "4.0.0-dev"
+dependencies = [
+ "enumflags2",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "pallet-balances 4.0.0-dev",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
  "sp-std",
 ]
 
@@ -4284,7 +4359,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "impl-trait-for-tuples",
- "pallet-balances",
+ "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
  "parity-scale-codec",
  "scale-info",
  "serde",
