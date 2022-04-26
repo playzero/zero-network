@@ -20,7 +20,7 @@
 
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
-use node_runtime::{
+use zero_runtime::{
 	constants::currency::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
 	BalancesConfig, Block, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
 	ImOnlineConfig, IndicesConfig, SessionConfig, SessionKeys, SocietyConfig, StakerStatus,
@@ -40,7 +40,7 @@ use sp_runtime::{
 };
 
 pub use node_primitives::{AccountId, Balance, Signature};
-pub use node_runtime::GenesisConfig;
+pub use zero_runtime::GenesisConfig;
 
 type AccountPublic = <Signature as Verify>::Signer;
 
@@ -63,16 +63,10 @@ pub struct Extensions {
 
 /// Specialized `ChainSpec`.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
-
-/// SUBZERO testnet generator
-pub fn subzero_config() -> Result<ChainSpec, String> {
-	ChainSpec::from_json_bytes(&include_bytes!("../../../res/alphaville.json")[..])
+/// Flaming Fir testnet generator
+pub fn flaming_fir_config() -> Result<ChainSpec, String> {
+	ChainSpec::from_json_bytes(&include_bytes!("../res/flaming-fir.json")[..])
 }
-
-// ZERO mainnet
-// pub fn zero_config() -> Result<ChainSpec, String> {
-// 	ChainSpec::from_json_bytes(&include_bytes!("../../../res/mainnet.json")[..])
-// }
 
 fn session_keys(
 	grandpa: GrandpaId,
@@ -344,10 +338,10 @@ pub fn testnet_genesis(
 				.collect(),
 			phantom: Default::default(),
 		},
-		sudo: SudoConfig { key: Some(root_key) },
+		sudo: SudoConfig { key: root_key },
 		babe: BabeConfig {
 			authorities: vec![],
-			epoch_config: Some(node_runtime::BABE_GENESIS_EPOCH_CONFIG),
+			epoch_config: Some(zero_runtime::BABE_GENESIS_EPOCH_CONFIG),
 		},
 		im_online: ImOnlineConfig { keys: vec![] },
 		authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },

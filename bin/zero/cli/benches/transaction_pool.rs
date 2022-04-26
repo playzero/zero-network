@@ -20,7 +20,7 @@ use criterion::{criterion_group, criterion_main, BatchSize, Criterion, Throughpu
 use futures::{future, StreamExt};
 use node_cli::service::{create_extrinsic, fetch_nonce, FullClient, TransactionPool};
 use node_primitives::AccountId;
-use node_runtime::{constants::currency::*, BalancesCall, SudoCall};
+use zero_runtime::{constants::currency::*, BalancesCall, SudoCall};
 use sc_client_api::execution_extensions::ExecutionStrategies;
 use sc_service::{
 	config::{
@@ -96,7 +96,6 @@ fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
 		tracing_targets: None,
 		tracing_receiver: Default::default(),
 		max_runtime_instances: 8,
-		runtime_cache_size: 2,
 		announce_block: true,
 		base_path: Some(base_path),
 		informant_output_format: Default::default(),

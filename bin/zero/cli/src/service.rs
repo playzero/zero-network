@@ -25,7 +25,7 @@ use frame_system_rpc_runtime_api::AccountNonceApi;
 use futures::prelude::*;
 use node_executor::ExecutorDispatch;
 use node_primitives::Block;
-use node_runtime::RuntimeApi;
+use zero_runtime::RuntimeApi;
 use sc_client_api::{BlockBackend, ExecutorProvider};
 use sc_consensus_babe::{self, SlotProportion};
 use sc_executor::NativeElseWasmExecutor;
@@ -68,41 +68,39 @@ pub fn fetch_nonce(client: &FullClient, account: sp_core::sr25519::Pair) -> u32 
 pub fn create_extrinsic(
 	client: &FullClient,
 	sender: sp_core::sr25519::Pair,
-	function: impl Into<node_runtime::Call>,
+	function: impl Into<zero_runtime::Call>,
 	nonce: Option<u32>,
-) -> node_runtime::UncheckedExtrinsic {
+) -> zero_runtime::UncheckedExtrinsic {
 	let function = function.into();
 	let genesis_hash = client.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
 	let best_hash = client.chain_info().best_hash;
 	let best_block = client.chain_info().best_number;
 	let nonce = nonce.unwrap_or_else(|| fetch_nonce(client, sender.clone()));
 
-	let period = node_runtime::BlockHashCount::get()
+	let period = zero_runtime::BlockHashCount::get()
 		.checked_next_power_of_two()
 		.map(|c| c / 2)
 		.unwrap_or(2) as u64;
 	let tip = 0;
-	let extra: node_runtime::SignedExtra = (
-		frame_system::CheckNonZeroSender::<node_runtime::Runtime>::new(),
-		frame_system::CheckSpecVersion::<node_runtime::Runtime>::new(),
-		frame_system::CheckTxVersion::<node_runtime::Runtime>::new(),
-		frame_system::CheckGenesis::<node_runtime::Runtime>::new(),
-		frame_system::CheckEra::<node_runtime::Runtime>::from(generic::Era::mortal(
+	let extra: zero_runtime::SignedExtra = (
+		frame_system::CheckSpecVersion::<zero_runtime::Runtime>::new(),
+		frame_system::CheckTxVersion::<zero_runtime::Runtime>::new(),
+		frame_system::CheckGenesis::<zero_runtime::Runtime>::new(),
+		frame_system::CheckEra::<zero_runtime::Runtime>::from(generic::Era::mortal(
 			period,
 			best_block.saturated_into(),
 		)),
-		frame_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
-		frame_system::CheckWeight::<node_runtime::Runtime>::new(),
-		pallet_asset_tx_payment::ChargeAssetTxPayment::<node_runtime::Runtime>::from(tip, None),
+		frame_system::CheckNonce::<zero_runtime::Runtime>::from(nonce),
+		frame_system::CheckWeight::<zero_runtime::Runtime>::new(),
+		pallet_asset_tx_payment::ChargeAssetTxPayment::<zero_runtime::Runtime>::from(tip, None),
 	);
 
-	let raw_payload = node_runtime::SignedPayload::from_raw(
+	let raw_payload = zero_runtime::SignedPayload::from_raw(
 		function.clone(),
 		extra.clone(),
 		(
-			(),
-			node_runtime::VERSION.spec_version,
-			node_runtime::VERSION.transaction_version,
+			zero_runtime::VERSION.spec_version,
+			zero_runtime::VERSION.transaction_version,
 			genesis_hash,
 			best_hash,
 			(),
@@ -112,10 +110,10 @@ pub fn create_extrinsic(
 	);
 	let signature = raw_payload.using_encoded(|e| sender.sign(e));
 
-	node_runtime::UncheckedExtrinsic::new_signed(
+	zero_runtime::UncheckedExtrinsic::new_signed(
 		function.clone(),
 		sp_runtime::AccountId32::from(sender.public()).into(),
-		node_runtime::Signature::Sr25519(signature.clone()),
+		zero_runtime::Signature::Sr25519(signature.clone()),
 		extra.clone(),
 	)
 }
@@ -161,7 +159,6 @@ pub fn new_partial(
 		config.wasm_method,
 		config.default_heap_pages,
 		config.max_runtime_instances,
-		config.runtime_cache_size,
 	);
 
 	let (client, backend, keystore_container, task_manager) =
@@ -196,7 +193,7 @@ pub fn new_partial(
 	let justification_import = grandpa_block_import.clone();
 
 	let (block_import, babe_link) = sc_consensus_babe::block_import(
-		sc_consensus_babe::Config::get(&*client)?,
+		sc_consensus_babe::Config::get_or_compute(&*client)?,
 		grandpa_block_import,
 		client.clone(),
 	)?;
@@ -530,7 +527,7 @@ mod tests {
 	use crate::service::{new_full_base, NewFullBase};
 	use codec::Encode;
 	use node_primitives::{Block, DigestItem, Signature};
-	use node_runtime::{
+	use zero_runtime::{
 		constants::{currency::CENTS, time::SLOT_DURATION},
 		Address, BalancesCall, Call, UncheckedExtrinsic,
 	};
@@ -722,7 +719,6 @@ mod tests {
 				let function =
 					Call::Balances(BalancesCall::transfer { dest: to.into(), value: amount });
 
-				let check_non_zero_sender = frame_system::CheckNonZeroSender::new();
 				let check_spec_version = frame_system::CheckSpecVersion::new();
 				let check_tx_version = frame_system::CheckTxVersion::new();
 				let check_genesis = frame_system::CheckGenesis::new();
@@ -731,7 +727,6 @@ mod tests {
 				let check_weight = frame_system::CheckWeight::new();
 				let tx_payment = pallet_asset_tx_payment::ChargeAssetTxPayment::from(0, None);
 				let extra = (
-					check_non_zero_sender,
 					check_spec_version,
 					check_tx_version,
 					check_genesis,
@@ -743,7 +738,7 @@ mod tests {
 				let raw_payload = SignedPayload::from_raw(
 					function,
 					extra,
-					((), spec_version, transaction_version, genesis_hash, genesis_hash, (), (), ()),
+					(spec_version, transaction_version, genesis_hash, genesis_hash, (), (), ()),
 				);
 				let signature = raw_payload.using_encoded(|payload| signer.sign(payload));
 				let (function, extra, _) = raw_payload.deconstruct();

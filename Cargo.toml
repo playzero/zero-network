@@ -1,10 +1,12 @@
+cargo-features = ["resolver"]
+
 [workspace]
 resolver = "2"
 
 members = [
 
-	"bin/zero-dev/node",
-	"bin/zero-dev/runtime",
+	"bin/zero/runtime",
+	"bin/zero/cli",
 
 	"orml/currencies",
 	"orml/traits",
@@ -126,3 +128,6 @@ zeroize = { opt-level = 3 }
 [profile.release]
 # Substrate runtime requires unwinding.
 panic = "unwind"
+
+[patch.crates-io]
+log = { git = "https://github.com/rust-lang/log" }
