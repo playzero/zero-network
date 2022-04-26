@@ -5,8 +5,8 @@ authors = ["ZERO <play@zero.io>"]
 description = "Test utilities for Substrate node."
 edition = "2021"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
+homepage = "https://zero.io"
+repository = "https://github.com/playzero/zero-network/"
 publish = true
 
 [package.metadata.docs.rs]
