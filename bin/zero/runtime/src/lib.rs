@@ -1480,8 +1480,8 @@ construct_runtime!(
 		Control: gamedao_control,
 		Signal: gamedao_signal,
 
-        // Zero pallets:
-        Migration: zero_migration,
+		// Zero pallets:
+		Migration: zero_migration,
 	}
 );
 
