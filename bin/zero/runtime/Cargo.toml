@@ -185,7 +185,17 @@ std = [
 	"log/std",
 	"frame-try-runtime/std",
 	"sp-npos-elections/std",
-  "sp-io/std"
+    "sp-io/std",
+
+    "gamedao-sense/std",
+    "gamedao-traits/std",
+    "gamedao-flow/std",
+    "gamedao-control/std",
+    "gamedao-signal/std",
+
+    "orml-tokens/std",
+    "orml-currencies/std",
+    "orml-traits/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
