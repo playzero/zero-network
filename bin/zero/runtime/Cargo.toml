@@ -101,6 +101,16 @@ pallet-transaction-storage = { default-features = false, git = "https://github.c
 pallet-uniques = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
+orml-tokens = { path = "../../../orml/tokens", default-features = false }
+orml-traits = { path = "../../../orml/traits", default-features = false }
+orml-currencies = { path = "../../../orml/currencies", default-features = false }
+
+gamedao-traits = { path = "../../../gamedao-protocol/traits", default-features = false }
+gamedao-flow = { path = "../../../gamedao-protocol/flow", default-features = false }
+gamedao-control = { path = "../../../gamedao-protocol/control", default-features = false }
+gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
+gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
+
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 

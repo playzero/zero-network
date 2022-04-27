@@ -26,8 +26,8 @@ use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{
-		Currency, EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter, KeyOwnerProofSystem,
-		LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote,
+		Contains, Currency, EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter,
+		KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote,
 	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -39,8 +39,8 @@ use frame_system::{
 	limits::{BlockLength, BlockWeights},
 	EnsureOneOf, EnsureRoot,
 };
-pub use zero_primitives::{AccountId, Signature};
-use zero_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
+pub use zero_primitives::{AccountId, CurrencyId, TokenSymbol, Signature};
+use zero_primitives::{AccountIndex, Amount, Balance, BlockNumber, Hash, Index, Moment};
 use pallet_contracts::weights::WeightInfo;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
@@ -63,10 +63,10 @@ use sp_runtime::{
 	generic, impl_opaque_keys,
 	traits::{
 		self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys,
-		SaturatedConversion, StaticLookup,
+		SaturatedConversion, StaticLookup, Zero
 	},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill, Perquintill,
+	AccountId32, ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill, Perquintill,
 };
 use sp_std::prelude::*;
 #[cfg(any(feature = "std", test))]
@@ -84,6 +84,9 @@ pub use pallet_staking::StakerStatus;
 pub use pallet_sudo::Call as SudoCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
+
+use orml_traits::parameter_type_with_key;
+use orml_currencies::BasicCurrencyAdapter;
 
 /// Implementations of some helper traits passed into runtime modules as associated types.
 pub mod impls;
@@ -1251,6 +1254,169 @@ impl pallet_transaction_storage::Config for Runtime {
 	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_type_with_key! {
+	pub ExistentialDeposits: |_currency_id: u32| -> Balance {
+		Zero::zero()
+	};
+}
+
+pub const MOCK_ACCOUNT: AccountId = AccountId32::new([3u8; 32]);
+
+parameter_types! {
+	pub DustReceiver: AccountId = MOCK_ACCOUNT;
+}
+
+pub struct MockDustRemovalWhitelist;
+impl Contains<AccountId> for MockDustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		*a == MOCK_ACCOUNT || *a == DustReceiver::get()
+	}
+}
+
+impl orml_tokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = u32;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = orml_tokens::TransferDust<Runtime, DustReceiver>;
+	type MaxLocks = MaxLocks;
+	type DustRemovalWhitelist = MockDustRemovalWhitelist;
+}
+
+impl orml_currencies::Config for Runtime {
+	type Event = Event;
+	type MultiCurrency = Tokens;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = ();
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub const GameCurrencyId: CurrencyId = TokenSymbol::GAME as u32;
+	pub const PlayCurrencyId: CurrencyId = TokenSymbol::PLAY as u32;
+}
+
+parameter_types! {
+	pub const MaxProposalsPerBlock: u32 = 100;
+	pub const MaxProposalDuration: u32 = 864000;  // 864000, 60 * 60 * 24 * 30 / 3
+}
+
+impl gamedao_signal::Config for Runtime {
+	type WeightInfo = ();
+	type Event = Event;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type Currency = Currencies;
+	type Randomness = RandomnessCollectiveFlip;
+	type Flow = Flow;
+	type Control = Control;
+	// type Call = Call;
+
+	type MaxProposalsPerBlock = MaxProposalsPerBlock;
+	type MaxProposalDuration = MaxProposalDuration;
+	type PaymentTokenId = PlayCurrencyId;
+	type ProtocolTokenId = GameCurrencyId;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+}
+
+parameter_types! {
+	pub const MaxDAOsPerAccount: u32 = 10;
+	pub const MaxMembersPerDAO: u32 = 1000;
+	pub const MaxCreationsPerBlock: u32 = 100;
+	pub const CreationFee: Balance = 1 * DOLLARS;
+}
+
+impl gamedao_control::Config for Runtime {
+	type WeightInfo = ();
+	type Event = Event;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type Currency = Currencies;
+	type Randomness = RandomnessCollectiveFlip;
+	type GameDAOTreasury = GameDAOTreasury;
+	// type Call = Call;
+
+	type PaymentTokenId = PlayCurrencyId;
+	type ProtocolTokenId = GameCurrencyId;
+	type MaxDAOsPerAccount = MaxDAOsPerAccount;
+	type MaxMembersPerDAO = MaxMembersPerDAO;
+	type MaxCreationsPerBlock = MaxCreationsPerBlock;
+	type CreationFee = CreationFee;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+
+}
+
+// TODO: move to runtime_common?
+pub type EnsureRootOrHalfGeneralCouncil = EnsureOneOf<
+	AccountId,
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>,
+>;
+
+parameter_types! {
+
+	// TODO: more flexible account admin map
+	// pub const Admin: EnsureRootOrGameDAOAdmin = ();
+	pub GameDAOTreasury: AccountId = MOCK_ACCOUNT;
+
+	// pub const SeedNonce: u64 = 1;
+
+	pub const MinNameLength: u32 = 4;
+	pub const MaxNameLength: u32 = 64;
+
+	pub const MaxCampaignsPerAddress: u32 = 3;
+	pub const MaxCampaignsPerBlock: u32 = 3;
+	pub const MaxContributionsPerBlock: u32 = 3;
+
+	pub const MinCampaignDuration: BlockNumber = 1 * DAYS;
+	pub const MaxCampaignDuration: BlockNumber = 100 * DAYS;
+
+	pub const MinCreatorDeposit: Balance = 1 * DOLLARS;
+	pub const MinContribution: Balance = 1 * DOLLARS;
+
+	// TODO: fees
+	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
+}
+
+impl gamedao_flow::Config for Runtime {
+	// ensure root or half council as admin role for campaigns.
+	// might need another instance of council as e.g. supervisor
+	// type ModuleAdmin = frame_system::EnsureRoot<AccountId>;
+	type WeightInfo = ();
+	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type Currency = Currencies;
+	type PaymentTokenId = PlayCurrencyId;
+	type ProtocolTokenId = GameCurrencyId;
+	type UnixTime = Timestamp;
+	type Randomness = RandomnessCollectiveFlip;
+	type Control = Control;
+	type GameDAOAdminOrigin = EnsureRootOrHalfGeneralCouncil;
+	type GameDAOTreasury = GameDAOTreasury;
+	// type Call = Call;
+
+	// type Nonce = SeedNonce;
+	type CampaignFee = CampaignFee;
+	type MinNameLength = MinNameLength;
+	type MaxNameLength = MaxNameLength;
+	type MaxCampaignsPerAddress = MaxCampaignsPerAddress;
+	type MaxCampaignsPerBlock = MaxCampaignsPerBlock;
+	type MaxContributionsPerBlock = MaxContributionsPerBlock;
+	type MinCampaignDuration = MinCampaignDuration;
+	type MaxCampaignDuration = MaxCampaignDuration;
+	type MinCreatorDeposit = MinCreatorDeposit;
+	type MinContribution = MinContribution;
+}
+
+impl gamedao_sense::Config for Runtime {
+	type Event = Event;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type WeightInfo = ();
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1299,6 +1465,16 @@ construct_runtime!(
 		Uniques: pallet_uniques,
 		TransactionStorage: pallet_transaction_storage,
 		BagsList: pallet_bags_list,
+
+		// ORML pallets:
+		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
+		Currencies: orml_currencies::{Pallet, Call, Event<T>},
+
+		// GameDAO protocol pallets:
+		Flow: gamedao_flow,
+		Sense: gamedao_sense,
+		Control: gamedao_control,
+		Signal: gamedao_signal,
 	}
 );
 
