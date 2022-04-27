@@ -1,21 +1,16 @@
 //! # Migration pallet
-//!
-//! TODO
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{dispatch::DispatchResult, ensure, traits::Currency, BoundedVec};
+use frame_support::{traits::{Currency, StoredMap}};
 use sp_runtime::AccountId32;
 use sp_runtime::{traits::SaturatedConversion, RuntimeDebug};
 use sp_std::{num::ParseIntError};
 use serde_json::{Value};
 use serde::{Deserialize};
-use sp_std::ops::Add;
 use scale_info::prelude::string::String;
 use sp_std::convert::TryInto;
 use sp_std::vec::Vec;
-
-use frame_support::traits::StoredMap;
 
 pub use pallet::*;
 use scale_info::TypeInfo;
@@ -59,16 +54,12 @@ struct IdentityItem<T: Config> {
 
 #[frame_support::pallet]
 pub mod pallet {
-	// use crate::weights::WeightInfo;
 	use frame_support::pallet_prelude::*;
-	use frame_support::sp_std::convert::TryInto;
 	use frame_support::transactional;
 	use frame_system::pallet_prelude::*;
 	use sp_std::vec::Vec;
 
 	use super::*;
-	use frame_support::sp_runtime::traits::Saturating;
-	use frame_support::sp_runtime::ArithmeticError;
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub (super) trait Store)]
@@ -81,20 +72,10 @@ pub mod pallet {
 		+ pallet_balances::Config
 	{
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-		// type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
-
-	#[pallet::type_value]
-	pub fn OnStatusEmpty() -> MigrationStatus {
-		MigrationStatus::Inactive
-	}
-
-	#[pallet::storage]
-	#[pallet::getter(fn status)]
-	pub(super) type Status<T: Config> = StorageValue<_, MigrationStatus, ValueQuery, OnStatusEmpty>;
 
 	#[pallet::storage]
 	pub(super) type BalancesVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
@@ -107,32 +88,28 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		MigratedBalances(u32),
 		MigratedIdentities(u32),
-		MigrationFinished,
 	}
 
 	#[pallet::error]
 	pub enum Error<T> {
-		MigrationAlreadyCompleted,
-		/// Indicates that a finalize call happened, although the migration pallet is not in an
-		/// ongoing migration
-		OnlyFinalizeOngoing,
+		GuruMeditation,
 	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 
-		// TODO: docs
+		/// Migrates to `Balances` storage from another chain.
+		/// Storage: `TotalIssuance`, AccountStore
 		#[pallet::weight(5_000_000)]
-		// #[transactional]
+		#[transactional]
 		pub fn migrate_balances(
 			origin: OriginFor<T>,
 			data: Vec<u8>,
 		) -> DispatchResult {
-			// ensure_root(origin)?;
+			ensure_root(origin)?;
 			
 			if <BalancesVersion<T>>::get() == StorageVersion::V2Imported {
 				return Ok(())
-				// return 0 as frame_support::weights::Weight;
 			}
 
 			let data_str = sp_std::str::from_utf8(&data).unwrap();
@@ -146,26 +123,24 @@ pub mod pallet {
 			}
 			<BalancesVersion<T>>::set(StorageVersion::V2Imported);
 
-			// TODO: calculate balances
-			Self::deposit_event(Event::<T>::MigratedBalances(1 as u32));
+			Self::deposit_event(Event::<T>::MigratedBalances(parsed.len() as u32));
 
-			// TODO: weight
 			Ok(())
 		}
 
-
-		// TODO: docs
+		/// Migrates to `Identity` storage from another chain.
+		/// Storage: `IdentityOf`
+		/// `IdentityOf` before using, privacy level should be patched: pub(super) -> pub
 		#[pallet::weight(5_000_000)]
-		// #[transactional]
+		#[transactional]
 		pub fn migrate_identities(
 			origin: OriginFor<T>,
 			data: Vec<u8>,
 		) -> DispatchResult {
-			// ensure_root(origin)?;
+			ensure_root(origin)?;
 
 			if <IdentityVersion<T>>::get() == StorageVersion::V2Imported {
 				return Ok(())
-				// return 0 as frame_support::weights::Weight;
 			}
 
 			let data_str = sp_std::str::from_utf8(&data).unwrap();
@@ -198,51 +173,15 @@ pub mod pallet {
 
 			<IdentityVersion<T>>::set(StorageVersion::V2Imported);
 			
-			// TODO: calculate identities
-			Self::deposit_event(Event::<T>::MigratedIdentities(1 as u32));
-
-			// TODO: weight
-			Ok(())
-
-		}
-
-		/// Update the migration status to `Complete`
-		#[pallet::weight(5_000_000)]
-		#[transactional]
-		pub fn finalize(origin: OriginFor<T>) -> DispatchResult {
-			// ensure_root(origin)?;
-
-			ensure!(
-				<Status<T>>::get() == MigrationStatus::Ongoing,
-				Error::<T>::OnlyFinalizeOngoing
-			);
-
-			<Status<T>>::set(MigrationStatus::Complete);
-
-			Self::deposit_event(Event::<T>::MigrationFinished);
+			Self::deposit_event(Event::<T>::MigratedIdentities(parsed.len() as u32));
 
 			Ok(())
+
 		}
 	}
 }
 
 impl<T: Config> Pallet<T> {
-	fn activate_migration() -> DispatchResult {
-		let mut status = <Status<T>>::get();
-
-		if status == MigrationStatus::Inactive {
-			<Status<T>>::set(MigrationStatus::Ongoing);
-			status = MigrationStatus::Ongoing;
-		}
-
-		ensure!(
-			status == MigrationStatus::Ongoing,
-			Error::<T>::MigrationAlreadyCompleted
-		);
-
-		Ok(())
-	}
-
 	// Balances helpers
 	fn get_balance(item: &AccountItem) -> T::Balance {
 		let free: u128 = item.free_balance.parse().unwrap();
