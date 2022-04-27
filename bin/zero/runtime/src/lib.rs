@@ -1417,6 +1417,10 @@ impl gamedao_sense::Config for Runtime {
 	type WeightInfo = ();
 }
 
+impl zero_migration::Config for Runtime {
+	type Event = Event;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1475,6 +1479,9 @@ construct_runtime!(
 		Sense: gamedao_sense,
 		Control: gamedao_control,
 		Signal: gamedao_signal,
+
+        // Zero pallets:
+        Migration: zero_migration,
 	}
 );
 

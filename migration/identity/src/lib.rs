@@ -83,7 +83,7 @@ use frame_support::traits::{BalanceStatus, Currency, OnUnbalanced, ReservableCur
 use sp_runtime::traits::{AppendZerosInput, Saturating, StaticLookup, Zero};
 use sp_std::prelude::*;
 pub use weights::WeightInfo;
-pub use migration::migrate_to_v2;
+// pub use migration::migrate_to_v2;
 
 pub use pallet::*;
 pub use types::{
@@ -163,7 +163,7 @@ pub mod pallet {
 	/// TWOX-NOTE: OK ― `AccountId` is a secure hash.
 	#[pallet::storage]
 	#[pallet::getter(fn identity)]
-	pub(super) type IdentityOf<T: Config> = StorageMap<
+	pub type IdentityOf<T: Config> = StorageMap<
 		_,
 		Twox64Concat,
 		T::AccountId,
@@ -272,12 +272,12 @@ pub mod pallet {
 		SubIdentityRevoked { sub: T::AccountId, main: T::AccountId, deposit: BalanceOf<T> },
 	}
 
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrate_to_v2::<T>()
-		}
-	}
+	// #[pallet::hooks]
+	// impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+	// 	fn on_runtime_upgrade() -> frame_support::weights::Weight {
+	// 		migrate_to_v2::<T>()
+	// 	}
+	// }
 
 	#[pallet::call]
 	/// Identity pallet declaration.
