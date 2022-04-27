@@ -58,7 +58,7 @@ pallet-authority-discovery = { default-features = false, git = "https://github.c
 pallet-authorship = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-babe = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-bags-list = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
-pallet-balances = { default-features = false, path = "../../../frame/balances" }
+pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-bounties = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-collective = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-contracts = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -71,7 +71,7 @@ pallet-gilt = { default-features = false, git = "https://github.com/paritytech/s
 pallet-grandpa = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-im-online = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-indices = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
-pallet-identity = { default-features = false, path = "../../../frame/identity" }
+pallet-identity = { default-features = false, path = "../../../migration/identity" }
 pallet-lottery = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-membership = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-mmr = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -110,6 +110,8 @@ gamedao-flow = { path = "../../../gamedao-protocol/flow", default-features = fal
 gamedao-control = { path = "../../../gamedao-protocol/control", default-features = false }
 gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
 gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
+
+zero-migration = { path = "../../../migration/migration", default-features = false }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -195,7 +197,9 @@ std = [
 
     "orml-tokens/std",
     "orml-currencies/std",
-    "orml-traits/std"
+    "orml-traits/std",
+
+    "zero-migration/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",

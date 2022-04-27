@@ -2049,7 +2049,7 @@ dependencies = [
  "orml-tokens",
  "orml-traits",
  "pallet-assets",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -2073,7 +2073,7 @@ dependencies = [
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
@@ -2114,7 +2114,7 @@ dependencies = [
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
@@ -4001,7 +4001,7 @@ dependencies = [
  "futures 0.3.21",
  "node-primitives",
  "node-testing",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "pallet-contracts",
  "pallet-im-online",
  "pallet-timestamp",
@@ -4313,7 +4313,7 @@ dependencies = [
  "orml-tokens",
  "orml-traits",
  "orml-utilities",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -4487,7 +4487,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "log",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
@@ -4495,26 +4495,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "sp-tracing",
-]
-
-[[package]]
-name = "pallet-balances"
-version = "4.0.0-dev"
-dependencies = [
- "bs58",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "serde_json",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
 ]
 
 [[package]]
@@ -4756,7 +4736,7 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "pallet-balances 4.0.0-dev",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -4909,7 +4889,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "log",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -4928,7 +4908,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "pallet-babe",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "pallet-grandpa",
  "pallet-im-online",
  "pallet-offences",
@@ -5190,7 +5170,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "hex-literal",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -5210,7 +5190,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "impl-trait-for-tuples",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -9848,7 +9828,7 @@ dependencies = [
  "node-primitives",
  "node-rpc",
  "pallet-asset-tx-payment",
- "pallet-balances 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.13)",
+ "pallet-balances",
  "pallet-im-online",
  "pallet-timestamp",
  "pallet-transaction-payment",
@@ -9911,6 +9891,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "zero-migration"
+version = "0.1.0"
+dependencies = [
+ "bs58",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "log",
+ "pallet-balances",
+ "pallet-identity",
+ "parity-scale-codec",
+ "rand 0.8.5",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "sp-version",
+]
+
+[[package]]
 name = "zero-primitives"
 version = "1.28.0"
 dependencies = [
@@ -9952,7 +9956,7 @@ dependencies = [
  "pallet-authorship",
  "pallet-babe",
  "pallet-bags-list",
- "pallet-balances 4.0.0-dev",
+ "pallet-balances",
  "pallet-bounties",
  "pallet-collective",
  "pallet-contracts",
@@ -10012,6 +10016,7 @@ dependencies = [
  "sp-version",
  "static_assertions",
  "substrate-wasm-builder",
+ "zero-migration",
  "zero-primitives",
 ]
 
