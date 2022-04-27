@@ -3586,7 +3586,8 @@ dependencies = [
 [[package]]
 name = "log"
 version = "0.4.16"
-source = "git+https://github.com/rust-lang/log#6c3cd4acbbabb226ff19cf2c17b50c58e53e8625"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6389c490849ff5bc16be905ae24bc913a9c8892e19b2341dbc175e14c341c2b8"
 dependencies = [
  "cfg-if 1.0.0",
  "value-bag",
@@ -9269,9 +9270,9 @@ checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
 
 [[package]]
 name = "value-bag"
-version = "1.0.0-alpha.9"
+version = "1.0.0-alpha.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2209b78d1249f7e6f3293657c9779fe31ced465df091bbd433a1cf88e916ec55"
+checksum = "79923f7731dc61ebfba3633098bf3ac533bbd35ccd8c57e7088d9a5eebe0263f"
 dependencies = [
  "ctor",
  "version_check",
@@ -9935,8 +9936,16 @@ dependencies = [
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
+ "gamedao-control",
+ "gamedao-flow",
+ "gamedao-sense",
+ "gamedao-signal",
+ "gamedao-traits",
  "hex-literal",
  "log",
+ "orml-currencies",
+ "orml-tokens",
+ "orml-traits",
  "pallet-asset-tx-payment",
  "pallet-assets",
  "pallet-authority-discovery",

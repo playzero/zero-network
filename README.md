@@ -43,22 +43,22 @@ cargo +nightly-2021-11-07 build --release
 ```
 3. Generate (and optionally edit) chainspec config:
 ```bash
-./target/release/zero-node build-spec --chain=dev > customSpec.json
+./target/release/subzero build-spec --chain=dev > customSpec.json
 ```
 4. Start the node:
 ```bash
-./target/release/zero-node --chain=customSpec.json [... other run options]
+./target/release/subzero --chain=customSpec.json [... other run options]
 ```
 
 ## Running with Docker
 It is possible to run the node with Docker solution.
-You can find docker file in `docker/zero_node.Dockerfile`.
+You can find docker file in `docker/subzero.Dockerfile`.
 
 1. Build docker image:
 ```bash
-docker build . -f docker/zero_node.Dockerfile -t zero-node
+docker build . -f docker/subzero.Dockerfile -t subzero
 ````
 2. Run node container:
 ```bash
-docker run zero-node /usr/local/bin/zero-node [run options]
+docker run subzero /usr/local/bin/subzero [run options]
 ```

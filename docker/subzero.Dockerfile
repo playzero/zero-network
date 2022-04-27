@@ -10,8 +10,8 @@ RUN apt-get update && \
 	apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold" && \
 	apt-get install -y cmake pkg-config libssl-dev git clang
 
-WORKDIR /zero-node
-COPY . /zero-node
+WORKDIR /subzero
+COPY . /subzero
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 	export PATH="$PATH:$HOME/.cargo/bin" && \
@@ -38,16 +38,16 @@ ARG PROFILE=release
 RUN mv /usr/share/ca* /tmp && \
 	rm -rf /usr/share/*  && \
 	mv /tmp/ca-certificates /usr/share/ && \
-	useradd -m -u 1000 -U -s /bin/sh -d /zero-node subzero && \
-	mkdir -p /zero-node/.local/share/zero-node && \
-	chown -R subzero:subzero /zero-node/.local && \
-	ln -s /zero-node/.local/share/zero-node /data
+	useradd -m -u 1000 -U -s /bin/sh -d /subzero subzero && \
+	mkdir -p /subzero/.local/share/subzero && \
+	chown -R subzero:subzero /subzero/.local && \
+	ln -s /subzero/.local/share/subzero /data
 
-COPY --from=builder /zero-node/target/$PROFILE/zero-node /usr/local/bin
+COPY --from=builder /subzero/target/$PROFILE/subzero /usr/local/bin
 
 # checks
-RUN ldd /usr/local/bin/zero-node && \
-	/usr/local/bin/zero-node --version
+RUN ldd /usr/local/bin/subzero && \
+	/usr/local/bin/subzero --version
 
 # Shrinking
 RUN rm -rf /usr/lib/python* && \
@@ -57,4 +57,4 @@ USER subzero
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
 
-CMD ["/usr/local/bin/zero-node"]
+CMD ["/usr/local/bin/subzero"]
