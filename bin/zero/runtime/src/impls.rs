@@ -27,8 +27,7 @@ use pallet_asset_tx_payment::HandleCredit;
 pub struct Author;
 impl OnUnbalanced<NegativeImbalance> for Author {
 	fn on_nonzero_unbalanced(amount: NegativeImbalance) {
-		let author = Authorship::author();
-		Balances::resolve_creating(&author, amount);
+		Balances::resolve_creating(&Authorship::author(), amount);
 	}
 }
 

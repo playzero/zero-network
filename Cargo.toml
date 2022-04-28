@@ -1,10 +1,12 @@
+cargo-features = ["resolver"]
+
 [workspace]
 resolver = "2"
 
 members = [
 
-	"bin/zero-dev/node",
-	"bin/zero-dev/runtime",
+	"bin/zero/runtime",
+	"bin/zero/cli",
 
 	"orml/currencies",
 	"orml/traits",

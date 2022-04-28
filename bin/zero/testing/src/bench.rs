@@ -35,7 +35,7 @@ use crate::{
 use codec::{Decode, Encode};
 use futures::executor;
 use node_primitives::Block;
-use node_runtime::{
+use zero_runtime::{
 	constants::currency::DOLLARS, AccountId, BalancesCall, Call, CheckedExtrinsic, MinimumPeriod,
 	Signature, SystemCall, UncheckedExtrinsic,
 };
@@ -305,20 +305,20 @@ impl<'a> Iterator for BlockContentIterator<'a> {
 			CheckedExtrinsic {
 				signed: Some((
 					sender,
-					signed_extra(0, node_runtime::ExistentialDeposit::get() + 1),
+					signed_extra(0, zero_runtime::ExistentialDeposit::get() + 1),
 				)),
 				function: match self.content.block_type {
 					BlockType::RandomTransfersKeepAlive =>
 						Call::Balances(BalancesCall::transfer_keep_alive {
 							dest: sp_runtime::MultiAddress::Id(receiver),
-							value: node_runtime::ExistentialDeposit::get() + 1,
+							value: zero_runtime::ExistentialDeposit::get() + 1,
 						}),
 					BlockType::RandomTransfersReaping => {
 						Call::Balances(BalancesCall::transfer {
 							dest: sp_runtime::MultiAddress::Id(receiver),
 							// Transfer so that ending balance would be 1 less than existential
 							// deposit so that we kill the sender account.
-							value: 100 * DOLLARS - (node_runtime::ExistentialDeposit::get() - 1),
+							value: 100 * DOLLARS - (zero_runtime::ExistentialDeposit::get() - 1),
 						})
 					},
 					BlockType::Noop => Call::System(SystemCall::remark { remark: Vec::new() }),
@@ -400,7 +400,7 @@ impl BenchDb {
 		let backend = sc_service::new_db_backend(db_config).expect("Should not fail");
 		let client = sc_service::new_client(
 			backend.clone(),
-			NativeElseWasmExecutor::new(WasmExecutionMethod::Compiled, None, 8, 2),
+			NativeElseWasmExecutor::new(WasmExecutionMethod::Compiled, None, 8),
 			&keyring.generate_genesis(),
 			None,
 			None,
@@ -589,9 +589,9 @@ impl BenchKeyring {
 	}
 
 	/// Generate genesis with accounts from this keyring endowed with some balance.
-	pub fn generate_genesis(&self) -> node_runtime::GenesisConfig {
+	pub fn generate_genesis(&self) -> zero_runtime::GenesisConfig {
 		crate::genesis::config_endowed(
-			Some(node_runtime::wasm_binary_unwrap()),
+			Some(zero_runtime::wasm_binary_unwrap()),
 			self.collect_account_ids(),
 		)
 	}

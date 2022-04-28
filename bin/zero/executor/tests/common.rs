@@ -37,7 +37,7 @@ use sp_state_machine::TestExternalities as CoreTestExternalities;
 
 use node_executor::ExecutorDispatch;
 use node_primitives::{BlockNumber, Hash};
-use node_runtime::{
+use zero_runtime::{
 	constants::currency::*, Block, BuildStorage, CheckedExtrinsic, Header, Runtime,
 	UncheckedExtrinsic,
 };
@@ -69,7 +69,7 @@ impl AppCrypto<MultiSigner, MultiSignature> for TestAuthorityId {
 /// making the binary slimmer. There is a convention to use compact version of the runtime
 /// as canonical.
 pub fn compact_code_unwrap() -> &'static [u8] {
-	node_runtime::WASM_BINARY.expect(
+	zero_runtime::WASM_BINARY.expect(
 		"Development wasm binary is not available. Testing is only supported with the flag \
 		 disabled.",
 	)
@@ -77,9 +77,9 @@ pub fn compact_code_unwrap() -> &'static [u8] {
 
 pub const GENESIS_HASH: [u8; 32] = [69u8; 32];
 
-pub const SPEC_VERSION: u32 = node_runtime::VERSION.spec_version;
+pub const SPEC_VERSION: u32 = zero_runtime::VERSION.spec_version;
 
-pub const TRANSACTION_VERSION: u32 = node_runtime::VERSION.transaction_version;
+pub const TRANSACTION_VERSION: u32 = zero_runtime::VERSION.transaction_version;
 
 pub type TestExternalities<H> = CoreTestExternalities<H>;
 
@@ -96,7 +96,7 @@ pub fn from_block_number(n: u32) -> Header {
 }
 
 pub fn executor() -> NativeElseWasmExecutor<ExecutorDispatch> {
-	NativeElseWasmExecutor::new(WasmExecutionMethod::Interpreted, None, 8, 2)
+	NativeElseWasmExecutor::new(WasmExecutionMethod::Interpreted, None, 8)
 }
 
 pub fn executor_call<
@@ -119,7 +119,7 @@ pub fn executor_call<
 		hash: sp_core::blake2_256(&code).to_vec(),
 		heap_pages: heap_pages.and_then(|hp| Decode::decode(&mut &hp[..]).ok()),
 	};
-	sp_tracing::try_init_simple();
+
 	executor().call::<R, NC>(&mut t, &runtime_code, method, data, use_native, native_call)
 }
 
@@ -142,7 +142,7 @@ pub fn construct_block(
 	extrinsics: Vec<CheckedExtrinsic>,
 	babe_slot: Slot,
 ) -> (Vec<u8>, Hash) {
-	use sp_trie::{LayoutV1 as Layout, TrieConfiguration};
+	use sp_trie::{trie_types::Layout, TrieConfiguration};
 
 	// sign extrinsics.
 	let extrinsics = extrinsics.into_iter().map(sign).collect::<Vec<_>>();
