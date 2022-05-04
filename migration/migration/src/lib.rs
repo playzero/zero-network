@@ -17,6 +17,9 @@ use scale_info::TypeInfo;
 use pallet_identity::{Registration, Data, IdentityInfo};
 use pallet_balances::AccountData;
 
+pub mod migration;
+pub use migration::migrate;
+
 
 type BalanceOf<T> = <<T as pallet_identity::Config>::Currency as Currency<
 	<T as frame_system::Config>::AccountId,
@@ -75,13 +78,20 @@ pub mod pallet {
 	}
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrate::<T>()
+		}
+	}
 
 	#[pallet::storage]
 	pub(super) type BalancesVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
 
 	#[pallet::storage]
 	pub(super) type IdentityVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
+
+	#[pallet::storage]
+	pub(super) type MigrationVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
