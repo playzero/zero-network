@@ -63,7 +63,7 @@ use sp_runtime::{
 	generic, impl_opaque_keys,
 	traits::{
 		self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys,
-		SaturatedConversion, StaticLookup, Zero
+		SaturatedConversion, StaticLookup, Zero, AccountIdConversion
 	},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
 	AccountId32, ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill, Perquintill,
@@ -143,20 +143,28 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
+// Pallet accounts of runtime
+parameter_types! {
+	pub const TreasuryPalletId: PalletId = PalletId(*b"zero/tre");
+}
+
+pub fn get_all_module_accounts() -> Vec<AccountId> {
+	vec![
+		TreasuryPalletId::get().into_account(),
+	]
+}
+
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
 pub struct DealWithFees;
 impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
-		if let Some(fees) = fees_then_tips.next() {
-			// for fees, 80% to treasury, 20% to author
-			let mut split = fees.ration(80, 20);
+		if let Some(mut fees) = fees_then_tips.next() {
 			if let Some(tips) = fees_then_tips.next() {
-				// for tips, if any, 80% to treasury, 20% to author (though this can be anything)
-				tips.ration_merge_into(80, 20, &mut split);
+				tips.merge_into(&mut fees);
 			}
-			Treasury::on_unbalanced(split.0);
-			Author::on_unbalanced(split.1);
+			// for fees and tips, 100% to treasury
+			Treasury::on_unbalanced(fees);
 		}
 	}
 }
@@ -841,7 +849,6 @@ parameter_types! {
 	pub const DataDepositPerByte: Balance = 1 * CENTS;
 	pub const BountyDepositBase: Balance = 1 * DOLLARS;
 	pub const BountyDepositPayoutDelay: BlockNumber = 1 * DAYS;
-	pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
 	pub const BountyUpdatePeriod: BlockNumber = 14 * DAYS;
 	pub const MaximumReasonLength: u32 = 16384;
 	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
@@ -1256,21 +1263,20 @@ impl pallet_transaction_storage::Config for Runtime {
 
 parameter_type_with_key! {
 	pub ExistentialDeposits: |_currency_id: u32| -> Balance {
+		// TODO: > 0
 		Zero::zero()
 	};
 }
 
-pub const MOCK_ACCOUNT: AccountId = AccountId32::new([3u8; 32]);
-
-parameter_types! {
-	pub DustReceiver: AccountId = MOCK_ACCOUNT;
+pub struct DustRemovalWhitelist;
+impl Contains<AccountId> for DustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		get_all_module_accounts().contains(a)
+	}
 }
 
-pub struct MockDustRemovalWhitelist;
-impl Contains<AccountId> for MockDustRemovalWhitelist {
-	fn contains(a: &AccountId) -> bool {
-		*a == MOCK_ACCOUNT || *a == DustReceiver::get()
-	}
+parameter_types! {
+	pub TreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
 }
 
 impl orml_tokens::Config for Runtime {
@@ -1280,9 +1286,9 @@ impl orml_tokens::Config for Runtime {
 	type CurrencyId = u32;
 	type WeightInfo = ();
 	type ExistentialDeposits = ExistentialDeposits;
-	type OnDust = orml_tokens::TransferDust<Runtime, DustReceiver>;
+	type OnDust = orml_tokens::TransferDust<Runtime, TreasuryAccount>;
 	type MaxLocks = MaxLocks;
-	type DustRemovalWhitelist = MockDustRemovalWhitelist;
+	type DustRemovalWhitelist = DustRemovalWhitelist;
 }
 
 impl orml_currencies::Config for Runtime {
@@ -1334,7 +1340,7 @@ impl gamedao_control::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Currencies;
 	type Randomness = RandomnessCollectiveFlip;
-	type GameDAOTreasury = GameDAOTreasury;
+	type GameDAOTreasury = TreasuryAccount;
 	// type Call = Call;
 
 	type PaymentTokenId = PlayCurrencyId;
@@ -1359,7 +1365,6 @@ parameter_types! {
 
 	// TODO: more flexible account admin map
 	// pub const Admin: EnsureRootOrGameDAOAdmin = ();
-	pub GameDAOTreasury: AccountId = MOCK_ACCOUNT;
 
 	// pub const SeedNonce: u64 = 1;
 
@@ -1395,7 +1400,7 @@ impl gamedao_flow::Config for Runtime {
 	type Randomness = RandomnessCollectiveFlip;
 	type Control = Control;
 	type GameDAOAdminOrigin = EnsureRootOrHalfGeneralCouncil;
-	type GameDAOTreasury = GameDAOTreasury;
+	type GameDAOTreasury = TreasuryAccount;
 	// type Call = Call;
 
 	// type Nonce = SeedNonce;
