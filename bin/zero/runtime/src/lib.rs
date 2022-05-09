@@ -63,7 +63,7 @@ use sp_runtime::{
 	generic, impl_opaque_keys,
 	traits::{
 		self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys,
-		SaturatedConversion, StaticLookup, Zero
+		SaturatedConversion, StaticLookup, Zero, AccountIdConversion
 	},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
 	AccountId32, ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill, Perquintill,
@@ -141,6 +141,17 @@ pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
 #[cfg(any(feature = "std", test))]
 pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
+}
+
+// Pallet accounts of runtime
+parameter_types! {
+	pub const TreasuryPalletId: PalletId = PalletId(*b"zero/tre");
+}
+
+pub fn get_all_module_accounts() -> Vec<AccountId> {
+	vec![
+		TreasuryPalletId::get().into_account(),
+	]
 }
 
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
@@ -841,7 +852,6 @@ parameter_types! {
 	pub const DataDepositPerByte: Balance = 1 * CENTS;
 	pub const BountyDepositBase: Balance = 1 * DOLLARS;
 	pub const BountyDepositPayoutDelay: BlockNumber = 1 * DAYS;
-	pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
 	pub const BountyUpdatePeriod: BlockNumber = 14 * DAYS;
 	pub const MaximumReasonLength: u32 = 16384;
 	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
@@ -1256,21 +1266,20 @@ impl pallet_transaction_storage::Config for Runtime {
 
 parameter_type_with_key! {
 	pub ExistentialDeposits: |_currency_id: u32| -> Balance {
+		// TODO: > 0
 		Zero::zero()
 	};
 }
 
-pub const MOCK_ACCOUNT: AccountId = AccountId32::new([3u8; 32]);
-
-parameter_types! {
-	pub DustReceiver: AccountId = MOCK_ACCOUNT;
+pub struct DustRemovalWhitelist;
+impl Contains<AccountId> for DustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		get_all_module_accounts().contains(a)
+	}
 }
 
-pub struct MockDustRemovalWhitelist;
-impl Contains<AccountId> for MockDustRemovalWhitelist {
-	fn contains(a: &AccountId) -> bool {
-		*a == MOCK_ACCOUNT || *a == DustReceiver::get()
-	}
+parameter_types! {
+	pub TreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
 }
 
 impl orml_tokens::Config for Runtime {
@@ -1280,9 +1289,9 @@ impl orml_tokens::Config for Runtime {
 	type CurrencyId = u32;
 	type WeightInfo = ();
 	type ExistentialDeposits = ExistentialDeposits;
-	type OnDust = orml_tokens::TransferDust<Runtime, DustReceiver>;
+	type OnDust = orml_tokens::TransferDust<Runtime, TreasuryAccount>;
 	type MaxLocks = MaxLocks;
-	type DustRemovalWhitelist = MockDustRemovalWhitelist;
+	type DustRemovalWhitelist = DustRemovalWhitelist;
 }
 
 impl orml_currencies::Config for Runtime {
@@ -1325,7 +1334,7 @@ parameter_types! {
 	pub const MaxDAOsPerAccount: u32 = 10;
 	pub const MaxMembersPerDAO: u32 = 1000;
 	pub const MaxCreationsPerBlock: u32 = 100;
-	pub const CreationFee: Balance = 1 * DOLLARS;
+	pub const InitialDeposit: Balance = 1 * DOLLARS;
 }
 
 impl gamedao_control::Config for Runtime {
@@ -1334,18 +1343,15 @@ impl gamedao_control::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Currencies;
 	type Randomness = RandomnessCollectiveFlip;
-	type GameDAOTreasury = GameDAOTreasury;
 	// type Call = Call;
-
 	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
 	type MaxDAOsPerAccount = MaxDAOsPerAccount;
 	type MaxMembersPerDAO = MaxMembersPerDAO;
 	type MaxCreationsPerBlock = MaxCreationsPerBlock;
-	type CreationFee = CreationFee;
+	type InitialDeposit = InitialDeposit;
 	type Balance = Balance;
 	type CurrencyId = CurrencyId;
-
 }
 
 // TODO: move to runtime_common?
@@ -1359,7 +1365,6 @@ parameter_types! {
 
 	// TODO: more flexible account admin map
 	// pub const Admin: EnsureRootOrGameDAOAdmin = ();
-	pub GameDAOTreasury: AccountId = MOCK_ACCOUNT;
 
 	// pub const SeedNonce: u64 = 1;
 
@@ -1395,7 +1400,7 @@ impl gamedao_flow::Config for Runtime {
 	type Randomness = RandomnessCollectiveFlip;
 	type Control = Control;
 	type GameDAOAdminOrigin = EnsureRootOrHalfGeneralCouncil;
-	type GameDAOTreasury = GameDAOTreasury;
+	type GameDAOTreasury = TreasuryAccount;
 	// type Call = Call;
 
 	// type Nonce = SeedNonce;
