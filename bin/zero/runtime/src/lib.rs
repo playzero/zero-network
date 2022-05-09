@@ -159,12 +159,15 @@ type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 pub struct DealWithFees;
 impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
-		if let Some(mut fees) = fees_then_tips.next() {
+		if let Some(fees) = fees_then_tips.next() {
+			// for fees, 80% to treasury, 20% to author
+			let mut split = fees.ration(80, 20);
 			if let Some(tips) = fees_then_tips.next() {
-				tips.merge_into(&mut fees);
+				// for tips, if any, 80% to treasury, 20% to author (though this can be anything)
+				tips.ration_merge_into(80, 20, &mut split);
 			}
-			// for fees and tips, 100% to treasury
-			Treasury::on_unbalanced(fees);
+			Treasury::on_unbalanced(split.0);
+			Author::on_unbalanced(split.1);
 		}
 	}
 }
@@ -1340,7 +1343,6 @@ impl gamedao_control::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Currencies;
 	type Randomness = RandomnessCollectiveFlip;
-	type GameDAOTreasury = TreasuryAccount;
 	// type Call = Call;
 	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
