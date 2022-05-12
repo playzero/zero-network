@@ -2137,6 +2137,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "gamedao-treasury"
+version = "1.0.1-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "impl-trait-for-tuples",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9945,6 +9962,7 @@ dependencies = [
  "gamedao-sense",
  "gamedao-signal",
  "gamedao-traits",
+ "gamedao-treasury",
  "hex-literal",
  "log",
  "orml-currencies",
