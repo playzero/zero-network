@@ -110,6 +110,7 @@ gamedao-flow = { path = "../../../gamedao-protocol/flow", default-features = fal
 gamedao-control = { path = "../../../gamedao-protocol/control", default-features = false }
 gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
 gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
+gamedao-treasury = { path = "../../../gamedao-protocol/treasury", default-features = false }
 
 zero-migration = { path = "../../../migration/migration", default-features = false }
 
@@ -194,6 +195,7 @@ std = [
     "gamedao-flow/std",
     "gamedao-control/std",
     "gamedao-signal/std",
+    "gamedao-treasury/std",
 
     "orml-tokens/std",
     "orml-currencies/std",
