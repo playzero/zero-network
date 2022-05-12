@@ -146,13 +146,13 @@ pub fn native_version() -> NativeVersion {
 // Pallet accounts of runtime
 parameter_types! {
 	pub const TreasuryPalletId: PalletId = PalletId(*b"zero/tre");
-    pub const GameDAOTreasuryPalletId: PalletId = PalletId(*b"game/tre");
+	pub const GameDAOTreasuryPalletId: PalletId = PalletId(*b"game/tre");
 }
 
 pub fn get_all_module_accounts() -> Vec<AccountId> {
 	vec![
 		TreasuryPalletId::get().into_account(),
-        GameDAOTreasuryPalletId::get().into_account(),
+		GameDAOTreasuryPalletId::get().into_account(),
 	]
 }
 
@@ -1282,7 +1282,7 @@ impl Contains<AccountId> for DustRemovalWhitelist {
 
 parameter_types! {
 	pub TreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
-    pub GameDAOTreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
+	pub GameDAOTreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
 }
 
 impl orml_tokens::Config for Runtime {
@@ -1427,7 +1427,7 @@ impl gamedao_sense::Config for Runtime {
 
 impl gamedao_treasury::Config for Runtime {
 	type PalletId = GameDAOTreasuryPalletId;
-    // TODO:
+	// TODO:
 }
 
 impl zero_migration::Config for Runtime {
@@ -1492,7 +1492,7 @@ construct_runtime!(
 		Sense: gamedao_sense,
 		Control: gamedao_control,
 		Signal: gamedao_signal,
-        GameDAOTreasury: gamedao_treasury,
+		GameDAOTreasury: gamedao_treasury,
 
 		// Zero pallets:
 		Migration: zero_migration,
