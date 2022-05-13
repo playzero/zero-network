@@ -19,7 +19,7 @@
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion, Throughput};
 
 use node_cli::service::{create_extrinsic, FullClient};
-use node_runtime::{constants::currency::*, BalancesCall};
+use zero_runtime::{constants::currency::*, BalancesCall};
 use sc_block_builder::{BlockBuilderProvider, BuiltBlock, RecordProof};
 use sc_client_api::execution_extensions::ExecutionStrategies;
 use sc_consensus::{
@@ -104,7 +104,6 @@ fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
 		tracing_targets: None,
 		tracing_receiver: Default::default(),
 		max_runtime_instances: 8,
-		runtime_cache_size: 2,
 		announce_block: true,
 		base_path: Some(base_path),
 		informant_output_format: Default::default(),
@@ -115,9 +114,9 @@ fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
 }
 
 fn extrinsic_set_time(now: u64) -> OpaqueExtrinsic {
-	node_runtime::UncheckedExtrinsic {
+	zero_runtime::UncheckedExtrinsic {
 		signature: None,
-		function: node_runtime::Call::Timestamp(pallet_timestamp::Call::set { now }),
+		function: zero_runtime::Call::Timestamp(pallet_timestamp::Call::set { now }),
 	}
 	.into()
 }

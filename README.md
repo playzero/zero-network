@@ -29,3 +29,36 @@ The reason for the split-licensing is to ensure that for the vast majority of te
 
 In the interests of the community, we require any deeper improvements made to Substrate's core logic (e.g. Substrate's internal consensus, crypto or database code) to be contributed back so everyone can benefit.
 
+## Running the node
+In case you would like to run the node on your machine, please follow next steps.
+
+1. Make sure you have correct version of Rust installed. Required to execute only once:
+```bash
+rustup toolchain install nightly-2021-11-07
+rustup target add wasm32-unknown-unknown --toolchain nightly-2021-11-07
+```
+2. Build project:
+```bash
+cargo +nightly-2021-11-07 build --release
+```
+3. Generate (and optionally edit) chainspec config:
+```bash
+./target/release/subzero build-spec --chain=dev > customSpec.json
+```
+4. Start the node:
+```bash
+./target/release/subzero --chain=customSpec.json [... other run options]
+```
+
+## Running with Docker
+It is possible to run the node with Docker solution.
+You can find docker file in `docker/subzero.Dockerfile`.
+
+1. Build docker image:
+```bash
+docker build . -f docker/subzero.Dockerfile -t subzero
+````
+2. Run node container:
+```bash
+docker run subzero /usr/local/bin/subzero [run options]
+```

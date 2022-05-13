@@ -1,23 +1,24 @@
 [package]
 name = "node-primitives"
 version = "2.0.0"
-authors = ["Parity Technologies <admin@parity.io>"]
+authors = ["ZERO <play@zero.io>"]
 edition = "2021"
 license = "Apache-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
+homepage = "https://zero.io"
+repository = "https://github.com/playzero/zero-network/"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = [
+	"derive",
+] }
 scale-info = { version = "1.0", default-features = false, features = ["derive"] }
-
-frame-system = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
-sp-application-crypto = { version = "4.0.0", default-features = false, git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
-sp-core = { version = "4.1.0-dev", default-features = false, git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
-sp-runtime = { version = "4.0.0", default-features = false, git = "https://github.com/paritytech/substrate", tag = "monthly-2022-01" }
+frame-system = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
+sp-application-crypto = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
+sp-core = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
 [features]
 default = ["std"]

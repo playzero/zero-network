@@ -1,13 +1,24 @@
+cargo-features = ["resolver"]
+
 [workspace]
 resolver = "2"
 
 members = [
 
-	# "bin/zero-template/node",
-	# "bin/zero-template/pallets/template",
-	# "bin/zero-template/runtime",
-
+	"bin/zero/runtime",
 	"bin/zero/cli",
+
+	"orml/currencies",
+	"orml/traits",
+	"orml/tokens",
+	"gamedao-protocol/flow",
+	"gamedao-protocol/control",
+	"gamedao-protocol/signal",
+	"gamedao-protocol/sense",
+	"gamedao-protocol/traits",
+	"primitives",
+
+	# "bin/zero/cli",
 
 	# "bin/zero/bench",
 	# "bin/zero/test-runner-example",
