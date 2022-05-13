@@ -4,3 +4,6 @@
 [submodule "gamedao-protocol"]
 	path = gamedao-protocol
 	url = git@github.com:gamedaoco/gamedao-protocol.git
+[submodule "rmrkl"]
+	path = rmrkl
+	url = git@github.com:cryply/rmrkl.git
