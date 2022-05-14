@@ -18,6 +18,9 @@ members = [
 	"gamedao-protocol/traits",
 	"primitives",
 
+	"gamedao-protocol/tangram",
+	"rmrkl/rmrk-core",
+	
 	# "bin/zero/cli",
 
 	# "bin/zero/bench",

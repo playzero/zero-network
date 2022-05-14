@@ -98,7 +98,7 @@ pallet-transaction-payment = { default-features = false, git = "https://github.c
 pallet-transaction-payment-rpc-runtime-api = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-asset-tx-payment = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-transaction-storage = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
-pallet-uniques = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
+#pallet-uniques = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
 orml-tokens = { path = "../../../orml/tokens", default-features = false }
@@ -111,6 +111,12 @@ gamedao-control = { path = "../../../gamedao-protocol/control", default-features
 gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
 gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
 gamedao-treasury = { path = "../../../gamedao-protocol/treasury", default-features = false }
+
+pallet-tangram = { path = "../../../gamedao-protocol/tangram", default-features = false }
+pallet-rmrk-core = { version = "0.0.1", default-features = false, path = "../../../rmrkl/rmrk-core" }
+pallet-uniques = { version = "0.0.1", default-features = false, path = "../../../rmrkl/uniques" }
+
+
 
 zero-migration = { path = "../../../migration/migration", default-features = false }
 
@@ -196,7 +202,9 @@ std = [
     "gamedao-control/std",
     "gamedao-signal/std",
     "gamedao-treasury/std",
-
+    "pallet-tangram/std",
+    "pallet-uniques/std",
+    "pallet-rmrk-core/std",
     "orml-tokens/std",
     "orml-currencies/std",
     "orml-traits/std",

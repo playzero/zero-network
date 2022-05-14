@@ -1,9 +1,12 @@
 [submodule "orml"]
 	path = orml
 	url = https://github.com/open-web3-stack/open-runtime-module-library.git
+	branch = polkadot-v0.9.13
 [submodule "gamedao-protocol"]
 	path = gamedao-protocol
 	url = git@github.com:gamedaoco/gamedao-protocol.git
+        branch = rmrked_tangram
 [submodule "rmrkl"]
 	path = rmrkl
 	url = git@github.com:cryply/rmrkl.git
+

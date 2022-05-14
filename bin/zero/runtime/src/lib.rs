@@ -100,6 +100,9 @@ use sp_runtime::generic::Era;
 /// Generated voter bag information.
 mod voter_bags;
 
+
+pub use pallet_rmrk_core;
+
 // Make the WASM binary available.
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
@@ -1357,6 +1360,48 @@ impl gamedao_control::Config for Runtime {
 	type CurrencyId = CurrencyId;
 }
 
+parameter_types! {
+	pub const MaxRecursions: u32 = 10;
+	pub const ResourceSymbolLimit: u32 = 10;
+	pub const CollectionSymbolLimit: u32 = 100;
+}
+	
+impl pallet_rmrk_core::Config for Runtime {
+	// type Currency = Balances;
+	type Event = Event;
+	type CollectionId = u32;
+	type NftId = u32;
+	type ResourceId = u32;
+	type ProtocolOrigin = frame_system::EnsureRoot<AccountId>;
+}
+
+
+parameter_types! {
+    pub const MaxRealmsPerOrg: u64 = 10;
+    pub const MaxClassesPerRealm:u64 = 10;
+    pub const MaxTokenPerClass:u128 = 5;
+    pub const MaxTotalToken:u128 = 100;
+	// pub const Index:u32 = u32;
+}
+
+
+impl pallet_tangram::Config for Runtime {
+	type Event= Event;
+	type WeightInfo= ();
+	type Time= Timestamp;
+	type Randomness= RandomnessCollectiveFlip;
+	
+	type MaxRealmsPerOrg=MaxRealmsPerOrg;
+	type MaxClassesPerRealm=MaxClassesPerRealm;
+	type MaxTokenPerClass=MaxTokenPerClass;
+	type MaxTotalToken=MaxTotalToken;
+	type NextRealmIndex=u32;
+	type NextClassIndex=u32;
+	type NextItemIndex=u32;
+	type TotalIndex=u32;
+	type BurnedIndex=u32;
+
+}
 // TODO: move to runtime_common?
 pub type EnsureRootOrHalfGeneralCouncil = EnsureOneOf<
 	AccountId,
@@ -1493,7 +1538,12 @@ construct_runtime!(
 		Control: gamedao_control,
 		Signal: gamedao_signal,
 		GameDAOTreasury: gamedao_treasury,
+		Tangram: pallet_tangram,
 
+		// RMRK
+		RmrkCore: pallet_rmrk_core::{Pallet, Call, Event<T>, Storage},
+		// Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
+		
 		// Zero pallets:
 		Migration: zero_migration,
 	}
