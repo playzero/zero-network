@@ -1,0 +1,175 @@
+version: "3.7"
+
+services:
+  validator-a:
+    image: playzero/subzero:latest
+    user: "0:0"
+    ports:
+      - "9944:9944"
+      - "9615:9615"
+    volumes:
+      - ${PWD}/tmp/alice:/tmp/alice
+# add this one for using the local build vs docker
+#      - ../../target/release/subzero:/usr/local/bin/subzero
+    networks:
+      - int
+    command:
+      - "/usr/local/bin/subzero"
+      - "--node-key"
+      - "0000000000000000000000000000000000000000000000000000000000000001"
+      - "--base-path"
+      - "/tmp/alice"
+      - "--chain=local"
+      - "--port"
+      - "30333"
+      - "--validator"
+      - "--alice"
+      - "--bootnodes"
+      - "/dns/validator-b/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      # Not only bind to localhost.
+      - "--unsafe-ws-external"
+      - "--unsafe-rpc-external"
+      # enable these two for verbose logs
+      # - "--log"
+      # - "sub-libp2p=trace"
+      - "--no-telemetry"
+      - "--rpc-cors"
+      - "all"
+      - "--prometheus-external"
+
+  validator-b:
+    image: playzero/subzero:latest
+    user: "0:0"
+    ports:
+      - "9945:9944"
+    volumes:
+      - ${PWD}/tmp/bob:/tmp/bob
+# add this one for using the local build vs docker
+#      - ../../target/release/subzero:/usr/local/bin/subzero
+    networks:
+      - int
+    command:
+      - "/usr/local/bin/subzero"
+      - "--node-key"
+      - "0000000000000000000000000000000000000000000000000000000000000002"
+      - "--base-path"
+      - "/tmp/bob"
+      - "--chain=local"
+      - "--port"
+      - "30333"
+      - "--validator"
+      - "--bob"
+      - "--bootnodes"
+      - "/dns/validator-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+      - "--no-telemetry"
+      - "--rpc-cors"
+      - "all"
+      # Not only bind to localhost.
+      - "--unsafe-ws-external"
+      - "--unsafe-rpc-external"
+      # - "--log"
+      # - "sub-libp2p=trace"
+      - "--prometheus-external"
+
+  validator-c:
+    image: playzero/subzero:latest
+    user: "0:0"
+    ports:
+      - "9946:9944"
+    volumes:
+      - ${PWD}/tmp/charlie:/tmp/charlie
+# add this one for using the local build vs docker
+#      - ../../target/release/subzero:/usr/local/bin/subzero
+    networks:
+      - int
+    command:
+      - "/usr/local/bin/subzero"
+      - "--node-key"
+      - "0000000000000000000000000000000000000000000000000000000000000003"
+      - "--base-path"
+      - "/tmp/charlie"
+      - "--chain=local"
+      - "--port"
+      - "30333"
+      - "--validator"
+      - "--charlie"
+      - "--bootnodes"
+      - "/dns/validator-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+      - "/dns/validator-b/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--no-telemetry"
+      - "--rpc-cors"
+      - "all"
+      # Not only bind to localhost.
+      - "--unsafe-ws-external"
+      - "--unsafe-rpc-external"
+      # - "--log"
+      # - "sub-libp2p=trace"
+      - "--prometheus-external"
+
+  light-d:
+    image: playzero/subzero:latest
+    ports:
+      - "9947:9944"
+    volumes:
+      - ${pwd}/tmp/light:/tmp/light
+# add this one for using the local build vs docker:
+#     - ../../target/release/subzero:/usr/local/bin/subzero
+    networks:
+      - int
+    command:
+      - "/usr/local/bin/subzero"
+      - "--node-key"
+      - "0000000000000000000000000000000000000000000000000000000000000004"
+      - "--base-path"
+      - "/tmp/light"
+      - "--chain=local"
+      - "--port"
+      - "30333"
+      - "--light"
+      - "--bootnodes"
+      - "/dns/validator-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+      - "/dns/validator-b/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--no-telemetry"
+      - "--rpc-cors"
+      - "all"
+      # Not only bind to localhost.
+      - "--unsafe-ws-external"
+      - "--unsafe-rpc-external"
+      - "--log"
+      - "sub-libp2p=trace"
+      - "--prometheus-external"
+
+  prometheus:
+    image: prom/prometheus
+    networks:
+      - int
+    ports:
+      - "9090:9090"
+    links:
+      - validator-a:validator-a
+      - validator-b:validator-b
+      - validator-c:validator-c
+      - light-d:light-d
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    user: "104"
+    depends_on:
+      - prometheus
+    networks:
+      - int
+      - ext
+    ports:
+      - 3001:3000
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning
+      - ../monitoring/grafana-dashboards/:/etc/grafana/provisioning/dashboard-definitions
+    restart: always
+
+networks:
+  int:
+    internal: true
+  ext:
