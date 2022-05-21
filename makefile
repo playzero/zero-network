@@ -1,3 +1,5 @@
+submodule:
+	git submodule update --init --recursive
 
 reset:
 	cargo clean

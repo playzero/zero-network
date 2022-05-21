@@ -8,14 +8,18 @@ members = [
 	"bin/zero/runtime",
 	"bin/zero/cli",
 
+	"modules/drop",
+
 	"orml/currencies",
 	"orml/traits",
 	"orml/tokens",
+
 	"gamedao-protocol/flow",
 	"gamedao-protocol/control",
 	"gamedao-protocol/signal",
 	"gamedao-protocol/sense",
 	"gamedao-protocol/traits",
+
 	"primitives",
 
 	# "bin/zero/cli",
