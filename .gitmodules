@@ -9,4 +9,5 @@
 [submodule "rmrkl"]
 	path = rmrkl
 	url = git@github.com:cryply/rmrkl.git
+	branch = main
 
