@@ -124,7 +124,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 51,
+	spec_version: 52,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1386,6 +1386,7 @@ parameter_types! {
 
 	// TODO: fees
 	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
+	pub MaxContributorsProcessing: u32 = 20;
 }
 
 impl gamedao_flow::Config for Runtime {
@@ -1417,6 +1418,7 @@ impl gamedao_flow::Config for Runtime {
 	type MaxCampaignDuration = MaxCampaignDuration;
 	type MinCreatorDeposit = MinCreatorDeposit;
 	type MinContribution = MinContribution;
+	type MaxContributorsProcessing = MaxContributorsProcessing;
 }
 
 impl gamedao_sense::Config for Runtime {
