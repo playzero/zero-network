@@ -172,10 +172,10 @@ impl_opaque_keys! {
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("template-parachain"),
-	impl_name: create_runtime_str!("template-parachain"),
-	authoring_version: 1,
-	spec_version: 1,
+	spec_name: create_runtime_str!("subzero"),
+	impl_name: create_runtime_str!("alphaville"),
+	authoring_version: 75,
+	spec_version: 52,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
