@@ -24,7 +24,7 @@ use sc_service::PartialComponents;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"ZERO Node".into()
+		"S U B Z E R O ".into()
 	}
 
 	fn impl_version() -> String {

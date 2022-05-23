@@ -147,12 +147,14 @@ pub fn native_version() -> NativeVersion {
 parameter_types! {
 	pub const TreasuryPalletId: PalletId = PalletId(*b"zero/tre");
 	pub const GameDAOTreasuryPalletId: PalletId = PalletId(*b"game/tre");
+	pub const ZeroLootDropPalletId: PalletId = PalletId(*b"zero/drp");
 }
 
 pub fn get_all_module_accounts() -> Vec<AccountId> {
 	vec![
 		TreasuryPalletId::get().into_account(),
 		GameDAOTreasuryPalletId::get().into_account(),
+		ZeroLootDropPalletId::get().into_account(),
 	]
 }
 
@@ -1430,6 +1432,40 @@ impl gamedao_treasury::Config for Runtime {
 	// TODO:
 }
 
+parameter_types! {
+	pub const ZeroCurrencyId: CurrencyId = TokenSymbol::ZERO as u32;
+	pub const MaxDropsPerBlock: u32 = 10;
+	// pub const MinDropInterval: u32 = 20; // ~ 1 minute
+	pub const MinDropInterval: BlockNumber = 1 * MINUTES;
+	pub const AccountDropInterval: BlockNumber = 1 * DAYS;
+	pub const DropAmount: Balance = 1 * DOLLARS;
+
+}
+
+impl zero_drop::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type Currency = Currencies;
+	type Randomness = RandomnessCollectiveFlip;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+
+	type GameDAOTreasury = GameDAOTreasuryAccount;
+
+	type NetworkTokenId = ZeroCurrencyId;
+	type PaymentTokenId = PlayCurrencyId;
+	type ProtocolTokenId = GameCurrencyId;
+
+	type DropAmount = DropAmount;
+
+	type MaxDropsPerBlock = MaxDropsPerBlock;
+	type MinDropInterval = MinDropInterval;
+	type AccountDropInterval = AccountDropInterval;
+
+	type PalletId = ZeroLootDropPalletId;
+	type WeightInfo = ();
+}
+
 impl zero_migration::Config for Runtime {
 	type Event = Event;
 }
@@ -1495,6 +1531,7 @@ construct_runtime!(
 		GameDAOTreasury: gamedao_treasury,
 
 		// Zero pallets:
+		LootDrop: zero_drop,
 		Migration: zero_migration,
 	}
 );

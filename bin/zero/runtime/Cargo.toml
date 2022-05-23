@@ -114,6 +114,9 @@ gamedao-treasury = { path = "../../../gamedao-protocol/treasury", default-featur
 
 zero-migration = { path = "../../../migration/migration", default-features = false }
 
+zero-drop = { path = "../../../modules/drop", default-features = false }
+
+
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
@@ -201,6 +204,7 @@ std = [
     "orml-currencies/std",
     "orml-traits/std",
 
+    "zero-drop/std",
     "zero-migration/std"
 ]
 runtime-benchmarks = [
