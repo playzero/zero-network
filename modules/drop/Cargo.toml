@@ -2,7 +2,7 @@
 # get 'em tokenz
 
 [package]
-name = "drop"
+name = "zero-drop"
 version = "0.1.0"
 edition = "2021"
 authors = ["2075@zero.io"]
@@ -37,8 +37,6 @@ pallet-balances = { default-features = false, git = "https://github.com/parityte
 orml-tokens = { path = "../../orml/tokens", default-features = false }
 orml-currencies = { path = "../../orml/currencies", default-features = false }
 
-gamedao-control = { package = "gamedao-control", path = "../../gamedao-protocol/control", default-features = true }
-
 [features]
 default = ["std"]
 runtime-benchmarks = ["frame-benchmarking"]
@@ -54,10 +52,11 @@ std = [
 	"sp-core/std",
 	"sp-std/std",
 	"sp-runtime/std",
+
 	"orml-traits/std",
 	"orml-tokens/std",
 	"orml-currencies/std",
+
 	"gamedao-traits/std",
-    "gamedao-control/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
