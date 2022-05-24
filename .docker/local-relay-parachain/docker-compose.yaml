@@ -1,0 +1,65 @@
+version: "3.7"
+
+services:
+  relay-chain-a:
+    image: parity/polkadot:v0.9.13
+    user: "0:0"
+    command:
+      - "--alice"
+      - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
+      - "--validator"
+      - "--base-path=/tmp/relay/alice"
+      - "--chain=/chainspec/rococo-raw.json"
+      - "--port=30333"
+      - "--ws-port=9944"
+      - "--unsafe-ws-external"
+    volumes:
+      - "./chainspec:/chainspec"
+      - "./tmp:/tmp"
+    ports:
+      - "9944:9944"
+  relay-chain-b:
+    image: parity/polkadot:v0.9.13
+    user: "0:0"
+    command:
+      - "--bob"
+      - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
+      - "--validator"
+      - "--base-path=/tmp/relay/bob"
+      - "--chain=/chainspec/rococo-raw.json"
+      - "--port=30333"
+      - "--ws-port=9944"
+      - "--unsafe-ws-external"
+      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+    volumes:
+      - "./chainspec:/chainspec"
+      - "./tmp:/tmp"
+    ports:
+      - "9945:9944"
+  parachain-a:
+    image: playzero/subzero:local
+    user: "0:0"
+    command:
+      - "/usr/local/bin/subzero-collator"
+      - "--alice"
+      - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
+      - "--collator"
+      - "--force-authoring"
+      - "--chain=/chainspec/subzero-parachain-raw.json"
+      - "--base-path=/tmp/parachain/alice"
+      - "--port=40333"
+      - "--ws-port=8844"
+      - "--unsafe-ws-external"
+      - "--"
+      - "--execution=wasm"
+      - "--chain=/chainspec/rococo-raw.json"
+      - "--port=30343"
+      - "--ws-port=9944"
+      - "--unsafe-ws-external"
+      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+    volumes:
+      - "./chainspec:/chainspec"
+      - "./tmp:/tmp"
+    ports:
+      - "9954:9944"
+      - "9955:8844"

@@ -26,7 +26,7 @@ FROM baseimage as builder
 ARG PROFILE=release
 
 RUN	export PATH="$PATH:$HOME/.cargo/bin" && \
-cargo build "--$PROFILE"
+cargo build --features parachain "--$PROFILE"
 
 # ===== STAGE 3 ======
 
@@ -44,6 +44,7 @@ RUN mv /usr/share/ca* /tmp && \
 	ln -s /subzero/.local/share/subzero /data
 
 COPY --from=builder /subzero/target/$PROFILE/subzero /usr/local/bin
+COPY --from=builder /subzero/target/$PROFILE/subzero-collator /usr/local/bin
 
 # checks
 RUN ldd /usr/local/bin/subzero && \
