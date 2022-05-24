@@ -1,5 +1,5 @@
 [package]
-name = "parachain-template-node"
+name = "parachain-subzero-node"
 version = "0.1.0"
 authors = ["Anonymous"]
 description = "A new Cumulus FRAME-based Substrate Node, ready for hacking together a parachain."
@@ -16,11 +16,9 @@ targets = ["x86_64-unknown-linux-gnu"]
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
 [[bin]]
-name = "parachain-collator"
+name = "subzero-collator"
 path = "src/main.rs"
-
-[features]
-runtime-benchmarks = ["parachain-template-runtime/runtime-benchmarks"]
+required-features = ["parachain"]
 
 [dependencies]
 derive_more = "0.99.2"
@@ -34,7 +32,7 @@ hex-literal = "0.3.1"
 jsonrpc-core = "18.0.0"
 
 # Local Dependencies
-parachain-template-runtime = { path = "../runtime" }
+parachain-subzero-runtime = { path = "../runtime" }
 
 # Substrate Dependencies
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -92,3 +90,10 @@ polkadot-cli = { git = "https://github.com/paritytech/polkadot", branch = "relea
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.13" }
 polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.13" }
 polkadot-service = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.13" }
+
+
+[features]
+runtime-benchmarks = [
+	"parachain-subzero-runtime/runtime-benchmarks"
+]
+parachain = []
