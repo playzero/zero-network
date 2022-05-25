@@ -1282,7 +1282,7 @@ impl Contains<AccountId> for DustRemovalWhitelist {
 
 parameter_types! {
 	pub TreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
-	pub GameDAOTreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
+	pub GameDAOTreasuryAccount: AccountId = GameDAOTreasuryPalletId::get().into_account();
 }
 
 impl orml_tokens::Config for Runtime {
