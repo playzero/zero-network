@@ -4,7 +4,7 @@
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{traits::{Currency, StoredMap}};
 use sp_runtime::AccountId32;
-use sp_runtime::{traits::SaturatedConversion, RuntimeDebug};
+use sp_runtime::{traits::{SaturatedConversion, Zero, StaticLookup}, RuntimeDebug};
 use sp_std::{num::ParseIntError};
 use serde_json::{Value};
 use serde::{Deserialize};
@@ -19,6 +19,11 @@ use pallet_balances::AccountData;
 
 pub mod migration;
 pub use migration::migrate;
+
+#[cfg(test)]
+pub mod mock;
+#[cfg(test)]
+mod tests;
 
 
 type BalanceOf<T> = <<T as pallet_identity::Config>::Currency as Currency<
@@ -73,8 +78,14 @@ pub mod pallet {
 		frame_system::Config
 		+ pallet_identity::Config
 		+ pallet_balances::Config
+		+ orml_tokens::Config
 	{
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		#[pallet::constant]
+		type ProtocolTokenId: Get<Self::CurrencyId>;
+		#[pallet::constant]
+		type PaymentTokenId: Get<Self::CurrencyId>;
 	}
 
 	#[pallet::hooks]
@@ -91,6 +102,9 @@ pub mod pallet {
 	pub(super) type IdentityVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
 
 	#[pallet::storage]
+	pub(super) type TokensVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
+
+	#[pallet::storage]
 	pub(super) type MigrationVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
 
 	#[pallet::event]
@@ -98,6 +112,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		MigratedBalances(u32),
 		MigratedIdentities(u32),
+		TokensDropped(u32)
 	}
 
 	#[pallet::error]
@@ -107,6 +122,44 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+
+		/// Set Tokens (GAME & PLAY) balances with the same amount as native currency has
+		#[pallet::weight(5_000_000)]
+		pub fn tokens_airdrop(origin: OriginFor<T>) -> DispatchResult {
+			ensure_root(origin.clone()).is_ok();
+
+			if <TokensVersion<T>>::get() == StorageVersion::V2Imported {
+				return Ok(())
+			}
+
+			let mut accounts: u32 = 0;
+			// for (account_id, account_data) in pallet_balances::Account::<T>::iter() {
+			// for (account_id, account_data) in <T as pallet_balances::Config>::AccountStore::iter() {
+			for (account_id, account_info) in <frame_system::Account::<T>>::iter() {				
+				let lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(account_id.clone());
+
+				let account_data: AccountData<<T as pallet_balances::Config>::Balance> = account_info.data;
+				let bal: u128 = account_data.free.saturated_into();
+				let balance: <T as orml_tokens::Config>::Balance = bal.saturated_into();
+
+				orml_tokens::Pallet::<T>::set_balance(
+					origin.clone(), lookup.clone(), T::ProtocolTokenId::get(),
+					balance, Zero::zero()
+				);
+				orml_tokens::Pallet::<T>::set_balance(
+					origin.clone(), lookup.clone(), T::PaymentTokenId::get(),
+					balance, Zero::zero()
+				);
+
+				accounts += 1;
+			}
+
+			<TokensVersion<T>>::set(StorageVersion::V2Imported);
+
+			Self::deposit_event(Event::<T>::TokensDropped(accounts as u32));
+
+			Ok(())
+		}
 
 		/// Migrates to `Balances` storage from another chain.
 		/// Storage: `TotalIssuance`, AccountStore
@@ -193,12 +246,12 @@ pub mod pallet {
 
 impl<T: Config> Pallet<T> {
 	// Balances helpers
-	fn get_balance(item: &AccountItem) -> T::Balance {
+	fn get_balance(item: &AccountItem) -> <T as pallet_balances::Config>::Balance {
 		let free: u128 = item.free_balance.parse().unwrap();
 		let reserved: u128 = item.reserved_balance.parse().unwrap();
 		(free + reserved).saturated_into()
 	}
-	
+
 	fn get_account(item: &AccountItem) -> T::AccountId {
 		let mut array = [0; 32];
 		let mut decoded = bs58::decode(&item.account_id).into_vec().unwrap();

@@ -1434,6 +1434,9 @@ impl gamedao_treasury::Config for Runtime {
 
 impl zero_migration::Config for Runtime {
 	type Event = Event;
+	type PaymentTokenId = PlayCurrencyId;
+	type ProtocolTokenId = GameCurrencyId;
+
 }
 
 construct_runtime!(
