@@ -133,10 +133,10 @@ pub mod pallet {
 			}
 			let mut accounts: u32 = 0;
 
-			// for (acc_id, acc_info) in pallet_balances::Account::<T>::iter() {			     // --> contains no accounts
-			// for (acc_id, acc_info) in <T as pallet_balances::Config>::AccountStore::iter() {  // --> no iterator
+			// for (acc_id, acc_info) in pallet_balances::Account::<T>::iter() {				// --> contains no accounts
+			// for (acc_id, acc_info) in <T as pallet_balances::Config>::AccountStore::iter() {	// --> no iterator
 			for (acc_id, _acc_info) in <frame_system::Account::<T>>::iter() {				
-				// let bal: u128 = acc_info.data.free.saturated_into();							 // --> no field `free` on type `AccountData`
+				// let bal: u128 = acc_info.data.free.saturated_into();							// --> no field `free` on type `AccountData`
 				let bal: u128 = <T as pallet_balances::Config>::AccountStore::get(&acc_id).free.saturated_into();
 				let balance: <T as orml_tokens::Config>::Balance = bal.saturated_into();
 				
@@ -153,7 +153,7 @@ pub mod pallet {
 			}
 			<TokensVersion<T>>::set(StorageVersion::V2Imported);
 
-			Self::deposit_event(Event::<T>::TokensAirDropped(accounts) );
+			Self::deposit_event(Event::<T>::TokensAirDropped(accounts));
 
 			Ok(())
 		}

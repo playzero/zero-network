@@ -21,7 +21,7 @@ fn migration_tokens_airdrop() {
 		assert_eq!(orml_tokens::Accounts::<Test>::get(BOB, PAYMENT_TOKEN_ID).free, 50);
 		assert_eq!(orml_tokens::Accounts::<Test>::get(DAVE, PROTOCOL_TOKEN_ID).free, 0);
 		assert_eq!(orml_tokens::Accounts::<Test>::get(DAVE, PAYMENT_TOKEN_ID).free, 0);
-		// Event
+		// TODO: Event test
 		// System::assert_has_event(mock::Event::Migration(crate::Event::TokensAirDropped(1)));
 	});
 }
