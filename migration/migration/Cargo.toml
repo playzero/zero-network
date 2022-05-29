@@ -34,7 +34,6 @@ sp-core = { git = "https://github.com/paritytech/substrate", default-features = 
 [dev-dependencies]
 hex = "0.4.3"
 rand = "0.8.5"
-orml-currencies = { path = "../../orml/currencies", default-features = false }
 orml-traits = { path = "../../orml/traits", default-features = false }
 
 [features]
