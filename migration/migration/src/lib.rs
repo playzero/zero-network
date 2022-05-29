@@ -112,7 +112,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		MigratedBalances(u32),
 		MigratedIdentities(u32),
-		TokensDropped(u32)
+		TokensAirDropped(u32)
 	}
 
 	#[pallet::error]
@@ -131,17 +131,16 @@ pub mod pallet {
 			if <TokensVersion<T>>::get() == StorageVersion::V2Imported {
 				return Ok(())
 			}
-
 			let mut accounts: u32 = 0;
-			// for (account_id, account_data) in pallet_balances::Account::<T>::iter() {
-			// for (account_id, account_data) in <T as pallet_balances::Config>::AccountStore::iter() {
-			for (account_id, account_info) in <frame_system::Account::<T>>::iter() {				
-				let lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(account_id.clone());
 
-				let account_data: AccountData<<T as pallet_balances::Config>::Balance> = account_info.data;
-				let bal: u128 = account_data.free.saturated_into();
+			// for (acc_id, acc_info) in pallet_balances::Account::<T>::iter() {			     // --> contains no accounts
+			// for (acc_id, acc_info) in <T as pallet_balances::Config>::AccountStore::iter() {  // --> no iterator
+			for (acc_id, _acc_info) in <frame_system::Account::<T>>::iter() {				
+				// let bal: u128 = acc_info.data.free.saturated_into();							 // --> no field `free` on type `AccountData`
+				let bal: u128 = <T as pallet_balances::Config>::AccountStore::get(&acc_id).free.saturated_into();
 				let balance: <T as orml_tokens::Config>::Balance = bal.saturated_into();
-
+				
+				let lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(acc_id.clone());
 				orml_tokens::Pallet::<T>::set_balance(
 					origin.clone(), lookup.clone(), T::ProtocolTokenId::get(),
 					balance, Zero::zero()
@@ -150,19 +149,17 @@ pub mod pallet {
 					origin.clone(), lookup.clone(), T::PaymentTokenId::get(),
 					balance, Zero::zero()
 				);
-
 				accounts += 1;
 			}
-
 			<TokensVersion<T>>::set(StorageVersion::V2Imported);
 
-			Self::deposit_event(Event::<T>::TokensDropped(accounts as u32));
+			Self::deposit_event(Event::<T>::TokensAirDropped(accounts) );
 
 			Ok(())
 		}
 
 		/// Migrates to `Balances` storage from another chain.
-		/// Storage: `TotalIssuance`, AccountStore
+		/// Storage: `TotalIssuance`, `AccountStore`
 		#[pallet::weight(5_000_000)]
 		#[transactional]
 		pub fn migrate_balances(

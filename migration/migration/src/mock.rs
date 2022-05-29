@@ -2,12 +2,11 @@
 
 pub use super::*;
 use frame_support::{
-	construct_runtime, parameter_types, ord_parameter_types,
-	traits::{Everything, GenesisBuild, Nothing},
+	construct_runtime, parameter_types,
+	traits::{Everything, Nothing},
 };
-use frame_system::{EnsureOneOf, EnsureRoot, EnsureSignedBy};
 use sp_core::H256;
-use sp_runtime::{traits::IdentityLookup, Permill};
+use sp_runtime::{traits::IdentityLookup};
 
 use orml_traits::parameter_type_with_key;
 
@@ -115,12 +114,6 @@ parameter_types! {
 	pub const MaxRegistrars: u32 = 20;
 }
 
-// ord_parameter_types! {
-// 	pub const One: u64 = 1;
-// 	pub const Two: u64 = 2;
-// }
-// type EnsureOneOrRoot = EnsureOneOf<u64, EnsureRoot<u64>, EnsureSignedBy<One, u64>>;
-// type EnsureTwoOrRoot = EnsureOneOf<u64, EnsureRoot<u64>, EnsureSignedBy<Two, u64>>;
 impl pallet_identity::Config for Test {
 	type Event = Event;
 	type Currency = Balances;
@@ -133,16 +126,6 @@ impl pallet_identity::Config for Test {
 	type MaxRegistrars = MaxRegistrars;
 	type RegistrarOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
-	type WeightInfo = ();
-}
-
-pub type AdaptedBasicCurrency = orml_currencies::BasicCurrencyAdapter<Test, Balances, Amount, BlockNumber>;
-
-impl orml_currencies::Config for Test {
-	type Event = Event;
-	type MultiCurrency = Tokens;
-	type NativeCurrency = AdaptedBasicCurrency;
-	type GetNativeCurrencyId = ();
 	type WeightInfo = ();
 }
 
@@ -166,21 +149,14 @@ construct_runtime!(
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Storage, Event<T>},
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>},
-		Currencies: orml_currencies::{Pallet, Call, Event<T>},
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
-
 		Migration: zero_migration,
 	}
 );
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
-	pallet_balances::GenesisConfig::<Test> { 
-		balances: vec![
-			// (ALICE, 100 * DOLLARS),
-			// (BOB, 50 * DOLLARS),
-		],
-	}
+	pallet_balances::GenesisConfig::<Test> { balances: vec![] }
 	.assimilate_storage(&mut t)
 	.unwrap();
 	t.into()
