@@ -2,7 +2,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{traits::{Currency, StoredMap}};
+use frame_support::{traits::{Currency, StoredMap, Contains}};
 use sp_runtime::AccountId32;
 use sp_runtime::{traits::{SaturatedConversion, Zero, StaticLookup}, RuntimeDebug};
 use sp_std::{num::ParseIntError};
@@ -80,7 +80,10 @@ pub mod pallet {
 		+ pallet_balances::Config
 		+ orml_tokens::Config
 	{
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type Event: From<Event<Self>>
+			+ IsType<<Self as frame_system::Config>::Event>
+			+ Into<<Self as frame_system::Config>::Event>;
+		type ModuleAccounts: Contains<Self::AccountId>;
 
 		#[pallet::constant]
 		type ProtocolTokenId: Get<Self::CurrencyId>;
@@ -126,14 +129,19 @@ pub mod pallet {
 		/// Set Tokens (GAME & PLAY) balances with the same amount as native currency has
 		#[pallet::weight(5_000_000)]
 		pub fn tokens_airdrop(origin: OriginFor<T>) -> DispatchResult {
-			ensure_root(origin.clone()).is_ok();
+			Self::deposit_event(Event::<T>::TokensAirDropped(1_u32));
+			ensure_root(origin.clone())?;
 
 			if <TokensVersion<T>>::get() == StorageVersion::V2Imported {
 				return Ok(())
 			}
 			let mut accounts: u32 = 0;
 
-			for (acc_id, _acc_info) in <frame_system::Account::<T>>::iter() {				
+			for (acc_id, _acc_info) in <frame_system::Account::<T>>::iter() {		
+				if T::ModuleAccounts::contains(&acc_id) {
+					// Skip system (module) accounts: Treasuries, etc.
+					continue;
+				}		
 				// let bal: u128 = acc_info.data.free.saturated_into();	// --> no field `free` on type `AccountData`
 				let bal: u128 = <T as pallet_balances::Config>::AccountStore::get(&acc_id).free.saturated_into();
 				let balance: <T as orml_tokens::Config>::Balance = bal.saturated_into();
@@ -151,7 +159,7 @@ pub mod pallet {
 			}
 			<TokensVersion<T>>::set(StorageVersion::V2Imported);
 
-			Self::deposit_event(Event::<T>::TokensAirDropped(accounts));
+			// Self::deposit_event(Event::<T>::TokensAirDropped(1_u32));
 
 			Ok(())
 		}

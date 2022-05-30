@@ -36,6 +36,7 @@ pub const PAYMENT_TOKEN_ID: CurrencyId = 2;
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
 pub const DAVE: AccountId = 3;
+pub const TREASURY: AccountId = 4;
 
 mod zero_migration {
 	pub use super::super::*;
@@ -134,10 +135,18 @@ frame_support::parameter_types! {
 	pub const PaymentTokenId: CurrencyId = PAYMENT_TOKEN_ID;
 }
 
+pub struct ModuleAccounts;
+impl Contains<AccountId> for ModuleAccounts {
+	fn contains(a: &AccountId) -> bool {
+		vec![TREASURY].contains(a)
+	}
+}
+
 impl Config for Test {
 	type Event = Event;
 	type PaymentTokenId = PaymentTokenId;
 	type ProtocolTokenId = ProtocolTokenId;
+	type ModuleAccounts = ModuleAccounts;
 }
 
 construct_runtime!(

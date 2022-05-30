@@ -1436,7 +1436,7 @@ impl zero_migration::Config for Runtime {
 	type Event = Event;
 	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
-
+	type ModuleAccounts = DustRemovalWhitelist;
 }
 
 construct_runtime!(

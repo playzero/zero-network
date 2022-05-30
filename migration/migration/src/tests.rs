@@ -1,7 +1,8 @@
 #![cfg(test)]
 
 use super::*;
-use frame_support::assert_ok;
+use frame_support::{assert_ok, assert_noop};
+use sp_runtime::traits::BadOrigin;
 use mock::*;
 
 
@@ -12,6 +13,7 @@ fn migration_tokens_airdrop() {
 		Balances::make_free_balance_be(&ALICE, 100);
 		Balances::make_free_balance_be(&BOB, 50);
 		Balances::make_free_balance_be(&DAVE, 0);
+		Balances::make_free_balance_be(&TREASURY, 999);
 		// Proceed with airdrop
 		assert_ok!(Migration::tokens_airdrop(Origin::root()));
 		// Check if tokens were sent
@@ -21,7 +23,11 @@ fn migration_tokens_airdrop() {
 		assert_eq!(orml_tokens::Accounts::<Test>::get(BOB, PAYMENT_TOKEN_ID).free, 50);
 		assert_eq!(orml_tokens::Accounts::<Test>::get(DAVE, PROTOCOL_TOKEN_ID).free, 0);
 		assert_eq!(orml_tokens::Accounts::<Test>::get(DAVE, PAYMENT_TOKEN_ID).free, 0);
+		assert_eq!(orml_tokens::Accounts::<Test>::get(TREASURY, PROTOCOL_TOKEN_ID).free, 0);
+		assert_eq!(orml_tokens::Accounts::<Test>::get(TREASURY, PAYMENT_TOKEN_ID).free, 0);
+		// Check origin
+		assert_noop!(Migration::tokens_airdrop(Origin::signed(ALICE)), BadOrigin);
 		// TODO: Event test
-		// System::assert_has_event(mock::Event::Migration(crate::Event::TokensAirDropped(1)));
+		// System::assert_has_event(mock::Event::Migration(crate::Event::TokensAirDropped(3)));
 	});
 }
