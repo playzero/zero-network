@@ -129,7 +129,6 @@ pub mod pallet {
 		/// Set Tokens (GAME & PLAY) balances with the same amount as native currency has
 		#[pallet::weight(5_000_000)]
 		pub fn tokens_airdrop(origin: OriginFor<T>) -> DispatchResult {
-			Self::deposit_event(Event::<T>::TokensAirDropped(1_u32));
 			ensure_root(origin.clone())?;
 
 			if <TokensVersion<T>>::get() == StorageVersion::V2Imported {
