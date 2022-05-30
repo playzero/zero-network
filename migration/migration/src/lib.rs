@@ -159,7 +159,7 @@ pub mod pallet {
 			}
 			<TokensVersion<T>>::set(StorageVersion::V2Imported);
 
-			// Self::deposit_event(Event::<T>::TokensAirDropped(1_u32));
+			Self::deposit_event(Event::<T>::TokensAirDropped(accounts));
 
 			Ok(())
 		}
