@@ -145,14 +145,19 @@ pub fn native_version() -> NativeVersion {
 
 // Pallet accounts of runtime
 parameter_types! {
-	pub const TreasuryPalletId: PalletId = PalletId(*b"zero/tre");
-	pub const GameDAOTreasuryPalletId: PalletId = PalletId(*b"game/tre");
+	pub const TreasuryPalletId: PalletId = PalletId(*b"zr/zrtrs");
+	pub const ControlPalletId: PalletId = PalletId(*b"gd/cntrl");
+	pub TreasuryAccountId: AccountId = TreasuryPalletId::get().into_account();
+	pub Game3FoundationTreasuryAccountId: AccountId = PalletId(*b"gd/g3trs").into_account();
+	pub GameDAOTreasuryAccountId: AccountId = PalletId(*b"gd/gdtrs").into_account();
 }
 
 pub fn get_all_module_accounts() -> Vec<AccountId> {
 	vec![
 		TreasuryPalletId::get().into_account(),
-		GameDAOTreasuryPalletId::get().into_account(),
+		ControlPalletId::get().into_account(),
+		Game3FoundationTreasuryAccountId::get(),
+		GameDAOTreasuryAccountId::get(),
 	]
 }
 
@@ -206,7 +211,7 @@ parameter_types! {
 		})
 		.avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
 		.build_or_panic();
-	pub const SS58Prefix: u16 = 42;
+	pub const SS58Prefix: u16 = 25;
 }
 
 const_assert!(NORMAL_DISPATCH_RATIO.deconstruct() >= AVERAGE_ON_INITIALIZE_RATIO.deconstruct());
@@ -1280,11 +1285,6 @@ impl Contains<AccountId> for DustRemovalWhitelist {
 	}
 }
 
-parameter_types! {
-	pub TreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
-	pub GameDAOTreasuryAccount: AccountId = GameDAOTreasuryPalletId::get().into_account();
-}
-
 impl orml_tokens::Config for Runtime {
 	type Event = Event;
 	type Balance = Balance;
@@ -1292,7 +1292,7 @@ impl orml_tokens::Config for Runtime {
 	type CurrencyId = u32;
 	type WeightInfo = ();
 	type ExistentialDeposits = ExistentialDeposits;
-	type OnDust = orml_tokens::TransferDust<Runtime, GameDAOTreasuryAccount>;
+	type OnDust = orml_tokens::TransferDust<Runtime, GameDAOTreasuryAccountId>;
 	type MaxLocks = MaxLocks;
 	type DustRemovalWhitelist = DustRemovalWhitelist;
 }
@@ -1318,9 +1318,7 @@ parameter_types! {
 impl gamedao_signal::Config for Runtime {
 	type WeightInfo = ();
 	type Event = Event;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Currencies;
-	type Randomness = RandomnessCollectiveFlip;
 	type Flow = Flow;
 	type Control = Control;
 	// type Call = Call;
@@ -1341,12 +1339,10 @@ parameter_types! {
 }
 
 impl gamedao_control::Config for Runtime {
+	type PalletId = ControlPalletId;
 	type WeightInfo = ();
 	type Event = Event;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Currencies;
-	type Randomness = RandomnessCollectiveFlip;
-	// type Call = Call;
 	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
 	type MaxDAOsPerAccount = MaxDAOsPerAccount;
@@ -1355,6 +1351,8 @@ impl gamedao_control::Config for Runtime {
 	type InitialDeposit = InitialDeposit;
 	type Balance = Balance;
 	type CurrencyId = CurrencyId;
+	type Game3FoundationTreasury = Game3FoundationTreasuryAccountId;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
 }
 
 // TODO: move to runtime_common?
@@ -1403,11 +1401,8 @@ impl gamedao_flow::Config for Runtime {
 	type UnixTime = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 	type Control = Control;
-	type GameDAOAdminOrigin = EnsureRootOrHalfGeneralCouncil;
-	type GameDAOTreasury = GameDAOTreasuryAccount;
-	// type Call = Call;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
 
-	// type Nonce = SeedNonce;
 	type CampaignFee = CampaignFee;
 	type MinNameLength = MinNameLength;
 	type MaxNameLength = MaxNameLength;
@@ -1423,13 +1418,7 @@ impl gamedao_flow::Config for Runtime {
 
 impl gamedao_sense::Config for Runtime {
 	type Event = Event;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = ();
-}
-
-impl gamedao_treasury::Config for Runtime {
-	type PalletId = GameDAOTreasuryPalletId;
-	// TODO:
 }
 
 impl zero_migration::Config for Runtime {
@@ -1497,7 +1486,6 @@ construct_runtime!(
 		Sense: gamedao_sense,
 		Control: gamedao_control,
 		Signal: gamedao_signal,
-		GameDAOTreasury: gamedao_treasury,
 
 		// Zero pallets:
 		Migration: zero_migration,
