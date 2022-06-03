@@ -1495,7 +1495,6 @@ construct_runtime!(
 		Control: gamedao_control,
 		Signal: gamedao_signal,
 
-		// GameDAOCouncil: pallet_collective::<Instance3>,
 		GameDAOTreasury: gamedao_treasury,
 
 		// Zero pallets:
