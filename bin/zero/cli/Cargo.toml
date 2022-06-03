@@ -1,6 +1,6 @@
 [package]
 name = "zero-cli"
-version = "2.0.55"
+version = "3.0.55"
 authors = ["ZERO <play@zero.io>"]
 description = "a substrate node for video games and beyond"
 build = "build.rs"
