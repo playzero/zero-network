@@ -124,7 +124,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 54,
+	spec_version: 55,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1494,6 +1494,8 @@ construct_runtime!(
 		Sense: gamedao_sense,
 		Control: gamedao_control,
 		Signal: gamedao_signal,
+
+		// GameDAOCouncil: pallet_collective::<Instance3>,
 		GameDAOTreasury: gamedao_treasury,
 
 		// Zero pallets:
