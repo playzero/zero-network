@@ -1,8 +1,8 @@
 [package]
 name = "zero-cli"
-version = "3.0.0-dev"
+version = "2.0.55"
 authors = ["ZERO <play@zero.io>"]
-description = "Generic Substrate node implementation in Rust."
+description = "a substrate node for video games and beyond"
 build = "build.rs"
 edition = "2021"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
@@ -27,7 +27,6 @@ is-it-maintained-open-issues = { repository = "playzero/zero-network" }
 [[bin]]
 name = "subzero"
 path = "bin/main.rs"
-required-features = ["cli"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
