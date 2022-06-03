@@ -54,6 +54,10 @@ gamedao-control = { path = "../../../gamedao-protocol/control", default-features
 gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
 gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
 
+pallet-tangram = { path = "../../../gamedao-protocol/tangram", default-features = false }
+pallet-rmrk-core = { version = "0.0.1", default-features = false, path = "../../../rmrkl/rmrk-core" }
+pallet-uniques = { version = "0.0.1", default-features = false, path = "../../../rmrkl/uniques" }
+
 # Used for the node template's RPCs
 frame-system-rpc-runtime-api = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-transaction-payment-rpc-runtime-api = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -82,6 +86,9 @@ std = [
     "pallet-identity/std",
     "pallet-bounties/std",
     "pallet-treasury/std",
+	"pallet-tangram/std",
+    "pallet-uniques/std",
+    "pallet-rmrk-core/std",	
 	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
 	"pallet-timestamp/std",

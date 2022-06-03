@@ -39,6 +39,9 @@ pub use frame_support::{
 	},
 	StorageValue
 };
+
+pub use pallet_rmrk_core;
+
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 use pallet_transaction_payment::CurrencyAdapter;
@@ -262,6 +265,51 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
+	pub const MaxRecursions: u32 = 10;
+	pub const ResourceSymbolLimit: u32 = 10;
+	pub const CollectionSymbolLimit: u32 = 100;
+}
+	
+impl pallet_rmrk_core::Config for Runtime {
+	// type Currency = Balances;
+	type Event = Event;
+	type CollectionId = u32;
+	type NftId = u32;
+	type ResourceId = u32;
+	type ProtocolOrigin = frame_system::EnsureRoot<AccountId>;
+}
+	
+parameter_types! {
+	pub const ClassDeposit: Balance = 100 * DOLLARS;
+	pub const InstanceDeposit: Balance = 1 * DOLLARS;
+	pub const KeyLimit: u32 = 32;
+	pub const ValueLimit: u32 = 256;
+	pub const UniquesMetadataDepositBase: Balance = 100 * DOLLARS;
+	pub const AttributeDepositBase: Balance = 10 * DOLLARS;
+	pub const DepositPerByte: Balance = DOLLARS;
+	pub const UniquesStringLimit: u32 = 128;
+}
+
+impl pallet_uniques::Config for Runtime {
+	type Event = Event;
+	type ClassId = u32;
+	type InstanceId = u32;
+	type Currency = Balances;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type ClassDeposit = ClassDeposit;
+	type InstanceDeposit = InstanceDeposit;
+	type MetadataDepositBase = UniquesMetadataDepositBase;
+	type AttributeDepositBase = AttributeDepositBase;
+	type DepositPerByte = DepositPerByte;
+	type StringLimit = UniquesStringLimit;
+	type KeyLimit = KeyLimit;
+	type ValueLimit = ValueLimit;
+	type WeightInfo = ();
+}
+
+
+	
+parameter_types! {
 	pub const CouncilMotionDuration: BlockNumber = 5 * DAYS;
 	pub const CouncilMaxProposals: u32 = 100;
 	pub const CouncilMaxMembers: u32 = 100;
@@ -459,6 +507,33 @@ impl gamedao_control::Config for Runtime {
 
 }
 
+parameter_types! {
+    pub const MaxRealmsPerOrg: u64 = 10;
+    pub const MaxClassesPerRealm:u64 = 10;
+    pub const MaxTokenPerClass:u128 = 5;
+    pub const MaxTotalToken:u128 = 100;
+	// pub const Index:u32 = u32;
+}
+
+
+impl pallet_tangram::Config for Runtime {
+	type Event= Event;
+	type WeightInfo= ();
+	type Time= Timestamp;
+	type Randomness= RandomnessCollectiveFlip;
+	
+	type MaxRealmsPerOrg=MaxRealmsPerOrg;
+	type MaxClassesPerRealm=MaxClassesPerRealm;
+	type MaxTokenPerClass=MaxTokenPerClass;
+	type MaxTotalToken=MaxTotalToken;
+	type NextRealmIndex=u32;
+	type NextClassIndex=u32;
+	type NextItemIndex=u32;
+	type TotalIndex=u32;
+	type BurnedIndex=u32;
+
+}
+
 // TODO: move to runtime_common?
 pub type EnsureRootOrHalfGeneralCouncil = EnsureOneOf<
 	AccountId,
@@ -557,6 +632,12 @@ construct_runtime!(
 		Sense: gamedao_sense,
 		Control: gamedao_control::{Pallet, Storage, Event<T>},
 		Signal: gamedao_signal::{Pallet, Storage, Event<T>},
+		Tangram: pallet_tangram,
+
+		// RMRK
+		RmrkCore: pallet_rmrk_core::{Pallet, Call, Event<T>, Storage},
+		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
+		
 	}
 );
 
