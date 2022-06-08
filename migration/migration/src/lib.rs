@@ -86,6 +86,15 @@ pub mod pallet {
 		type ModuleAccounts: Contains<Self::AccountId>;
 
 		#[pallet::constant]
+		type ZeroTreasury = Get<Self::AccountId>;
+		#[pallet::constant]
+		type Game3FoundationTreasury = Get<Self::AccountId>;
+		#[pallet::constant]
+		type GameDAOTreasury: Get<Self::AccountId>;
+
+		#[pallet::constant]
+		type NativeTokenId: Get<Self::CurrencyId>;
+		#[pallet::constant]
 		type ProtocolTokenId: Get<Self::CurrencyId>;
 		#[pallet::constant]
 		type PaymentTokenId: Get<Self::CurrencyId>;
@@ -97,6 +106,18 @@ pub mod pallet {
 			migrate::<T>()
 		}
 	}
+
+	// #[pallet::hooks]
+	// impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+	// 	fn on_runtime_upgrade() -> Weight {
+	// 		if StorageVersion::<T>::get() == Releases::V0 {
+	// 			StorageVersion::<T>::put(Releases::V1);
+	// 			migrations::v1::migrate::<T>().saturating_add(T::DbWeight::get().reads_writes(1, 1))
+	// 		} else {
+	// 			T::DbWeight::get().reads(1)
+	// 		}
+	// 	}
+	// }
 
 	#[pallet::storage]
 	pub(super) type BalancesVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
@@ -115,7 +136,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		MigratedBalances(u32),
 		MigratedIdentities(u32),
-		TokensAirDropped(u32)
+		TokensDistributed(u32)
 	}
 
 	#[pallet::error]
@@ -134,6 +155,34 @@ pub mod pallet {
 			if <TokensVersion<T>>::get() == StorageVersion::V2Imported {
 				return Ok(())
 			}
+
+			// TODO: Implement TokenInfo and CurrencyId in order to get different decimal places for tokens
+			pub fn dollar(decimals: u32) -> Balance {
+				10u128.saturating_pow(decimals).into()
+			}
+			let ZERO_DOLLAR: u128 = dollar(18);
+			let GAME_DOLLAR: u128 = dollar(10);
+			let PLAY_DOLLAR: u128 = dollar(10);
+
+			let ZERO: CurrencyId = T::NativeCurrencyId::get();
+			let GAME: CurrencyId = T::ProtocolTokenId::get();
+			let PLAY: CurrencyId = T::PaymentTokenId::get();
+
+			// Set initial Balances for the Treasuries that own the token issuance
+			T::Currency::update_balance(&ZERO, T::ZeroTreasury::get(), 1_000_000_000 * ZERO_DOLLAR);
+			T::Currency::update_balance(&GAME, T::Game3FoundationTreasury::get(), 100_000_000 * GAME_DOLLAR);
+			T::Currency::update_balance(&PLAY, T::Game3FoundationTreasury::get(), 10_000_000 * PLAY_DOLLAR);
+
+			// Token distribution for the Treasuries
+			T::Currency::transfer(&ZERO, T::ZeroTreasury::get(), T::Game3FoundationTreasury::get(), 1_000_000 * ZERO_DOLLAR);
+			T::Currency::transfer(&ZERO, T::ZeroTreasury::get(), T::GameDAOTreasury::get(), 10_000_000 * ZERO_DOLLAR);
+			
+			T::Currency::transfer(&GAME, T::Game3FoundationTreasury::get(), T::ZeroTreasury::get(), 100_000 * GAME_DOLLAR);
+			T::Currency::transfer(&GAME, T::Game3FoundationTreasury::get(), T::GameDAOTreasury::get(), 100_000 * GAME_DOLLAR);
+
+			T::Currency::transfer(&PLAY, T::Game3FoundationTreasury::get(), T::ZeroTreasury::get(), 1_000_000 * PLAY_DOLLAR);
+			T::Currency::transfer(&PLAY, T::Game3FoundationTreasury::get(), T::GameDAOTreasury::get(), 1_000_000 * PLAY_DOLLAR);
+
 			let mut accounts: u32 = 0;
 
 			for (acc_id, _acc_info) in <frame_system::Account::<T>>::iter() {		
@@ -158,7 +207,7 @@ pub mod pallet {
 			}
 			<TokensVersion<T>>::set(StorageVersion::V2Imported);
 
-			Self::deposit_event(Event::<T>::TokensAirDropped(accounts));
+			Self::deposit_event(Event::<T>::TokensDistributed(accounts));
 
 			Ok(())
 		}

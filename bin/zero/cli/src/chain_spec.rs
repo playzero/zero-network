@@ -317,7 +317,7 @@ pub fn testnet_genesis(
 	let mut zero_issuance = 1_000_000_000 * ZERO_DOLLAR;
 	let zeronet_game = 100_000 * GAME_DOLLAR;
 	let zeronet_play = 1_000_000 * PLAY_DOLLAR;
-	// Web3 Foundation Treasury owns GAME & PLAY issuance:
+	// Game3 Foundation Treasury owns GAME & PLAY issuance:
 	let game3_zero = 1_000_000 * ZERO_DOLLAR;
 	let mut game_issuance = 100_000_000 * GAME_DOLLAR;
 	let mut play_issuance = 10_000_000 * PLAY_DOLLAR;

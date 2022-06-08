@@ -1301,11 +1301,12 @@ impl orml_currencies::Config for Runtime {
 	type Event = Event;
 	type MultiCurrency = Tokens;
 	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
-	type GetNativeCurrencyId = ();
+	type GetNativeCurrencyId = NativeCurrencyId;
 	type WeightInfo = ();
 }
 
 parameter_types! {
+	pub const NativeCurrencyId: CurrencyId = TokenSymbol::ZERO as u32;
 	pub const GameCurrencyId: CurrencyId = TokenSymbol::GAME as u32;
 	pub const PlayCurrencyId: CurrencyId = TokenSymbol::PLAY as u32;
 }
@@ -1423,9 +1424,15 @@ impl gamedao_sense::Config for Runtime {
 
 impl zero_migration::Config for Runtime {
 	type Event = Event;
+	type ModuleAccounts = DustRemovalWhitelist;
+
+	type NativeTokenId = NativeTokenId;
 	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
-	type ModuleAccounts = DustRemovalWhitelist;
+
+	type ZeroTreasury = TreasuryAccountId;
+	type Game3FoundationTreasury = Game3FoundationTreasuryAccountId;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
 }
 
 construct_runtime!(
