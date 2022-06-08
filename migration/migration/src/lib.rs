@@ -2,9 +2,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{traits::{Currency, StoredMap, Contains}};
+use frame_support::{traits::{Currency, StoredMap}};
 use sp_runtime::AccountId32;
-use sp_runtime::{traits::{SaturatedConversion, Zero, StaticLookup}, RuntimeDebug};
+use sp_runtime::{traits::SaturatedConversion, RuntimeDebug};
 use sp_std::{num::ParseIntError};
 use serde_json::{Value};
 use serde::{Deserialize};
@@ -19,11 +19,6 @@ use pallet_balances::AccountData;
 
 pub mod migration;
 pub use migration::migrate;
-
-#[cfg(test)]
-pub mod mock;
-#[cfg(test)]
-mod tests;
 
 
 type BalanceOf<T> = <<T as pallet_identity::Config>::Currency as Currency<
@@ -78,26 +73,8 @@ pub mod pallet {
 		frame_system::Config
 		+ pallet_identity::Config
 		+ pallet_balances::Config
-		+ orml_tokens::Config
 	{
-		type Event: From<Event<Self>>
-			+ IsType<<Self as frame_system::Config>::Event>
-			+ Into<<Self as frame_system::Config>::Event>;
-		type ModuleAccounts: Contains<Self::AccountId>;
-
-		#[pallet::constant]
-		type ZeroTreasury = Get<Self::AccountId>;
-		#[pallet::constant]
-		type Game3FoundationTreasury = Get<Self::AccountId>;
-		#[pallet::constant]
-		type GameDAOTreasury: Get<Self::AccountId>;
-
-		#[pallet::constant]
-		type NativeTokenId: Get<Self::CurrencyId>;
-		#[pallet::constant]
-		type ProtocolTokenId: Get<Self::CurrencyId>;
-		#[pallet::constant]
-		type PaymentTokenId: Get<Self::CurrencyId>;
+		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 	}
 
 	#[pallet::hooks]
@@ -107,26 +84,11 @@ pub mod pallet {
 		}
 	}
 
-	// #[pallet::hooks]
-	// impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-	// 	fn on_runtime_upgrade() -> Weight {
-	// 		if StorageVersion::<T>::get() == Releases::V0 {
-	// 			StorageVersion::<T>::put(Releases::V1);
-	// 			migrations::v1::migrate::<T>().saturating_add(T::DbWeight::get().reads_writes(1, 1))
-	// 		} else {
-	// 			T::DbWeight::get().reads(1)
-	// 		}
-	// 	}
-	// }
-
 	#[pallet::storage]
 	pub(super) type BalancesVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
 
 	#[pallet::storage]
 	pub(super) type IdentityVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
-
-	#[pallet::storage]
-	pub(super) type TokensVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
 
 	#[pallet::storage]
 	pub(super) type MigrationVersion<T: Config> = StorageValue<_, StorageVersion, ValueQuery, GetDefault>;
@@ -136,7 +98,6 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		MigratedBalances(u32),
 		MigratedIdentities(u32),
-		TokensDistributed(u32)
 	}
 
 	#[pallet::error]
@@ -147,73 +108,8 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 
-		/// Set Tokens (GAME & PLAY) balances with the same amount as native currency has
-		#[pallet::weight(5_000_000)]
-		pub fn tokens_airdrop(origin: OriginFor<T>) -> DispatchResult {
-			ensure_root(origin.clone())?;
-
-			if <TokensVersion<T>>::get() == StorageVersion::V2Imported {
-				return Ok(())
-			}
-
-			// TODO: Implement TokenInfo and CurrencyId in order to get different decimal places for tokens
-			pub fn dollar(decimals: u32) -> Balance {
-				10u128.saturating_pow(decimals).into()
-			}
-			let ZERO_DOLLAR: u128 = dollar(18);
-			let GAME_DOLLAR: u128 = dollar(10);
-			let PLAY_DOLLAR: u128 = dollar(10);
-
-			let ZERO: CurrencyId = T::NativeCurrencyId::get();
-			let GAME: CurrencyId = T::ProtocolTokenId::get();
-			let PLAY: CurrencyId = T::PaymentTokenId::get();
-
-			// Set initial Balances for the Treasuries that own the token issuance
-			T::Currency::update_balance(&ZERO, T::ZeroTreasury::get(), 1_000_000_000 * ZERO_DOLLAR);
-			T::Currency::update_balance(&GAME, T::Game3FoundationTreasury::get(), 100_000_000 * GAME_DOLLAR);
-			T::Currency::update_balance(&PLAY, T::Game3FoundationTreasury::get(), 10_000_000 * PLAY_DOLLAR);
-
-			// Token distribution for the Treasuries
-			T::Currency::transfer(&ZERO, T::ZeroTreasury::get(), T::Game3FoundationTreasury::get(), 1_000_000 * ZERO_DOLLAR);
-			T::Currency::transfer(&ZERO, T::ZeroTreasury::get(), T::GameDAOTreasury::get(), 10_000_000 * ZERO_DOLLAR);
-			
-			T::Currency::transfer(&GAME, T::Game3FoundationTreasury::get(), T::ZeroTreasury::get(), 100_000 * GAME_DOLLAR);
-			T::Currency::transfer(&GAME, T::Game3FoundationTreasury::get(), T::GameDAOTreasury::get(), 100_000 * GAME_DOLLAR);
-
-			T::Currency::transfer(&PLAY, T::Game3FoundationTreasury::get(), T::ZeroTreasury::get(), 1_000_000 * PLAY_DOLLAR);
-			T::Currency::transfer(&PLAY, T::Game3FoundationTreasury::get(), T::GameDAOTreasury::get(), 1_000_000 * PLAY_DOLLAR);
-
-			let mut accounts: u32 = 0;
-
-			for (acc_id, _acc_info) in <frame_system::Account::<T>>::iter() {		
-				if T::ModuleAccounts::contains(&acc_id) {
-					// Skip system (module) accounts: Treasuries, etc.
-					continue;
-				}		
-				// let bal: u128 = acc_info.data.free.saturated_into();	// --> no field `free` on type `AccountData`
-				let bal: u128 = <T as pallet_balances::Config>::AccountStore::get(&acc_id).free.saturated_into();
-				let balance: <T as orml_tokens::Config>::Balance = bal.saturated_into();
-				
-				let lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(acc_id.clone());
-				orml_tokens::Pallet::<T>::set_balance(
-					origin.clone(), lookup.clone(), T::ProtocolTokenId::get(),
-					balance, Zero::zero()
-				);
-				orml_tokens::Pallet::<T>::set_balance(
-					origin.clone(), lookup.clone(), T::PaymentTokenId::get(),
-					balance, Zero::zero()
-				);
-				accounts += 1;
-			}
-			<TokensVersion<T>>::set(StorageVersion::V2Imported);
-
-			Self::deposit_event(Event::<T>::TokensDistributed(accounts));
-
-			Ok(())
-		}
-
 		/// Migrates to `Balances` storage from another chain.
-		/// Storage: `TotalIssuance`, `AccountStore`
+		/// Storage: `TotalIssuance`, AccountStore
 		#[pallet::weight(5_000_000)]
 		#[transactional]
 		pub fn migrate_balances(
@@ -297,12 +193,12 @@ pub mod pallet {
 
 impl<T: Config> Pallet<T> {
 	// Balances helpers
-	fn get_balance(item: &AccountItem) -> <T as pallet_balances::Config>::Balance {
+	fn get_balance(item: &AccountItem) -> T::Balance {
 		let free: u128 = item.free_balance.parse().unwrap();
 		let reserved: u128 = item.reserved_balance.parse().unwrap();
 		(free + reserved).saturated_into()
 	}
-
+	
 	fn get_account(item: &AccountItem) -> T::AccountId {
 		let mut array = [0; 32];
 		let mut decoded = bs58::decode(&item.account_id).into_vec().unwrap();
