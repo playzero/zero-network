@@ -11939,8 +11939,6 @@ dependencies = [
  "frame-system",
  "hex",
  "log",
- "orml-tokens",
- "orml-traits",
  "pallet-balances",
  "pallet-identity 4.0.0-dev",
  "parity-scale-codec",

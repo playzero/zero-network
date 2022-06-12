@@ -391,7 +391,7 @@ fn balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) -> 
 	// GameDAO Treasury:
 	let gamedao_zero = 1_000_000 * ZERO_DOLLAR;
 
-	// TODO: ENDOWMENT
+	// TODO: proper ENDOWMENT calculation
 	let ENDOWMENT = 100;
 
 	let account_balances = accounts.iter().cloned().map(|x| (x, ENDOWMENT))
@@ -417,8 +417,7 @@ fn balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) -> 
 	let mut balances = vec![
 		(zero_treasury, zero_issuance),
 	];
-	// TODO:
-	// balances.extend(account_balances);
+	balances.extend(account_balances);
 	balances
 }
 
@@ -443,7 +442,7 @@ fn tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
 	let gamedao_game = 100_000 * GAME_DOLLAR;
 	let gamedao_play = 1_000_000 * PLAY_DOLLAR;
 
-	// TODO: ENDOWMENT
+	// TODO: proper ENDOWMENT calculation
 	let ENDOWMENT = 100;
 
 	let account_token_balances = accounts
@@ -476,10 +475,8 @@ fn tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
 		(gamedao_treasury.clone(), GAME, gamedao_game),
 		(gamedao_treasury, PLAY, gamedao_play),
 	];
-	// TODO:
-	// token_balances.extend(account_token_balances);
+	token_balances.extend(account_token_balances);
 	token_balances
-
 }
 
 fn development_config_genesis() -> GenesisConfig {
