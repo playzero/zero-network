@@ -1336,7 +1336,7 @@ parameter_types! {
 	pub const MaxDAOsPerAccount: u32 = 10;
 	pub const MaxMembersPerDAO: u32 = 1000;
 	pub const MaxCreationsPerBlock: u32 = 100;
-	pub const InitialDeposit: Balance = 1 * DOLLARS;
+	pub const OrgMinimumDeposit: Balance = 1 * DOLLARS;
 }
 
 impl gamedao_control::Config for Runtime {
@@ -1349,7 +1349,7 @@ impl gamedao_control::Config for Runtime {
 	type MaxDAOsPerAccount = MaxDAOsPerAccount;
 	type MaxMembersPerDAO = MaxMembersPerDAO;
 	type MaxCreationsPerBlock = MaxCreationsPerBlock;
-	type InitialDeposit = InitialDeposit;
+	type MinimumDeposit = OrgMinimumDeposit;
 	type Balance = Balance;
 	type CurrencyId = CurrencyId;
 	type Game3FoundationTreasury = Game3FoundationTreasuryAccountId;
@@ -1400,7 +1400,6 @@ impl gamedao_flow::Config for Runtime {
 	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
 	type UnixTime = Timestamp;
-	type Randomness = RandomnessCollectiveFlip;
 	type Control = Control;
 	type GameDAOTreasury = GameDAOTreasuryAccountId;
 
@@ -1424,15 +1423,6 @@ impl gamedao_sense::Config for Runtime {
 
 impl zero_migration::Config for Runtime {
 	type Event = Event;
-	type ModuleAccounts = DustRemovalWhitelist;
-
-	type NativeTokenId = NativeTokenId;
-	type PaymentTokenId = PlayCurrencyId;
-	type ProtocolTokenId = GameCurrencyId;
-
-	type ZeroTreasury = TreasuryAccountId;
-	type Game3FoundationTreasury = Game3FoundationTreasuryAccountId;
-	type GameDAOTreasury = GameDAOTreasuryAccountId;
 }
 
 construct_runtime!(
