@@ -24,7 +24,7 @@ use sc_service::PartialComponents;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"ZERO Node".into()
+		"S U B Z E R O".into()
 	}
 
 	fn impl_version() -> String {
@@ -49,14 +49,15 @@ impl SubstrateCli for Cli {
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 		let spec = match id {
-			"" =>
-				return Err(
-					"Please specify which chain you want to run, e.g. --dev or --chain=local"
-						.into(),
-				),
+			// "" =>
+			// 	return Err(
+			// 		"Please specify which chain you want to run, e.g. --dev or --chain=local"
+			// 			.into(),
+			// 	),
 			"dev" => Box::new(chain_spec::development_config()),
 			"local" => Box::new(chain_spec::local_testnet_config()),
-			"subzero" | "alphaville" => Box::new(chain_spec::subzero_config()?),
+			// default to alphaville when running without param to be compatible to old behaviour
+			"" | "subzero" | "alphaville" => Box::new(chain_spec::subzero_config()?),
 			"staging" => Box::new(chain_spec::staging_testnet_config()),
 			path =>
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
