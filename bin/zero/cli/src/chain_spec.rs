@@ -24,7 +24,9 @@ use zero_runtime::{
 	constants::currency::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
 	BalancesConfig, Block, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
 	ImOnlineConfig, IndicesConfig, SessionConfig, SessionKeys, SocietyConfig, StakerStatus,
-	StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, MAX_NOMINATIONS,
+	StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, TokensConfig, MAX_NOMINATIONS,
+	Game3FoundationTreasuryAccountId, GameDAOTreasuryAccountId, TreasuryAccountId as ZeroTreasuryAccountId,
+	TokenSymbol, CurrencyId, ControlConfig
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
@@ -38,6 +40,7 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	Perbill,
 };
+use std::collections::btree_map::BTreeMap;
 
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use zero_runtime::GenesisConfig;
@@ -368,8 +371,112 @@ pub fn testnet_genesis(
 		transaction_storage: Default::default(),
 		scheduler: Default::default(),
 		transaction_payment: Default::default(),
-        tokens: Default::default(),
+		tokens: TokensConfig { balances: Default::default() },
+		control: ControlConfig { orgs: Default::default() },
 	}
+}
+
+pub fn dollar(decimals: u32) -> Balance {
+	10u128.saturating_pow(decimals).into()
+}
+
+fn balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) -> Vec<(AccountId, Balance)> {
+	// TODO: Implement TokenInfo and CurrencyId in order to get different decimal places for tokens
+	let ZERO_DOLLAR: u128 = dollar(18);
+	
+	// Zero Network Treasury owns ZERO issuance:
+	let mut zero_issuance = 1_000_000_000 * ZERO_DOLLAR;
+	// Game3 Foundation Treasury:
+	let game3_zero = 1_000_000 * ZERO_DOLLAR;
+	// GameDAO Treasury:
+	let gamedao_zero = 1_000_000 * ZERO_DOLLAR;
+
+	// TODO: proper ENDOWMENT calculation
+	let ENDOWMENT = 100;
+
+	let account_balances = accounts.iter().cloned().map(|x| (x, ENDOWMENT))
+		.fold(
+			BTreeMap::<AccountId, Balance>::new(),
+			|mut acc, (account_id, amount)| {
+				if let Some(balance) = acc.get_mut(&account_id) {
+					*balance = balance
+						.checked_add(amount)
+						.expect("balance overflow");
+				} else {
+					zero_issuance.saturating_sub(amount);
+					acc.insert(account_id.clone(), amount);
+				}
+				acc
+			},
+		)
+		.into_iter()
+		.collect::<Vec<(AccountId, Balance)>>();
+	
+	zero_issuance.saturating_sub(game3_zero);
+	zero_issuance.saturating_sub(gamedao_zero);
+	let mut balances = vec![
+		(zero_treasury, zero_issuance),
+	];
+	balances.extend(account_balances);
+	balances
+}
+
+fn tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
+		game3_treasury: AccountId, gamedao_treasury: AccountId) -> Vec<(AccountId, CurrencyId, Balance)> {
+	// TODO: Implement TokenInfo and CurrencyId in order to get different decimal places for tokens
+	let GAME_DOLLAR: u128 = dollar(10);
+	let PLAY_DOLLAR: u128 = dollar(10);
+
+	let GAME: CurrencyId = TokenSymbol::GAME as u32;
+	let PLAY: CurrencyId = TokenSymbol::PLAY as u32;
+	
+	// Game3 Foundation Treasury owns GAME & PLAY issuance:
+	let mut game_issuance = 100_000_000 * GAME_DOLLAR;
+	let mut play_issuance = 10_000_000 * PLAY_DOLLAR;
+
+	// Zero Network Treasury:
+	let zeronet_game = 100_000 * GAME_DOLLAR;
+	let zeronet_play = 1_000_000 * PLAY_DOLLAR;
+
+	// GameDAO:
+	let gamedao_game = 100_000 * GAME_DOLLAR;
+	let gamedao_play = 1_000_000 * PLAY_DOLLAR;
+
+	// TODO: proper ENDOWMENT calculation
+	let ENDOWMENT = 100;
+
+	let account_token_balances = accounts
+		.iter().cloned()
+			.flat_map(|x| vec![(x.clone(), GAME, ENDOWMENT), (x.clone(), GAME, ENDOWMENT)])
+		.fold(
+			Vec::new(),
+			|mut vec, (account_id, currency_id, amount)| {
+				match currency_id {
+					GAME => { game_issuance.saturating_sub(amount); },
+					PLAY => { play_issuance.saturating_sub(amount); },
+				};
+				vec.push((account_id.clone(), currency_id, amount));
+				vec
+			},
+		)
+		.into_iter()
+		.collect::<Vec<(AccountId, CurrencyId, Balance)>>();
+	
+	game_issuance.saturating_sub(zeronet_game);
+	game_issuance.saturating_sub(gamedao_game);
+	play_issuance.saturating_sub(zeronet_play);
+	play_issuance.saturating_sub(gamedao_play);
+
+	let mut token_balances = vec![
+		(zero_treasury.clone(), GAME, zeronet_game),
+		(zero_treasury, PLAY, zeronet_play),
+		(game3_treasury.clone(), GAME, game_issuance),
+		(game3_treasury, PLAY, play_issuance),
+		(gamedao_treasury.clone(), GAME, gamedao_game),
+		(gamedao_treasury, PLAY, gamedao_play),
+	];
+	token_balances.extend(account_token_balances);
+	token_balances
 }
 
 fn development_config_genesis() -> GenesisConfig {
