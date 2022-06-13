@@ -154,7 +154,7 @@ parameter_types! {
 
 pub fn get_all_module_accounts() -> Vec<AccountId> {
 	vec![
-		TreasuryPalletId::get().into_account(),
+		TreasuryAccountId::get(),
 		ControlPalletId::get().into_account(),
 		Game3FoundationTreasuryAccountId::get(),
 		GameDAOTreasuryAccountId::get(),
