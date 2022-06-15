@@ -3,7 +3,7 @@ reset:
 	cargo clean
 
 test:
-	cargo +nightly test
+	cargo +nightly test -p gamedao-signal -p gamedao-control -p gamedao-flow -p gamedao-sense
 test-mod:
 	cargo +nightly test -p $(mod)
 
