@@ -5,47 +5,29 @@ resolver = "2"
 
 members = [
 
-	"bin/zero/runtime",
 	"bin/zero/cli",
-
-	# "bin/zero-dev/runtime",
-	# "bin/zero-dev/node",
-
-	"bin/zero-parachain/runtime",
-	"bin/zero-parachain/node",
-
-	"orml/currencies",
-	"orml/traits",
-	"orml/tokens",
-	"gamedao-protocol/flow",
-	"gamedao-protocol/control",
-	"gamedao-protocol/signal",
-	"gamedao-protocol/sense",
-	"gamedao-protocol/traits",
-	"primitives",
-
-	# "bin/zero/cli",
-
+	"bin/zero/runtime",
 	# "bin/zero/bench",
 	# "bin/zero/test-runner-example",
 	# "bin/zero/executor",
 	# "bin/zero/primitives",
 	# "bin/zero/rpc",
-	# "bin/zero/runtime",
 	# "bin/zero/testing",
+
+	# "bin/zero-dev/node",
+	# "bin/zero-dev/runtime",
+
+	"bin/zero-parachain/node",
+	"bin/zero-parachain/runtime",
+
+	# "ext/orml/*",
+	# "ext/gamedao-protocol/*",
+	# "ext/zero/*",
+	# "primitives",
 
 	# "bin/node-template/node",
 	# "bin/node-template/pallets/template",
 	# "bin/node-template/runtime",
-
-	# "bin/node/bench",
-	# "bin/node/cli",
-	# "bin/node/test-runner-example",
-	# "bin/node/executor",
-	# "bin/node/primitives",
-	# "bin/node/rpc",
-	# "bin/node/runtime",
-	# "bin/node/testing",
 
 	# "bin/utils/chain-spec-builder",
 	# "bin/utils/subkey",
