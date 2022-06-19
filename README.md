@@ -32,7 +32,7 @@ ZERO is a multichain network, Multiverse + DAO for next generation videogames. I
 
 - Network currency: $ZERO
 - Join our growing game community on [Discord](http://discord.gg/rhwtr7p)
-- Parachain launch information and tokenomics on [Blog](https://blog.zero.io)]
+- Parachain launch information and tokenomics on [Blog](https://blog.zero.io)
 
 # 2. Economics
 
@@ -59,7 +59,7 @@ To secure a parachain slot, ZERO Network will require supportive DOT/KSM holders
 
 # 3. Project Status
 
-Zero Network is the common description for all contribtuting protocols and chains, subzero is the network core preparing for parachain operation.
+Zero Network is the common description for all contributing protocols and chains, subzero is the network core preparing for parachain operation.
 
 - subzero code base has been migrated from early 3.0.0 to current to prepare for parachain operation
 - subzero testnet alphaville is live since 08/2020
