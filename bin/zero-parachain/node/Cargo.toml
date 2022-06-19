@@ -1,7 +1,7 @@
 [package]
-name = "parachain-subzero-node"
+name = "subzero-parachain-node"
 version = "0.1.0"
-authors = ["Anonymous"]
+authors = ["Anonymouse"]
 description = "A new Cumulus FRAME-based Substrate Node, ready for hacking together a parachain."
 license = "Unlicense"
 homepage = "https://substrate.io"
@@ -32,7 +32,7 @@ hex-literal = "0.3.1"
 jsonrpc-core = "18.0.0"
 
 # Local Dependencies
-parachain-subzero-runtime = { path = "../runtime" }
+subzero-parachain-runtime = { path = "../runtime" }
 
 # Substrate Dependencies
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -94,6 +94,6 @@ polkadot-service = { git = "https://github.com/paritytech/polkadot", branch = "r
 
 [features]
 runtime-benchmarks = [
-	"parachain-subzero-runtime/runtime-benchmarks"
+	"subzero-parachain-runtime/runtime-benchmarks"
 ]
 parachain = []
