@@ -452,8 +452,8 @@ fn tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
 			Vec::new(),
 			|mut vec, (account_id, currency_id, amount)| {
 				match currency_id {
-					GAME => { game_issuance.saturating_sub(amount); },
-					PLAY => { play_issuance.saturating_sub(amount); },
+					GAME => { game_issuance = game_issuance.saturating_sub(amount); },
+					PLAY => { play_issuance = play_issuance.saturating_sub(amount); },
 				};
 				vec.push((account_id.clone(), currency_id, amount));
 				vec
@@ -462,10 +462,8 @@ fn tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
 		.into_iter()
 		.collect::<Vec<(AccountId, CurrencyId, Balance)>>();
 	
-	game_issuance.saturating_sub(zeronet_game);
-	game_issuance.saturating_sub(gamedao_game);
-	play_issuance.saturating_sub(zeronet_play);
-	play_issuance.saturating_sub(gamedao_play);
+	game_issuance = game_issuance.saturating_sub(zeronet_game).saturating_sub(gamedao_game);
+	play_issuance = play_issuance.saturating_sub(zeronet_play).saturating_sub(gamedao_play);
 
 	let mut token_balances = vec![
 		(zero_treasury.clone(), GAME, zeronet_game),
