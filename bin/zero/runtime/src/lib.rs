@@ -1314,6 +1314,7 @@ parameter_types! {
 parameter_types! {
 	pub const MaxProposalsPerBlock: u32 = 100;
 	pub const MaxProposalDuration: u32 = 864000;  // 864000, 60 * 60 * 24 * 30 / 3
+	pub const MaxVotesPerProposal: u32 = 1000;
 }
 
 impl gamedao_signal::Config for Runtime {
@@ -1326,6 +1327,7 @@ impl gamedao_signal::Config for Runtime {
 
 	type MaxProposalsPerBlock = MaxProposalsPerBlock;
 	type MaxProposalDuration = MaxProposalDuration;
+	type MaxVotesPerProposal = MaxVotesPerProposal;
 	type PaymentTokenId = PlayCurrencyId;
 	type ProtocolTokenId = GameCurrencyId;
 	type Balance = Balance;
@@ -1374,6 +1376,7 @@ parameter_types! {
 	pub const MaxNameLength: u32 = 64;
 
 	pub const MaxCampaignsPerAddress: u32 = 3;
+	pub const MaxCampaignsPerOrg: u32 = 64;
 	pub const MaxCampaignsPerBlock: u32 = 3;
 	pub const MaxContributionsPerBlock: u32 = 3;
 
@@ -1407,6 +1410,7 @@ impl gamedao_flow::Config for Runtime {
 	type MinNameLength = MinNameLength;
 	type MaxNameLength = MaxNameLength;
 	type MaxCampaignsPerAddress = MaxCampaignsPerAddress;
+	type MaxCampaignsPerOrg = MaxCampaignsPerOrg;
 	type MaxCampaignsPerBlock = MaxCampaignsPerBlock;
 	type MaxContributionsPerBlock = MaxContributionsPerBlock;
 	type MinCampaignDuration = MinCampaignDuration;
@@ -1853,6 +1857,11 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_vesting, Vesting);
 
+			list_benchmark!(list, extra, gamedao_sense, Sense);
+			list_benchmark!(list, extra, gamedao_control, Control);
+			list_benchmark!(list, extra, gamedao_flow, Flow);
+			list_benchmark!(list, extra, gamedao_signal, Signal);
+
 			let storage_info = AllPalletsWithSystem::storage_info();
 
 			return (list, storage_info)
@@ -1929,6 +1938,11 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_uniques, Uniques);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_vesting, Vesting);
+
+			add_benchmark!(params, batches, gamedao_sense, Sense);
+			add_benchmark!(params, batches, gamedao_control, Control);
+			add_benchmark!(params, batches, gamedao_flow, Flow);
+			add_benchmark!(params, batches, gamedao_signal, Signal);
 
 			Ok(batches)
 		}
