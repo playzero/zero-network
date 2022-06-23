@@ -11,8 +11,8 @@ members = [
 	# "bin/zero-dev/runtime",
 	# "bin/zero-dev/node",
 
-	"bin/zero-parachain/runtime",
-	"bin/zero-parachain/node",
+	# "bin/zero-parachain/runtime",
+	# "bin/zero-parachain/node",
 
 	"orml/currencies",
 	"orml/traits",

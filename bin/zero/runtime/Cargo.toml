@@ -240,6 +240,13 @@ runtime-benchmarks = [
 	"pallet-session-benchmarking",
 	"frame-system-benchmarking",
 	"hex-literal",
+
+	"gamedao-traits/runtime-benchmarks",
+	"gamedao-sense/runtime-benchmarks",
+	"gamedao-control/runtime-benchmarks",
+	"gamedao-flow/runtime-benchmarks",
+	"gamedao-signal/runtime-benchmarks",
+
 ]
 try-runtime = [
 	"frame-executive/try-runtime",
