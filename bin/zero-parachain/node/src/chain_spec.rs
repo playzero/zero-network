@@ -1,5 +1,5 @@
 use cumulus_primitives_core::ParaId;
-use parachain_subzero_runtime::{AccountId, AuraId, Signature, EXISTENTIAL_DEPOSIT};
+use subzero_parachain_runtime::{AccountId, AuraId, Signature, EXISTENTIAL_DEPOSIT};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -8,7 +8,7 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec =
-	sc_service::GenericChainSpec<parachain_subzero_runtime::GenesisConfig, Extensions>;
+	sc_service::GenericChainSpec<subzero_parachain_runtime::GenesisConfig, Extensions>;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_public_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -54,8 +54,8 @@ where
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn template_session_keys(keys: AuraId) -> parachain_subzero_runtime::SessionKeys {
-	parachain_subzero_runtime::SessionKeys { aura: keys }
+pub fn template_session_keys(keys: AuraId) -> subzero_parachain_runtime::SessionKeys {
+	subzero_parachain_runtime::SessionKeys { aura: keys }
 }
 
 pub fn development_config() -> ChainSpec {
@@ -175,23 +175,23 @@ fn testnet_genesis(
 	invulnerables: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
-) -> parachain_subzero_runtime::GenesisConfig {
-	parachain_subzero_runtime::GenesisConfig {
-		system: parachain_subzero_runtime::SystemConfig {
-			code: parachain_subzero_runtime::WASM_BINARY
+) -> subzero_parachain_runtime::GenesisConfig {
+	subzero_parachain_runtime::GenesisConfig {
+		system: subzero_parachain_runtime::SystemConfig {
+			code: subzero_parachain_runtime::WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 		},
-		balances: parachain_subzero_runtime::BalancesConfig {
+		balances: subzero_parachain_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
-		parachain_info: parachain_subzero_runtime::ParachainInfoConfig { parachain_id: id },
-		collator_selection: parachain_subzero_runtime::CollatorSelectionConfig {
+		parachain_info: subzero_parachain_runtime::ParachainInfoConfig { parachain_id: id },
+		collator_selection: subzero_parachain_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
 			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
 			..Default::default()
 		},
-		session: parachain_subzero_runtime::SessionConfig {
+		session: subzero_parachain_runtime::SessionConfig {
 			keys: invulnerables
 				.into_iter()
 				.map(|(acc, aura)| {

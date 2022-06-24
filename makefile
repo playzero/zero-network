@@ -7,7 +7,15 @@ test:
 test-mod:
 	cargo +nightly test -p $(mod)
 
-# release
+# build for parachain
+parachain-build:
+	cargo build --release --features parachain
+parachain-run:
+	./target/release/subzero --tmp --name local-collator --collator
+parachain-purge:
+	./target/release/subzero --collator purge-chain -y
+
+# release standalone
 
 build:
 	cargo build --release

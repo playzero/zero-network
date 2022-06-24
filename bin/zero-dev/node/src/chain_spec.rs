@@ -1,4 +1,4 @@
-use node_template_runtime::{
+use subzero_dev_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
 	SystemConfig, WASM_BINARY,
 };

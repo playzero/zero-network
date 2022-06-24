@@ -18,7 +18,7 @@
 
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion, Throughput};
 use futures::{future, StreamExt};
-use node_cli::service::{create_extrinsic, fetch_nonce, FullClient, TransactionPool};
+use zero_cli::service::{create_extrinsic, fetch_nonce, FullClient, TransactionPool};
 use node_primitives::AccountId;
 use zero_runtime::{constants::currency::*, BalancesCall, SudoCall};
 use sc_client_api::execution_extensions::ExecutionStrategies;
@@ -36,7 +36,7 @@ use sp_keyring::Sr25519Keyring;
 use sp_runtime::{generic::BlockId, OpaqueExtrinsic};
 use tokio::runtime::Handle;
 
-fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
+fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 	let base_path = BasePath::new_temp_dir().expect("Creates base path");
 	let root = base_path.path().to_path_buf();
 
@@ -47,7 +47,7 @@ fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
 		None,
 	);
 
-	let spec = Box::new(node_cli::chain_spec::development_config());
+	let spec = Box::new(zero_cli::chain_spec::development_config());
 
 	let config = Configuration {
 		impl_name: "BenchmarkImpl".into(),
@@ -102,7 +102,7 @@ fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
 		wasm_runtime_overrides: None,
 	};
 
-	node_cli::service::new_full_base(config, |_, _| ()).expect("Creates node")
+	zero_cli::service::new_full_base(config, |_, _| ()).expect("Creates node")
 }
 
 fn create_accounts(num: usize) -> Vec<sr25519::Pair> {

@@ -1,5 +1,5 @@
 [package]
-name = "node-template-runtime"
+name = "subzero-dev-runtime"
 version = "3.0.0"
 description = 'A fresh FRAME-based Substrate runtime, ready for hacking.'
 authors = ["Substrate DevHub <https://github.com/substrate-developer-hub>"]
@@ -17,8 +17,10 @@ codec = { package = "parity-scale-codec", version = "2.0.0", default-features = 
 scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 
 pallet-aura = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
-pallet-balances = { path = "../../../frame/balances", default-features = false }
-pallet-identity = { path = "../../../frame/identity", default-features = false }
+# pallet-balances = { path = "../../../frame/balances", default-features = false }
+# pallet-identity = { path = "../../../frame/identity", default-features = false }
+pallet-balances = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
+pallet-identity = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-bounties = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-treasury = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 frame-support = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -67,8 +69,8 @@ hex-literal = { version = "0.3.4", optional = true }
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 
 [features]
-default = ["std"]
-std = [
+# default = ["std"]
+dev = [
 	"codec/std",
 	"scale-info/std",
 	"frame-executive/std",
