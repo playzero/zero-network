@@ -21,12 +21,12 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
 use zero_runtime::{
-	constants::currency::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
+	wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
 	BalancesConfig, Block, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
 	ImOnlineConfig, IndicesConfig, SessionConfig, SessionKeys, SocietyConfig, StakerStatus,
 	StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, TokensConfig, MAX_NOMINATIONS,
-	Game3FoundationTreasuryAccountId, GameDAOTreasuryAccountId, TreasuryAccountId as ZeroTreasuryAccountId,
-	TokenSymbol, CurrencyId, ControlConfig
+	// Game3FoundationTreasuryAccountId, GameDAOTreasuryAccountId, TreasuryAccountId as ZeroTreasuryAccountId,
+	CurrencyId, ControlConfig, ZERO, PLAY, GAME, dollar
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
@@ -278,11 +278,14 @@ pub fn testnet_genesis(
 			}
 		});
 
+	let endowment: Balance = 10_000_000 * dollar(ZERO);
+	let stash: Balance = endowment / 1000;
+
 	// stakers: all validators and nominators.
 	let mut rng = rand::thread_rng();
 	let stakers = initial_authorities
 		.iter()
-		.map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+		.map(|x| (x.0.clone(), x.1.clone(), stash, StakerStatus::Validator))
 		.chain(initial_nominators.iter().map(|x| {
 			use rand::{seq::SliceRandom, Rng};
 			let limit = (MAX_NOMINATIONS as usize).min(initial_authorities.len());
@@ -293,19 +296,16 @@ pub fn testnet_genesis(
 				.into_iter()
 				.map(|choice| choice.0.clone())
 				.collect::<Vec<_>>();
-			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
+			(x.clone(), x.clone(), stash, StakerStatus::Nominator(nominations))
 		}))
 		.collect::<Vec<_>>();
 
 	let num_endowed_accounts = endowed_accounts.len();
 
-	const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
-	const STASH: Balance = ENDOWMENT / 1000;
-
 	GenesisConfig {
 		system: SystemConfig { code: wasm_binary_unwrap().to_vec() },
 		balances: BalancesConfig {
-			balances: endowed_accounts.iter().cloned().map(|x| (x, ENDOWMENT)).collect(),
+			balances: endowed_accounts.iter().cloned().map(|x| (x, endowment)).collect(),
 		},
 		indices: IndicesConfig { indices: vec![] },
 		session: SessionConfig {
@@ -334,7 +334,7 @@ pub fn testnet_genesis(
 				.iter()
 				.take((num_endowed_accounts + 1) / 2)
 				.cloned()
-				.map(|member| (member, STASH))
+				.map(|member| (member, stash))
 				.collect(),
 		},
 		council: CouncilConfig::default(),
@@ -373,28 +373,22 @@ pub fn testnet_genesis(
 		transaction_payment: Default::default(),
 		tokens: TokensConfig { balances: Default::default() },
 		control: ControlConfig { orgs: Default::default() },
+		// asset_registry: Default::default(),
 	}
 }
 
-pub fn dollar(decimals: u32) -> Balance {
-	10u128.saturating_pow(decimals).into()
-}
-
-fn balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) -> Vec<(AccountId, Balance)> {
-	// TODO: Implement TokenInfo and CurrencyId in order to get different decimal places for tokens
-	let ZERO_DOLLAR: u128 = dollar(18);
-	
+fn _balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) -> Vec<(AccountId, Balance)> {
 	// Zero Network Treasury owns ZERO issuance:
-	let mut zero_issuance = 1_000_000_000 * ZERO_DOLLAR;
+	let mut zero_issuance = 1_000_000_000 * dollar(ZERO);
 	// Game3 Foundation Treasury:
-	let game3_zero = 1_000_000 * ZERO_DOLLAR;
+	let game3_zero = 1_000_000 * dollar(ZERO);
 	// GameDAO Treasury:
-	let gamedao_zero = 1_000_000 * ZERO_DOLLAR;
+	let gamedao_zero = 1_000_000 * dollar(ZERO);
 
-	// TODO: proper ENDOWMENT calculation
-	let ENDOWMENT = 100;
+	// TODO: proper endowment calculation
+	let endowment = 100 * dollar(ZERO);
 
-	let account_balances = accounts.iter().cloned().map(|x| (x, ENDOWMENT))
+	let account_balances = accounts.iter().cloned().map(|x| (x, endowment))
 		.fold(
 			BTreeMap::<AccountId, Balance>::new(),
 			|mut acc, (account_id, amount)| {
@@ -403,7 +397,7 @@ fn balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) -> 
 						.checked_add(amount)
 						.expect("balance overflow");
 				} else {
-					zero_issuance.saturating_sub(amount);
+					zero_issuance = zero_issuance.saturating_sub(amount);
 					acc.insert(account_id.clone(), amount);
 				}
 				acc
@@ -412,8 +406,7 @@ fn balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) -> 
 		.into_iter()
 		.collect::<Vec<(AccountId, Balance)>>();
 	
-	zero_issuance.saturating_sub(game3_zero);
-	zero_issuance.saturating_sub(gamedao_zero);
+	zero_issuance = zero_issuance.saturating_sub(game3_zero).saturating_sub(gamedao_zero);
 	let mut balances = vec![
 		(zero_treasury, zero_issuance),
 	];
@@ -421,39 +414,31 @@ fn balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) -> 
 	balances
 }
 
-fn tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
-		game3_treasury: AccountId, gamedao_treasury: AccountId) -> Vec<(AccountId, CurrencyId, Balance)> {
-	// TODO: Implement TokenInfo and CurrencyId in order to get different decimal places for tokens
-	let GAME_DOLLAR: u128 = dollar(10);
-	let PLAY_DOLLAR: u128 = dollar(10);
-
-	let GAME: CurrencyId = TokenSymbol::GAME as u32;
-	let PLAY: CurrencyId = TokenSymbol::PLAY as u32;
-	
+fn _tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
+		game3_treasury: AccountId, gamedao_treasury: AccountId) -> Vec<(AccountId, CurrencyId, Balance)> {	
 	// Game3 Foundation Treasury owns GAME & PLAY issuance:
-	let mut game_issuance = 100_000_000 * GAME_DOLLAR;
-	let mut play_issuance = 10_000_000 * PLAY_DOLLAR;
+	let mut game_issuance = 100_000_000 * dollar(GAME);
+	let mut play_issuance = 10_000_000 * dollar(PLAY);
 
 	// Zero Network Treasury:
-	let zeronet_game = 100_000 * GAME_DOLLAR;
-	let zeronet_play = 1_000_000 * PLAY_DOLLAR;
+	let zeronet_game = 100_000 * dollar(GAME);
+	let zeronet_play = 1_000_000 * dollar(PLAY);
 
 	// GameDAO:
-	let gamedao_game = 100_000 * GAME_DOLLAR;
-	let gamedao_play = 1_000_000 * PLAY_DOLLAR;
-
-	// TODO: proper ENDOWMENT calculation
-	let ENDOWMENT = 100;
+	let gamedao_game = 100_000 * dollar(GAME);
+	let gamedao_play = 1_000_000 * dollar(PLAY);
 
 	let account_token_balances = accounts
 		.iter().cloned()
-			.flat_map(|x| vec![(x.clone(), GAME, ENDOWMENT), (x.clone(), GAME, ENDOWMENT)])
+			// TODO: proper endowment calculation
+			.flat_map(|x| vec![(x.clone(), GAME, 100 * dollar(GAME)), (x.clone(), PLAY, 100 * dollar(PLAY))])
 		.fold(
 			Vec::new(),
 			|mut vec, (account_id, currency_id, amount)| {
 				match currency_id {
 					GAME => { game_issuance = game_issuance.saturating_sub(amount); },
 					PLAY => { play_issuance = play_issuance.saturating_sub(amount); },
+					_ => ()
 				};
 				vec.push((account_id.clone(), currency_id, amount));
 				vec
