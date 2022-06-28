@@ -93,10 +93,10 @@ create_currency_id! {
 	// Represent a Token symbol with 8 bit
 	//
 	// 0 - 127: Polkadot Ecosystem tokens
-	// 0 - 9: Zero & GameDAO native tokens
-	// 10 - 19: Acala & Polkadot native tokens
-	// 20 - 39: External tokens (e.g. bridged)
-	// 40 - 127: Polkadot parachain tokens
+	// 0 - 19: Zero & GameDAO native tokens
+	// 20 - 39: Acala & Polkadot native tokens
+	// 40 - 59: External tokens (e.g. bridged)
+	// 60 - 127: Polkadot parachain tokens
 	//
 	// 128 - 255: Kusama Ecosystem tokens
 	// 128 - 147: Karura & Kusama native tokens
@@ -106,19 +106,17 @@ create_currency_id! {
 	#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 	#[repr(u8)]
 	pub enum TokenSymbol {
-		// 0 - 9: Zero & GameDAO native tokens
+		// 0 - 19: Zero & GameDAO native tokens
 		ZERO("Zero", 18) = 0,
 		PLAY("Play", 10) = 1,
 		GAME("Game", 10) = 2,
-		// 10 - 19: Acala & Polkadot native tokens
+		// 20 - 39: Acala & Polkadot native tokens
 		ACA("Acala", 12) = 10,
 		AUSD("Acala Dollar", 12) = 11,
 		DOT("Polkadot", 10) = 12,
 		LDOT("Liquid DOT", 10) = 13,
-		// 20 - 39: External tokens (e.g. bridged)
-		RENBTC("Ren Protocol BTC", 8) = 20,
-		CASH("Compound CASH", 8) = 21,
-		// 40 - 127: Polkadot parachain tokens
+		// 40 - 59: External tokens (e.g. bridged)
+		// 60 - 127: Polkadot parachain tokens
 
 		// 128 - 147: Karura & Kusama native tokens
 		KAR("Karura", 12) = 128,
@@ -145,23 +143,17 @@ pub trait TokenInfo {
 	fn decimals(&self) -> Option<u8>;
 }
 
-pub type ForeignAssetId = u16;
 
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "std", serde(rename_all = "camelCase"))]
 pub enum CurrencyId {
 	Token(TokenSymbol),
-	ForeignAsset(ForeignAssetId),
 }
 
 impl CurrencyId {
 	pub fn is_token_currency_id(&self) -> bool {
 		matches!(self, CurrencyId::Token(_))
-	}
-
-	pub fn is_foreign_asset_currency_id(&self) -> bool {
-		matches!(self, CurrencyId::ForeignAsset(_))
 	}
 }
 
@@ -184,5 +176,17 @@ impl CurrencyId {
 #[repr(u8)]
 pub enum CurrencyIdType {
 	Token = 1, // 0 is prefix of precompile and predeploy
-	ForeignAsset,
+}
+
+#[derive(Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, TypeInfo)]
+pub enum AssetIds {
+	NativeAssetId(CurrencyId),
+}
+
+#[derive(Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, TypeInfo)]
+pub struct AssetMetadata<Balance> {
+	pub name: Vec<u8>,
+	pub symbol: Vec<u8>,
+	pub decimals: u8,
+	pub minimal_balance: Balance,
 }

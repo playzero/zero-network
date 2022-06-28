@@ -112,7 +112,7 @@ gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features =
 gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
 
 module-migration = { path = "../../../modules/migration/migration", default-features = false }
-# module-asset-registry = { path = "../../../modules/asset-registry", default-features = false }
+module-asset-registry = { path = "../../../modules/asset-registry", default-features = false }
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -201,7 +201,7 @@ std = [
     "orml-traits/std",
 
     "module-migration/std",
-	# "module-asset-registry/std"
+	"module-asset-registry/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -248,7 +248,7 @@ runtime-benchmarks = [
 	"gamedao-control/runtime-benchmarks",
 	"gamedao-flow/runtime-benchmarks",
 	"gamedao-signal/runtime-benchmarks",
-
+	"module-asset-registry/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-executive/try-runtime",

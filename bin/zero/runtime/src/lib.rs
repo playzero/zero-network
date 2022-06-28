@@ -1289,22 +1289,19 @@ parameter_type_with_key! {
 				TokenSymbol::KUSD |
 				TokenSymbol::KSM |
 				TokenSymbol::LKSM |
-				TokenSymbol::RENBTC |
 				TokenSymbol::BNC |
 				TokenSymbol::PHA |
 				TokenSymbol::VSKSM |
 				TokenSymbol::ACA |
 				TokenSymbol::KBTC |
 				TokenSymbol::KINT |
-				TokenSymbol::TAI |
-				TokenSymbol::CASH => Balance::max_value() // unsupported
+				TokenSymbol::TAI => Balance::max_value() // unsupported
 			},
-			CurrencyId::ForeignAsset(_foreign_asset_id) => {
-				Zero::zero()
 			// TODO: add module_asset_registry
+			// CurrencyId::ForeignAsset(_foreign_asset_id) => {
 			// 	AssetIdMaps::<Runtime>::get_foreign_asset_metadata(*foreign_asset_id).
 			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
-			},
+			// },
 		}
 	};
 }
@@ -1349,7 +1346,7 @@ parameter_types! {
 }
 
 impl gamedao_signal::Config for Runtime {
-	type WeightInfo = ();
+	type WeightInfo = gamedao_signal::weights::SubstrateWeight<Runtime>;
 	type Event = Event;
 	type Currency = Currencies;
 	type Flow = Flow;
@@ -1374,7 +1371,7 @@ parameter_types! {
 
 impl gamedao_control::Config for Runtime {
 	type PalletId = ControlPalletId;
-	type WeightInfo = ();
+	type WeightInfo = gamedao_control::weights::SubstrateWeight<Runtime>;
 	type Event = Event;
 	type Currency = Currencies;
 	type PaymentTokenId = GetStableCurrencyId;
@@ -1425,7 +1422,7 @@ impl gamedao_flow::Config for Runtime {
 	// ensure root or half council as admin role for campaigns.
 	// might need another instance of council as e.g. supervisor
 	// type ModuleAdmin = frame_system::EnsureRoot<AccountId>;
-	type WeightInfo = ();
+	type WeightInfo = gamedao_flow::weights::SubstrateWeight<Runtime>;
 	type Event = Event;
 	type Balance = Balance;
 	type CurrencyId = CurrencyId;
@@ -1451,11 +1448,18 @@ impl gamedao_flow::Config for Runtime {
 
 impl gamedao_sense::Config for Runtime {
 	type Event = Event;
-	type WeightInfo = ();
+	type WeightInfo = gamedao_sense::weights::SubstrateWeight<Runtime>;
 }
 
 impl module_migration::Config for Runtime {
 	type Event = Event;
+}
+
+impl module_asset_registry::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type RegisterOrigin = EnsureRootOrHalfGeneralCouncil;
+	type WeightInfo = ();
 }
 
 construct_runtime!(
@@ -1519,6 +1523,7 @@ construct_runtime!(
 
 		// Zero pallets:
 		Migration: module_migration,
+		AssetRegistry: module_asset_registry,
 	}
 );
 
@@ -1890,6 +1895,7 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, gamedao_control, Control);
 			list_benchmark!(list, extra, gamedao_flow, Flow);
 			list_benchmark!(list, extra, gamedao_signal, Signal);
+			list_benchmark!(list, extra, module_asset_registry, AssetRegistry);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -1972,6 +1978,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, gamedao_control, Control);
 			add_benchmark!(params, batches, gamedao_flow, Flow);
 			add_benchmark!(params, batches, gamedao_signal, Signal);
+			add_benchmark!(params, batches, module_asset_registry, AssetRegistry);
 
 			Ok(batches)
 		}

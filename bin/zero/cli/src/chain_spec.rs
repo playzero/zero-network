@@ -373,7 +373,7 @@ pub fn testnet_genesis(
 		transaction_payment: Default::default(),
 		tokens: TokensConfig { balances: Default::default() },
 		control: ControlConfig { orgs: Default::default() },
-		// asset_registry: Default::default(),
+		asset_registry: Default::default(),
 	}
 }
 

@@ -4402,6 +4402,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "module-asset-registry"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "log",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "zero-primitives",
+]
+
+[[package]]
 name = "module-migration"
 version = "0.1.0"
 dependencies = [
@@ -11998,6 +12019,7 @@ dependencies = [
  "gamedao-traits",
  "hex-literal",
  "log",
+ "module-asset-registry",
  "module-migration",
  "orml-currencies",
  "orml-tokens",
