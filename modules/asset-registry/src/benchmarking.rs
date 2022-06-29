@@ -4,7 +4,7 @@ use crate::*;
 use crate::Pallet as AssetRegistry;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, whitelisted_caller};
 use frame_system::RawOrigin;
-use sp_runtime::{DispatchError, traits::SaturatedConversion};
+use sp_runtime::{DispatchError, traits::{SaturatedConversion, Zero}};
 use sp_std::{boxed::Box, vec};
 use primitives::{currency::AssetMetadata, TokenSymbol};
 
@@ -16,7 +16,7 @@ benchmarks! {
 			name: b"Token Name".to_vec(),
 			symbol: b"TN".to_vec(),
 			decimals: 12,
-			minimal_balance: 1,
+			minimal_balance: Zero::zero(),
 		};
 	}: _(RawOrigin::Root, CurrencyId::Token(TokenSymbol::DOT), Box::new(asset_metadata))
 
@@ -26,7 +26,7 @@ benchmarks! {
 			name: b"Token Name".to_vec(),
 			symbol: b"TN".to_vec(),
 			decimals: 12,
-			minimal_balance: 1,
+			minimal_balance: Zero::zero(),
 		};
 
 		AssetRegistry::<T>::register_native_asset(RawOrigin::Root.into(), currency_id, Box::new(asset_metadata.clone()))?;
