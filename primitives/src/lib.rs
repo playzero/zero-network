@@ -18,17 +18,10 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-// pub mod currency;
+use sp_runtime::{generic, traits::{BlakeTwo256, IdentifyAccount, Verify}, MultiSignature};
 
-use codec::{Decode, Encode};
-use sp_runtime::{
-	generic,
-	traits::{BlakeTwo256, IdentifyAccount, Verify},
-	MultiSignature, OpaqueExtrinsic, RuntimeDebug,
-};
-
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
+pub mod currency;
+pub use currency::{CurrencyId, TokenSymbol, TokenInfo};
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -90,8 +83,6 @@ pub type Signature = MultiSignature;
 /// time scale is milliseconds.
 pub type Timestamp = u64;
 
-/// Currency Id type
-pub type CurrencyId = u32;
 /// Group collection id type
 pub type GroupCollectionId = u64;
 /// AssetId for all NFT and FT
@@ -101,150 +92,18 @@ pub type RealmId = u64;
 /// NFT Balance
 pub type NFTBalance = u128;
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum TokenSymbol {
-	ZERO = 0,
-	PLAY = 1,
-	GAME = 2,
-	DOT = 3,
-	KSM = 4,
-	DAI = 5,
-	EUR = 6,
-	HYPE = 7,
-	FUEL = 8,
+pub fn dollar(currency_id: CurrencyId) -> Balance {
+	10u128.saturating_pow(currency_id.decimals().expect("Not support Non-Token decimals").into())
 }
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum AirDropCurrencyId {
-	ZERO = 0,
-	PLAY = 1,
-	GAME = 2,
+pub fn cent(currency_id: CurrencyId) -> Balance {
+	dollar(currency_id) / 100
 }
 
-// bodies
-
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum BodyType {
-	INDIVIDUAL = 0, // individual address
-	COMPANY = 1,    // ...with a legal body
-	DAO = 2,        // ...governed by a dao
+pub fn millicent(currency_id: CurrencyId) -> Balance {
+	cent(currency_id) / 1000
 }
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum BodyState {
-	INACTIVE = 0,
-	ACTIVE = 1,
-	LOCKED = 2,
+pub fn microcent(currency_id: CurrencyId) -> Balance {
+	millicent(currency_id) / 1000
 }
-
-// roles
-
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum AuthoritysOriginId {
-	Root,
-	ZeroTreasury,
-	GameDAOTreasury,
-	SenseNet,
-}
-
-//
-//	s e n s e
-//
-
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum SenseProps {
-	XP = 0,
-	REP = 1,
-	TRUST = 2,
-}
-
-//
-//	g o v e r n a n c e
-//
-
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ProposalType {
-	PROPOSAL = 0,
-	TREASURY = 1,
-	MEMBERSHIP = 2,
-}
-
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum VotingType {
-	WEIGHTED = 0,
-	DEMOCRATIC = 1,
-	QUADRATIC = 2,
-	CONVICTION = 3,
-}
-
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum ProposalState {
-	LOCK = 0,
-	OPEN = 1,
-	ACK = 2,
-	NACK = 3,
-	TERM = 4,
-	DONE = 5,
-}
-
-// TODO: type CurrencyId, make use of TokenInfo
-// pub fn dollar(currency_id: CurrencyId) -> Balance {
-// 	10u128.saturating_pow(currency_id.decimals().expect("Not support Non-Token decimals").into())
-// }
-
-// pub fn cent(currency_id: CurrencyId) -> Balance {
-// 	dollar(currency_id) / 100
-// }
-
-// pub fn millicent(currency_id: CurrencyId) -> Balance {
-// 	cent(currency_id) / 1000
-// }
-
-// pub fn microcent(currency_id: CurrencyId) -> Balance {
-// 	millicent(currency_id) / 1000
-// }
-
-//
-//
-//
-
-// / App-specific crypto used for reporting equivocation/misbehavior in BABE and
-// / GRANDPA. Any rewards for misbehavior reporting will be paid out to this
-// / account.
-
-// pub mod report {
-// 	use super::{Signature, Verify};
-// 	use frame_system::offchain::AppCrypto;
-// 	use sp_core::crypto::{key_types, KeyTypeId};
-
-// 	/// Key type for the reporting module. Used for reporting BABE and GRANDPA
-// 	/// equivocations.
-// 	pub const KEY_TYPE: KeyTypeId = key_types::REPORTING;
-
-// 	mod app {
-// 		use sp_application_crypto::{app_crypto, sr25519};
-// 		app_crypto!(sr25519, super::KEY_TYPE);
-// 	}
-
-// 	/// Identity of the equivocation/misbehavior reporter.
-// 	pub type ReporterId = app::Public;
-
-// 	/// An `AppCrypto` type to allow submitting signed transactions using the reporting
-// 	/// application key as signer.
-// 	pub struct ReporterAppCrypto;
-
-// 	impl AppCrypto<<Signature as Verify>::Signer, Signature> for ReporterAppCrypto {
-// 		type RuntimeAppPublic = ReporterId;
-// 		type GenericSignature = sp_core::sr25519::Signature;
-// 		type GenericPublic = sp_core::sr25519::Public;
-// 	}
-// }

@@ -710,6 +710,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bstringify"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd769563b4ea2953e2825c9e6b7470a5f55f67e0be00030bf3e390a2a6071f64"
+
+[[package]]
 name = "build-helper"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2638,6 +2644,7 @@ dependencies = [
 name = "gamedao-traits"
 version = "1.0.1-dev"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "parity-scale-codec",
  "scale-info",
@@ -4395,6 +4402,51 @@ dependencies = [
 ]
 
 [[package]]
+name = "module-asset-registry"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "log",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "zero-primitives",
+]
+
+[[package]]
+name = "module-migration"
+version = "0.1.0"
+dependencies = [
+ "bs58",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "log",
+ "pallet-balances",
+ "pallet-identity 4.0.0-dev",
+ "parity-scale-codec",
+ "rand 0.8.5",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "sp-version",
+]
+
+[[package]]
 name = "more-asserts"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6040,6 +6092,7 @@ dependencies = [
  "pallet-authorship",
  "pallet-balances",
  "pallet-collator-selection",
+ "pallet-collective",
  "pallet-session",
  "pallet-sudo",
  "pallet-timestamp",
@@ -11849,7 +11902,7 @@ dependencies = [
 
 [[package]]
 name = "zero-cli"
-version = "3.0.0-dev"
+version = "3.0.55"
 dependencies = [
  "assert_cmd",
  "async-std",
@@ -11930,41 +11983,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "zero-migration"
-version = "0.1.0"
-dependencies = [
- "bs58",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "hex",
- "log",
- "pallet-balances",
- "pallet-identity 4.0.0-dev",
- "parity-scale-codec",
- "rand 0.8.5",
- "scale-info",
- "serde",
- "serde_json",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "sp-version",
-]
-
-[[package]]
 name = "zero-primitives"
 version = "1.28.0"
 dependencies = [
+ "bstringify",
+ "frame-support",
  "frame-system",
+ "num_enum",
  "parity-scale-codec",
  "pretty_assertions 0.6.1",
+ "scale-info",
  "serde",
- "sp-application-crypto",
  "sp-core",
  "sp-runtime",
  "sp-serializer",
+ "sp-std",
 ]
 
 [[package]]
@@ -11986,6 +12019,8 @@ dependencies = [
  "gamedao-traits",
  "hex-literal",
  "log",
+ "module-asset-registry",
+ "module-migration",
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
@@ -12055,7 +12090,6 @@ dependencies = [
  "sp-version",
  "static_assertions",
  "substrate-wasm-builder",
- "zero-migration",
  "zero-primitives",
 ]
 

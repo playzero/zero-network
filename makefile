@@ -3,7 +3,7 @@ reset:
 	cargo clean
 
 test:
-	cargo +nightly test -p gamedao-signal -p gamedao-control -p gamedao-flow -p gamedao-sense
+	cargo +nightly test -p gamedao-signal -p gamedao-control -p gamedao-flow -p gamedao-sense -p module-asset-registry
 test-mod:
 	cargo +nightly test -p $(mod)
 
