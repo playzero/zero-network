@@ -130,7 +130,7 @@ async-std = { version = "1.10.0", features = ["attributes"] }
 soketto = "0.4.2"
 criterion = { version = "0.3.5", features = [ "async_tokio" ] }
 tokio = { version = "1.13", features = ["macros", "time"] }
-jsonrpsee-ws-client = "0.4.1"
+jsonrpsee-ws-client = "0.14.0"
 wait-timeout = "0.2"
 remote-externalities = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
