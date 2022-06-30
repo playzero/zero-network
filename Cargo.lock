@@ -11902,7 +11902,7 @@ dependencies = [
 
 [[package]]
 name = "zero-cli"
-version = "3.0.55"
+version = "3.0.56"
 dependencies = [
  "assert_cmd",
  "async-std",
