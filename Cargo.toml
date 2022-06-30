@@ -5,24 +5,27 @@ resolver = "2"
 
 members = [
 
-	"bin/zero/runtime",
-	"bin/zero/cli",
+	"bin/zero-latest/runtime",
+	"bin/zero-latest/cli",
+
+	# "bin/zero/runtime",
+	# "bin/zero/cli",
 
 	# "bin/zero-dev/runtime",
 	# "bin/zero-dev/node",
 
-	"bin/zero-parachain/runtime",
-	"bin/zero-parachain/node",
+	# "bin/zero-parachain/runtime",
+	# "bin/zero-parachain/node",
 
-	"orml/currencies",
-	"orml/traits",
-	"orml/tokens",
-	"gamedao-protocol/flow",
-	"gamedao-protocol/control",
-	"gamedao-protocol/signal",
-	"gamedao-protocol/sense",
-	"gamedao-protocol/traits",
-	"primitives",
+	# "orml/currencies",
+	# "orml/traits",
+	# "orml/tokens",
+	# "gamedao-protocol/flow",
+	# "gamedao-protocol/control",
+	# "gamedao-protocol/signal",
+	# "gamedao-protocol/sense",
+	# "gamedao-protocol/traits",
+	# "primitives",
 
 	# "bin/zero/cli",
 
