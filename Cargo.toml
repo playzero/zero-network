@@ -25,7 +25,8 @@ members = [
 	# "gamedao-protocol/signal",
 	# "gamedao-protocol/sense",
 	# "gamedao-protocol/traits",
-	# "primitives",
+	"modules/asset-registry",
+	"primitives",
 
 	# "bin/zero/cli",
 
