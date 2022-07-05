@@ -1571,6 +1571,13 @@ impl pallet_alliance::Config for Runtime {
 	type WeightInfo = pallet_alliance::weights::SubstrateWeight<Runtime>;
 }
 
+impl module_asset_registry::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type RegisterOrigin = EnsureRootOrHalfCouncil;
+	type WeightInfo = ();
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1633,6 +1640,9 @@ construct_runtime!(
 		NominationPools: pallet_nomination_pools,
 		RankedPolls: pallet_referenda::<Instance2>,
 		RankedCollective: pallet_ranked_collective,
+
+		// Zero pallets:
+		AssetRegistry: module_asset_registry,
 	}
 );
 
@@ -1738,6 +1748,7 @@ mod benches {
 		[pallet_utility, Utility]
 		[pallet_vesting, Vesting]
 		[pallet_whitelist, Whitelist]
+		[module_asset_registry, AssetRegistry]
 	);
 }
 

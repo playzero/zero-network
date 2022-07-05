@@ -108,6 +108,20 @@ pallet-uniques = { default-features = false, git = "https://github.com/paritytec
 pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 pallet-whitelist = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 
+#orml-tokens = { path = "../../../orml/tokens", default-features = false }
+#orml-traits = { path = "../../../orml/traits", default-features = false }
+#orml-currencies = { path = "../../../orml/currencies", default-features = false }
+
+#gamedao-traits = { path = "../../../gamedao-protocol/traits", default-features = false }
+#gamedao-flow = { path = "../../../gamedao-protocol/flow", default-features = false }
+#gamedao-control = { path = "../../../gamedao-protocol/control", default-features = false }
+#gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
+#gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
+
+module-asset-registry = { path = "../../../modules/asset-registry", default-features = false }
+
+primitives = { package = "zero-primitives", path = "../../../primitives", default-features = false }
+
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 
@@ -189,6 +203,18 @@ std = [
 	"sp-io/std",
 	"pallet-child-bounties/std",
 	"pallet-alliance/std",
+	
+	#"gamedao-sense/std",
+	#"gamedao-traits/std",
+	#"gamedao-flow/std",
+	#"gamedao-control/std",
+	#"gamedao-signal/std",
+
+	#"orml-tokens/std",
+	#"orml-currencies/std",
+	#"orml-traits/std",
+
+	"module-asset-registry/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -241,6 +267,7 @@ runtime-benchmarks = [
 	"pallet-whitelist/runtime-benchmarks",
 	"frame-system-benchmarking",
 	"hex-literal",
+	"module-asset-registry/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-executive/try-runtime",

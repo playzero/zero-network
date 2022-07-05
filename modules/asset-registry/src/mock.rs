@@ -1,12 +1,7 @@
 #![cfg(test)]
 
-use frame_support::parameter_types;
+use frame_support::{parameter_types, traits::{ConstU128, ConstU32, ConstU64, Everything}};
 use frame_system as system;
-use sp_core::H256;
-use sp_runtime::{
-	testing::Header,
-	traits::{BlakeTwo256, IdentityLookup},
-};
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -37,39 +32,40 @@ parameter_types! {
 }
 
 impl system::Config for Test {
-	type BaseCallFilter = frame_support::traits::Everything;
+	type BaseCallFilter = Everything;
+	type Origin = Origin;
+	type Index = u64;
+	type BlockNumber = u64;
+	type Call = Call;
+	type Hash = sp_runtime::testing::H256;
+	type Hashing = sp_runtime::traits::BlakeTwo256;
+	type AccountId = u64;
+	type Lookup = sp_runtime::traits::IdentityLookup<Self::AccountId>;
+	type Header = sp_runtime::testing::Header;
+	type Event = Event;
+	type BlockHashCount = ConstU64<250>;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type DbWeight = ();
-	type Origin = Origin;
-	type Call = Call;
-	type Index = u64;
-	type BlockNumber = u64;
-	type Hash = H256;
-	type Hashing = BlakeTwo256;
-	type AccountId = u64;
-	type Lookup = IdentityLookup<Self::AccountId>;
-	type Header = Header;
-	type Event = Event;
-	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
-	type SS58Prefix = SS58Prefix;
+	type SS58Prefix = ();
 	type OnSetCode = ();
+	type MaxConsumers = ConstU32<16>;
 }
 
 impl pallet_balances::Config for Test {
 	type Balance = Balance;
 	type DustRemoval = ();
 	type Event = Event;
-	type ExistentialDeposit = ExistentialDeposit;
-	type AccountStore = frame_system::Pallet<Test>;
+	type ExistentialDeposit = ConstU128<1>;
+	type AccountStore = System;
 	type MaxLocks = ();
-	type MaxReserves = ();
+	type MaxReserves = ConstU32<50>;
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 }
