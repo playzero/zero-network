@@ -18,13 +18,13 @@
 use codec::{Decode, Encode};
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 use frame_support::Hashable;
-use node_executor::ExecutorDispatch;
-use node_primitives::{BlockNumber, Hash};
-use node_runtime::{
+use zero_executor::ExecutorDispatch;
+use zero_primitives::{BlockNumber, Hash};
+use zero_runtime::{
 	constants::currency::*, Block, BuildStorage, Call, CheckedExtrinsic, GenesisConfig, Header,
 	UncheckedExtrinsic,
 };
-use node_testing::keyring::*;
+use zero_testing::keyring::*;
 #[cfg(feature = "wasmtime")]
 use sc_executor::WasmtimeInstantiationStrategy;
 use sc_executor::{Externalities, NativeElseWasmExecutor, RuntimeVersionOf, WasmExecutionMethod};
@@ -41,7 +41,7 @@ criterion_main!(benches);
 
 /// The wasm runtime code.
 pub fn compact_code_unwrap() -> &'static [u8] {
-	node_runtime::WASM_BINARY.expect(
+	zero_runtime::WASM_BINARY.expect(
 		"Development wasm binary is not available. Testing is only supported with the flag \
 		 disabled.",
 	)
@@ -49,9 +49,9 @@ pub fn compact_code_unwrap() -> &'static [u8] {
 
 const GENESIS_HASH: [u8; 32] = [69u8; 32];
 
-const TRANSACTION_VERSION: u32 = node_runtime::VERSION.transaction_version;
+const TRANSACTION_VERSION: u32 = zero_runtime::VERSION.transaction_version;
 
-const SPEC_VERSION: u32 = node_runtime::VERSION.spec_version;
+const SPEC_VERSION: u32 = zero_runtime::VERSION.spec_version;
 
 const HEAP_PAGES: u64 = 20;
 
@@ -64,7 +64,7 @@ enum ExecutionMethod {
 }
 
 fn sign(xt: CheckedExtrinsic) -> UncheckedExtrinsic {
-	node_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
+	zero_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
 }
 
 fn new_test_ext(genesis_config: &GenesisConfig) -> TestExternalities<BlakeTwo256> {
@@ -192,7 +192,7 @@ fn bench_execute_block(c: &mut Criterion) {
 
 	for strategy in execution_methods {
 		group.bench_function(format!("{:?}", strategy), |b| {
-			let genesis_config = node_testing::genesis::config(Some(compact_code_unwrap()));
+			let genesis_config = zero_testing::genesis::config(Some(compact_code_unwrap()));
 			let (use_native, wasm_method) = match strategy {
 				ExecutionMethod::Native => (true, WasmExecutionMethod::Interpreted),
 				ExecutionMethod::Wasm(wasm_method) => (false, wasm_method),

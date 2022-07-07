@@ -26,13 +26,13 @@ use sp_runtime::{
 	traits::Hash as HashT, transaction_validity::InvalidTransaction, ApplyExtrinsicResult,
 };
 
-use node_primitives::{Balance, Hash};
-use node_runtime::{
+use zero_primitives::{Balance, Hash};
+use zero_runtime::{
 	constants::{currency::*, time::SLOT_DURATION},
 	Balances, Call, CheckedExtrinsic, Event, Header, Runtime, System, TransactionPayment,
 	UncheckedExtrinsic,
 };
-use node_testing::keyring::*;
+use zero_testing::keyring::*;
 use wat;
 
 pub mod common;
@@ -44,7 +44,7 @@ use self::common::{sign, *};
 /// have to execute provided wasm code instead of the native equivalent. This trick is used to
 /// test code paths that differ between native and wasm versions.
 pub fn bloaty_code_unwrap() -> &'static [u8] {
-	node_runtime::WASM_BINARY_BLOATY.expect(
+	zero_runtime::WASM_BINARY_BLOATY.expect(
 		"Development wasm binary is not available. \
 											 Testing is only supported with the flag disabled.",
 	)
@@ -886,14 +886,14 @@ fn successful_execution_gives_ok() {
 
 #[test]
 fn should_import_block_with_test_client() {
-	use node_testing::client::{
+	use zero_testing::client::{
 		sp_consensus::BlockOrigin, ClientBlockImportExt, TestClientBuilder, TestClientBuilderExt,
 	};
 
 	let mut client = TestClientBuilder::new().build();
 	let block1 = changes_trie_block();
 	let block_data = block1.0;
-	let block = node_primitives::Block::decode(&mut &block_data[..]).unwrap();
+	let block = zero_primitives::Block::decode(&mut &block_data[..]).unwrap();
 
 	futures::executor::block_on(client.import(BlockOrigin::Own, block)).unwrap();
 }

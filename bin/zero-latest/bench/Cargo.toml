@@ -1,5 +1,5 @@
 [package]
-name = "node-bench"
+name = "zero-bench"
 version = "0.9.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
 description = "Substrate node integration benchmarks."
@@ -11,9 +11,9 @@ license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 [dependencies]
 clap = { version = "3.1.18", features = ["derive"] }
 log = "0.4.17"
-node-primitives = { version = "2.0.0", path = "../primitives" }
-node-testing = { version = "3.0.0-dev", path = "../testing" }
-node-runtime = { version = "3.0.0-dev", path = "../runtime" }
+zero-primitives = { version = "2.0.0", path = "../../primitives" }
+zero-testing = { version = "3.0.0-dev", path = "../testing" }
+zero-runtime = { version = "3.0.0-dev", path = "../runtime" }
 sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sp-state-machine = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }

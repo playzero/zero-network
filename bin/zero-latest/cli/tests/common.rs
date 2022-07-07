@@ -23,7 +23,7 @@ use nix::{
 	sys::signal::{kill, Signal::SIGINT},
 	unistd::Pid,
 };
-use node_primitives::Block;
+use zero_primitives::Block;
 use remote_externalities::rpc_api;
 use std::{
 	io::{BufRead, BufReader, Read},

@@ -23,9 +23,9 @@ use crate::{
 	Cli, Subcommand,
 };
 use frame_benchmarking_cli::*;
-use node_executor::ExecutorDispatch;
-use node_primitives::Block;
-use node_runtime::RuntimeApi;
+use zero_executor::ExecutorDispatch;
+use zero_primitives::Block;
+use zero_runtime::RuntimeApi;
 use sc_cli::{ChainSpec, Result, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 
@@ -74,7 +74,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&node_runtime::VERSION
+		&zero_runtime::VERSION
 	}
 }
 

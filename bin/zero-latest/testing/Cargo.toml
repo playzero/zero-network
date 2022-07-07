@@ -1,5 +1,5 @@
 [package]
-name = "node-testing"
+name = "zero-testing"
 version = "3.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
 description = "Test utilities for Substrate node."
@@ -20,9 +20,9 @@ log = "0.4.17"
 tempfile = "3.1.0"
 
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
-node-executor = { version = "3.0.0-dev", path = "../executor" }
-node-primitives = { version = "2.0.0", path = "../primitives" }
-node-runtime = { version = "3.0.0-dev", path = "../runtime" }
+zero-executor = { version = "3.0.0-dev", path = "../executor" }
+zero-primitives = { version = "2.0.0", path = "../../../primitives" }
+zero-runtime = { version = "3.0.0-dev", path = "../runtime" }
 pallet-asset-tx-payment = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sc-block-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }

@@ -18,8 +18,8 @@
 
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion, Throughput};
 
-use node_cli::service::{create_extrinsic, FullClient};
-use node_runtime::{constants::currency::*, BalancesCall};
+use zero_cli::service::{create_extrinsic, FullClient};
+use zero_runtime::{constants::currency::*, BalancesCall};
 use sc_block_builder::{BlockBuilderProvider, BuiltBlock, RecordProof};
 use sc_client_api::execution_extensions::ExecutionStrategies;
 use sc_consensus::{
@@ -43,7 +43,7 @@ use sp_runtime::{
 };
 use tokio::runtime::Handle;
 
-fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
+fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 	let base_path = BasePath::new_temp_dir()
 		.expect("getting the base path of a temporary path doesn't fail; qed");
 	let root = base_path.path().to_path_buf();
@@ -55,7 +55,7 @@ fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
 		None,
 	);
 
-	let spec = Box::new(node_cli::chain_spec::development_config());
+	let spec = Box::new(zero_cli::chain_spec::development_config());
 
 	// NOTE: We enforce the use of the WASM runtime to benchmark block production using WASM.
 	let execution_strategy = sc_client_api::ExecutionStrategy::AlwaysWasm;
@@ -116,14 +116,14 @@ fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
 		wasm_runtime_overrides: None,
 	};
 
-	node_cli::service::new_full_base(config, false, |_, _| ())
+	zero_cli::service::new_full_base(config, false, |_, _| ())
 		.expect("creating a full node doesn't fail")
 }
 
 fn extrinsic_set_time(now: u64) -> OpaqueExtrinsic {
-	node_runtime::UncheckedExtrinsic {
+	zero_runtime::UncheckedExtrinsic {
 		signature: None,
-		function: node_runtime::Call::Timestamp(pallet_timestamp::Call::set { now }),
+		function: zero_runtime::Call::Timestamp(pallet_timestamp::Call::set { now }),
 	}
 	.into()
 }
@@ -131,8 +131,8 @@ fn extrinsic_set_time(now: u64) -> OpaqueExtrinsic {
 fn import_block(
 	mut client: &FullClient,
 	built: BuiltBlock<
-		node_primitives::Block,
-		<FullClient as sp_api::CallApiAt<node_primitives::Block>>::StateBackend,
+		zero_primitives::Block,
+		<FullClient as sp_api::CallApiAt<zero_primitives::Block>>::StateBackend,
 	>,
 ) {
 	let mut params = BlockImportParams::new(BlockOrigin::File, built.block.header);

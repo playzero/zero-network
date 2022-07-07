@@ -35,13 +35,13 @@ use sp_runtime::{
 };
 use sp_state_machine::TestExternalities as CoreTestExternalities;
 
-use node_executor::ExecutorDispatch;
-use node_primitives::{BlockNumber, Hash};
-use node_runtime::{
+use zero_executor::ExecutorDispatch;
+use zero_primitives::{BlockNumber, Hash};
+use zero_runtime::{
 	constants::currency::*, Block, BuildStorage, CheckedExtrinsic, Header, Runtime,
 	UncheckedExtrinsic,
 };
-use node_testing::keyring::*;
+use zero_testing::keyring::*;
 use sp_externalities::Externalities;
 
 pub const TEST_KEY_TYPE_ID: KeyTypeId = KeyTypeId(*b"test");
@@ -69,7 +69,7 @@ impl AppCrypto<MultiSigner, MultiSignature> for TestAuthorityId {
 /// making the binary slimmer. There is a convention to use compact version of the runtime
 /// as canonical.
 pub fn compact_code_unwrap() -> &'static [u8] {
-	node_runtime::WASM_BINARY.expect(
+	zero_runtime::WASM_BINARY.expect(
 		"Development wasm binary is not available. Testing is only supported with the flag \
 		 disabled.",
 	)
@@ -77,14 +77,14 @@ pub fn compact_code_unwrap() -> &'static [u8] {
 
 pub const GENESIS_HASH: [u8; 32] = [69u8; 32];
 
-pub const SPEC_VERSION: u32 = node_runtime::VERSION.spec_version;
+pub const SPEC_VERSION: u32 = zero_runtime::VERSION.spec_version;
 
-pub const TRANSACTION_VERSION: u32 = node_runtime::VERSION.transaction_version;
+pub const TRANSACTION_VERSION: u32 = zero_runtime::VERSION.transaction_version;
 
 pub type TestExternalities<H> = CoreTestExternalities<H>;
 
 pub fn sign(xt: CheckedExtrinsic) -> UncheckedExtrinsic {
-	node_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
+	zero_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
 }
 
 pub fn default_transfer_call() -> pallet_balances::Call<Runtime> {
@@ -126,7 +126,7 @@ pub fn executor_call<
 pub fn new_test_ext(code: &[u8]) -> TestExternalities<BlakeTwo256> {
 	let ext = TestExternalities::new_with_code(
 		code,
-		node_testing::genesis::config(Some(code)).build_storage().unwrap(),
+		zero_testing::genesis::config(Some(code)).build_storage().unwrap(),
 	);
 	ext
 }

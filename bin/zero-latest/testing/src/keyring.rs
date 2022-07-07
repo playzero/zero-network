@@ -19,8 +19,8 @@
 //! Test accounts.
 
 use codec::Encode;
-use node_primitives::{AccountId, Balance, Index};
-use node_runtime::{CheckedExtrinsic, SessionKeys, SignedExtra, UncheckedExtrinsic};
+use zero_primitives::{AccountId, Balance, Index};
+use zero_runtime::{CheckedExtrinsic, SessionKeys, SignedExtra, UncheckedExtrinsic};
 use sp_keyring::{AccountKeyring, Ed25519Keyring, Sr25519Keyring};
 use sp_runtime::generic::Era;
 

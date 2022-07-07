@@ -30,7 +30,7 @@ mod txpool;
 
 use clap::Parser;
 
-use node_testing::bench::{BlockType, DatabaseType as BenchDataBaseType, KeyTypes, Profile};
+use zero_testing::bench::{BlockType, DatabaseType as BenchDataBaseType, KeyTypes, Profile};
 
 use crate::{
 	common::SizeType,

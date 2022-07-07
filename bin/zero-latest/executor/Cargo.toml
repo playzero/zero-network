@@ -1,5 +1,5 @@
 [package]
-name = "node-executor"
+name = "zero-executor"
 version = "3.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
 description = "Substrate node implementation in Rust."
@@ -15,8 +15,8 @@ targets = ["x86_64-unknown-linux-gnu"]
 codec = { package = "parity-scale-codec", version = "3.0.0" }
 scale-info = { version = "2.1.1", features = ["derive"] }
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
-node-primitives = { version = "2.0.0", path = "../primitives" }
-node-runtime = { version = "3.0.0-dev", path = "../runtime" }
+zero-primitives = { version = "2.0.0", path = "../../../primitives" }
+zero-runtime = { version = "3.0.0-dev", path = "../runtime" }
 sc-executor = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sp-keystore = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
@@ -30,7 +30,7 @@ futures = "0.3.21"
 wat = "1.0"
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
-node-testing = { version = "3.0.0-dev", path = "../testing" }
+zero-testing = { version = "3.0.0-dev", path = "../testing" }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 pallet-contracts = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 pallet-im-online = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }

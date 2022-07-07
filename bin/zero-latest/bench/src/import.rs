@@ -32,8 +32,8 @@
 
 use std::borrow::Cow;
 
-use node_primitives::Block;
-use node_testing::bench::{BenchDb, BlockType, DatabaseType, KeyTypes, Profile};
+use zero_primitives::Block;
+use zero_testing::bench::{BenchDb, BlockType, DatabaseType, KeyTypes, Profile};
 use sc_client_api::backend::Backend;
 use sp_runtime::generic::BlockId;
 use sp_state_machine::InspectState;
@@ -147,13 +147,13 @@ impl core::Benchmark for ImportBenchmark {
 						//      the transaction fee into the treasury
 						//    - extrinsic success
 						assert_eq!(
-							node_runtime::System::events().len(),
+							zero_runtime::System::events().len(),
 							(self.block.extrinsics.len() - 1) * 7 + 1,
 						);
 					},
 					BlockType::Noop => {
 						assert_eq!(
-							node_runtime::System::events().len(),
+							zero_runtime::System::events().len(),
 							// should be 2 per signed extrinsic + 1 per unsigned
 							// we have 1 unsigned and the rest are signed in the block
 							// those 2 events per signed are:

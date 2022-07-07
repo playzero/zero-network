@@ -26,7 +26,7 @@ use sp_state_machine::Backend as _;
 use sp_trie::{trie_types::TrieDBMutV1, TrieMut as _};
 use std::{borrow::Cow, collections::HashMap, sync::Arc};
 
-use node_primitives::Hash;
+use zero_primitives::Hash;
 
 use crate::{
 	core::{self, Mode, Path},

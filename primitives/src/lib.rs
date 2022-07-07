@@ -18,7 +18,11 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use sp_runtime::{generic, traits::{BlakeTwo256, IdentifyAccount, Verify}, MultiSignature};
+use sp_runtime::{
+	generic,
+	traits::{BlakeTwo256, IdentifyAccount, Verify},
+	MultiSignature, OpaqueExtrinsic
+};
 
 pub mod currency;
 pub use currency::{CurrencyId, TokenSymbol, TokenInfo};
@@ -63,12 +67,12 @@ pub type Amount = i128;
 /// Index of a transaction in the chain.
 pub type Index = u32;
 
+/// Digest item type.
+pub type DigestItem = generic::DigestItem;
 /// Header type.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
-
 /// Block type.
-pub type Block = generic::Block<Header, UncheckedExtrinsic>;
-
+pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 /// Block ID.
 pub type BlockId = generic::BlockId<Block>;
 

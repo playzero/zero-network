@@ -21,7 +21,7 @@
 
 use crate::service::{create_extrinsic, FullClient};
 
-use node_runtime::SystemCall;
+use zero_runtime::SystemCall;
 use sc_cli::Result;
 use sp_inherents::{InherentData, InherentDataProvider};
 use sp_keyring::Sr25519Keyring;
