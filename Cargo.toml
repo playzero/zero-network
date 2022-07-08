@@ -5,8 +5,8 @@ resolver = "2"
 
 members = [
 
-	"bin/zero-latest/runtime",
-	"bin/zero-latest/cli",
+	"bin/zero/runtime",
+	"bin/zero/cli",
 
 	"bin/zero-parachain/runtime",
 	"bin/zero-parachain/node"

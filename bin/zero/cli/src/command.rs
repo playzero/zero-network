@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2017-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2017-2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -16,15 +16,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{chain_spec, service, service::new_partial, Cli, Subcommand};
-use node_executor::ExecutorDispatch;
-use zero_runtime::{Block, RuntimeApi};
+use super::command_helper::{inherent_benchmark_data, BenchmarkExtrinsicBuilder};
+use crate::{
+	chain_spec, service,
+	service::{new_partial, FullClient},
+	Cli, Subcommand,
+};
+use frame_benchmarking_cli::*;
+use zero_executor::ExecutorDispatch;
+use zero_primitives::Block;
+use zero_runtime::RuntimeApi;
 use sc_cli::{ChainSpec, Result, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 
+use std::sync::Arc;
+
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"S U B Z E R O".into()
+		"Substrate Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -40,7 +49,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/playzero/zero-network/issues/new".into()
+		"https://github.com/paritytech/substrate/issues/new".into()
 	}
 
 	fn copyright_start_year() -> i32 {
@@ -49,15 +58,14 @@ impl SubstrateCli for Cli {
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 		let spec = match id {
-			// "" =>
-			// 	return Err(
-			// 		"Please specify which chain you want to run, e.g. --dev or --chain=local"
-			// 			.into(),
-			// 	),
+			"" =>
+				return Err(
+					"Please specify which chain you want to run, e.g. --dev or --chain=local"
+						.into(),
+				),
 			"dev" => Box::new(chain_spec::development_config()),
 			"local" => Box::new(chain_spec::local_testnet_config()),
-			// default to alphaville when running without param to be compatible to old behaviour
-			"" | "subzero" | "alphaville" => Box::new(chain_spec::subzero_config()?),
+			"fir" | "flaming-fir" => Box::new(chain_spec::flaming_fir_config()?),
 			"staging" => Box::new(chain_spec::staging_testnet_config()),
 			path =>
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
@@ -78,7 +86,8 @@ pub fn run() -> Result<()> {
 		None => {
 			let runner = cli.create_runner(&cli.run)?;
 			runner.run_node_until_exit(|config| async move {
-				service::new_full(config).map_err(sc_cli::Error::Service)
+				service::new_full(config, cli.no_hardware_benchmarks)
+					.map_err(sc_cli::Error::Service)
 			})
 		},
 		Some(Subcommand::Inspect(cmd)) => {
@@ -86,16 +95,46 @@ pub fn run() -> Result<()> {
 
 			runner.sync_run(|config| cmd.run::<Block, RuntimeApi, ExecutorDispatch>(config))
 		},
-		Some(Subcommand::Benchmark(cmd)) =>
-			if cfg!(feature = "runtime-benchmarks") {
-				let runner = cli.create_runner(cmd)?;
+		Some(Subcommand::Benchmark(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
 
-				runner.sync_run(|config| cmd.run::<Block, ExecutorDispatch>(config))
-			} else {
-				Err("Benchmarking wasn't enabled when building the node. \
-				You can enable it with `--features runtime-benchmarks`."
-					.into())
-			},
+			runner.sync_run(|config| {
+				// This switch needs to be in the client, since the client decides
+				// which sub-commands it wants to support.
+				match cmd {
+					BenchmarkCmd::Pallet(cmd) => {
+						if !cfg!(feature = "runtime-benchmarks") {
+							return Err(
+								"Runtime benchmarking wasn't enabled when building the node. \
+							You can enable it with `--features runtime-benchmarks`."
+									.into(),
+							)
+						}
+
+						cmd.run::<Block, ExecutorDispatch>(config)
+					},
+					BenchmarkCmd::Block(cmd) => {
+						let PartialComponents { client, .. } = new_partial(&config)?;
+						cmd.run(client)
+					},
+					BenchmarkCmd::Storage(cmd) => {
+						let PartialComponents { client, backend, .. } = new_partial(&config)?;
+						let db = backend.expose_db();
+						let storage = backend.expose_storage();
+
+						cmd.run(config, client, db, storage)
+					},
+					BenchmarkCmd::Overhead(cmd) => {
+						let PartialComponents { client, .. } = new_partial(&config)?;
+						let ext_builder = BenchmarkExtrinsicBuilder::new(client.clone());
+
+						cmd.run(config, client, inherent_benchmark_data()?, Arc::new(ext_builder))
+					},
+					BenchmarkCmd::Machine(cmd) =>
+						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
+				}
+			})
+		},
 		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
 		Some(Subcommand::Sign(cmd)) => cmd.run(),
 		Some(Subcommand::Verify(cmd)) => cmd.run(),
@@ -142,7 +181,12 @@ pub fn run() -> Result<()> {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|config| {
 				let PartialComponents { client, task_manager, backend, .. } = new_partial(&config)?;
-				Ok((cmd.run(client, backend), task_manager))
+				let aux_revert = Box::new(|client: Arc<FullClient>, backend, blocks| {
+					sc_consensus_babe::revert(client.clone(), backend, blocks)?;
+					grandpa::revert(client, blocks)?;
+					Ok(())
+				});
+				Ok((cmd.run(client, backend, Some(aux_revert)), task_manager))
 			})
 		},
 		#[cfg(feature = "try-runtime")]
@@ -163,5 +207,9 @@ pub fn run() -> Result<()> {
 		Some(Subcommand::TryRuntime) => Err("TryRuntime wasn't enabled when building the node. \
 				You can enable it with `--features try-runtime`."
 			.into()),
+		Some(Subcommand::ChainInfo(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.sync_run(|config| cmd.run::<Block>(&config))
+		},
 	}
 }
