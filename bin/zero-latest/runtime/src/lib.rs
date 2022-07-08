@@ -31,7 +31,7 @@ use frame_support::{
 	pallet_prelude::Get,
 	parameter_types,
 	traits::{
-		AsEnsureOriginWithArg, ConstU128, ConstU16, ConstU32, Currency, EitherOfDiverse,
+		AsEnsureOriginWithArg, ConstU16, ConstU32, Contains, Currency, EitherOfDiverse,
 		EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter, KeyOwnerProofSystem,
 		LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote,
 	},
@@ -45,8 +45,12 @@ use frame_system::{
 	limits::{BlockLength, BlockWeights},
 	EnsureRoot, EnsureRootWithSuccess, EnsureSigned,
 };
-pub use node_primitives::{AccountId, Signature};
-use node_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment};
+pub use primitives::{
+	currency::{ZERO, PLAY, GAME, CurrencyId},
+	dollar, cent, millicent,
+	AccountId, ReserveIdentifier, Signature, TokenSymbol
+};
+use primitives::{AccountIndex, Amount, Balance, BlockNumber, Hash, Index, Moment};
 use pallet_contracts::weights::WeightInfo;
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::{
@@ -65,8 +69,8 @@ use sp_runtime::{
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys,
-		SaturatedConversion, StaticLookup,
+		self, AccountIdConversion, BlakeTwo256, Block as BlockT, ConvertInto,
+		NumberFor, OpaqueKeys, SaturatedConversion, StaticLookup,
 	},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill, Perquintill,
@@ -87,6 +91,9 @@ pub use pallet_staking::StakerStatus;
 pub use pallet_sudo::Call as SudoCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
+
+use orml_traits::parameter_type_with_key;
+use orml_currencies::BasicCurrencyAdapter;
 
 /// Implementations of some helper traits passed into runtime modules as associated types.
 pub mod impls;
@@ -144,6 +151,24 @@ pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
 #[cfg(any(feature = "std", test))]
 pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
+}
+
+// Pallet accounts of runtime
+parameter_types! {
+	pub const TreasuryPalletId: PalletId = PalletId(*b"zr/zrtrs");
+	pub const ControlPalletId: PalletId = PalletId(*b"gd/cntrl");
+	pub TreasuryAccountId: AccountId = TreasuryPalletId::get().into_account_truncating();
+	pub Game3FoundationTreasuryAccountId: AccountId = PalletId(*b"gd/g3trs").into_account_truncating();
+	pub GameDAOTreasuryAccountId: AccountId = PalletId(*b"gd/gdtrs").into_account_truncating();
+}
+
+pub fn get_all_module_accounts() -> Vec<AccountId> {
+	vec![
+		TreasuryAccountId::get(),
+		ControlPalletId::get().into_account_truncating(),
+		Game3FoundationTreasuryAccountId::get(),
+		GameDAOTreasuryAccountId::get(),
+	]
 }
 
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
@@ -222,7 +247,7 @@ impl frame_system::Config for Runtime {
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = frame_system::weights::SubstrateWeight<Runtime>;
-	type SS58Prefix = ConstU16<42>;
+	type SS58Prefix = ConstU16<25>;
 	type OnSetCode = ();
 	type MaxConsumers = ConstU32<16>;
 }
@@ -357,9 +382,9 @@ impl pallet_scheduler::Config for Runtime {
 
 parameter_types! {
 	pub const PreimageMaxSize: u32 = 4096 * 1024;
-	pub const PreimageBaseDeposit: Balance = 1 * DOLLARS;
+	pub PreimageBaseDeposit: Balance = 1 * dollar(ZERO);
 	// One cent: $10,000 / MB
-	pub const PreimageByteDeposit: Balance = 1 * CENTS;
+	pub PreimageByteDeposit: Balance = 1 * cent(ZERO);
 }
 
 impl pallet_preimage::Config for Runtime {
@@ -407,7 +432,7 @@ impl pallet_babe::Config for Runtime {
 }
 
 parameter_types! {
-	pub const IndexDeposit: Balance = 1 * DOLLARS;
+	pub IndexDeposit: Balance = 1 * dollar(ZERO);
 }
 
 impl pallet_indices::Config for Runtime {
@@ -419,17 +444,15 @@ impl pallet_indices::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ExistentialDeposit: Balance = 1 * DOLLARS;
-	// For weight estimation, we assume that the most locks on an individual account will be 50.
-	// This number may need to be adjusted in the future if this assumption no longer holds true.
 	pub const MaxLocks: u32 = 50;
-	pub const MaxReserves: u32 = 50;
+	pub const MaxReserves: u32 = ReserveIdentifier::Count as u32;
+	pub ExistentialDeposit: Balance = 1 * dollar(ZERO);
 }
 
 impl pallet_balances::Config for Runtime {
 	type MaxLocks = MaxLocks;
 	type MaxReserves = MaxReserves;
-	type ReserveIdentifier = [u8; 8];
+	type ReserveIdentifier = ReserveIdentifier;
 	type Balance = Balance;
 	type DustRemoval = ();
 	type Event = Event;
@@ -439,7 +462,7 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
-	pub const TransactionByteFee: Balance = 10 * MILLICENTS;
+	pub TransactionByteFee: Balance = 10 * millicent(ZERO);
 	pub const OperationalFeeMultiplier: u8 = 5;
 	pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
 	pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(1, 100_000);
@@ -576,9 +599,9 @@ parameter_types! {
 	pub const UnsignedPhase: u32 = EPOCH_DURATION_IN_BLOCKS / 4;
 
 	// signed config
-	pub const SignedRewardBase: Balance = 1 * DOLLARS;
-	pub const SignedDepositBase: Balance = 1 * DOLLARS;
-	pub const SignedDepositByte: Balance = 1 * CENTS;
+	pub SignedRewardBase: Balance = 1 * dollar(ZERO);
+	pub SignedDepositBase: Balance = 1 * dollar(ZERO);
+	pub SignedDepositByte: Balance = 1 * cent(ZERO);
 
 	pub BetterUnsignedThreshold: Perbill = Perbill::from_rational(1u32, 10_000);
 
@@ -727,9 +750,7 @@ impl pallet_bags_list::Config for Runtime {
 }
 
 parameter_types! {
-	pub const PostUnbondPoolsWindow: u32 = 4;
 	pub const NominationPoolsPalletId: PalletId = PalletId(*b"py/nopls");
-	pub const MinPointsToBalance: u32 = 10;
 }
 
 use sp_runtime::traits::Convert;
@@ -753,11 +774,11 @@ impl pallet_nomination_pools::Config for Runtime {
 	type BalanceToU256 = BalanceToU256;
 	type U256ToBalance = U256ToBalance;
 	type StakingInterface = pallet_staking::Pallet<Self>;
-	type PostUnbondingPoolsWindow = PostUnbondPoolsWindow;
+	type PostUnbondingPoolsWindow = ConstU32<4>;
 	type MaxMetadataLen = ConstU32<256>;
 	type MaxUnbonding = ConstU32<8>;
 	type PalletId = NominationPoolsPalletId;
-	type MinPointsToBalance = MinPointsToBalance;
+	type MinPointsToBalance = ConstU32<10>;
 }
 
 parameter_types! {
@@ -776,7 +797,7 @@ impl pallet_conviction_voting::Config for Runtime {
 
 parameter_types! {
 	pub const AlarmInterval: BlockNumber = 1;
-	pub const SubmissionDeposit: Balance = 100 * DOLLARS;
+	pub SubmissionDeposit: Balance = 100 * dollar(ZERO);
 	pub const UndecidingTimeout: BlockNumber = 28 * DAYS;
 }
 
@@ -878,7 +899,7 @@ parameter_types! {
 	pub const LaunchPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
 	pub const VotingPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
 	pub const FastTrackVotingPeriod: BlockNumber = 3 * 24 * 60 * MINUTES;
-	pub const MinimumDeposit: Balance = 100 * DOLLARS;
+	pub MinimumDeposit: Balance = 100 * dollar(ZERO);
 	pub const EnactmentPeriod: BlockNumber = 30 * 24 * 60 * MINUTES;
 	pub const CooloffPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
 	pub const MaxProposals: u32 = 100;
@@ -937,7 +958,6 @@ impl pallet_democracy::Config for Runtime {
 
 parameter_types! {
 	pub const CouncilMotionDuration: BlockNumber = 5 * DAYS;
-	pub const CouncilMaxProposals: u32 = 100;
 	pub const CouncilMaxMembers: u32 = 100;
 }
 
@@ -947,21 +967,20 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type Proposal = Call;
 	type Event = Event;
 	type MotionDuration = CouncilMotionDuration;
-	type MaxProposals = CouncilMaxProposals;
+	type MaxProposals = ConstU32<100>;
 	type MaxMembers = CouncilMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
-	pub const CandidacyBond: Balance = 10 * DOLLARS;
+	pub CandidacyBond: Balance = 10 * dollar(ZERO);
 	// 1 storage item created, key size is 32 bytes, value size is 16+16.
 	pub const VotingBondBase: Balance = deposit(1, 64);
 	// additional data per vote is 32 bytes (account id).
 	pub const VotingBondFactor: Balance = deposit(0, 32);
 	pub const TermDuration: BlockNumber = 7 * DAYS;
 	pub const DesiredMembers: u32 = 13;
-	pub const DesiredRunnersUp: u32 = 7;
 	pub const ElectionsPhragmenPalletId: LockIdentifier = *b"phrelect";
 }
 
@@ -983,14 +1002,13 @@ impl pallet_elections_phragmen::Config for Runtime {
 	type LoserCandidate = ();
 	type KickedMember = ();
 	type DesiredMembers = DesiredMembers;
-	type DesiredRunnersUp = DesiredRunnersUp;
+	type DesiredRunnersUp = ConstU32<7>;
 	type TermDuration = TermDuration;
 	type WeightInfo = pallet_elections_phragmen::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
 	pub const TechnicalMotionDuration: BlockNumber = 5 * DAYS;
-	pub const TechnicalMaxProposals: u32 = 100;
 	pub const TechnicalMaxMembers: u32 = 100;
 }
 
@@ -1000,7 +1018,7 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 	type Proposal = Call;
 	type Event = Event;
 	type MotionDuration = TechnicalMotionDuration;
-	type MaxProposals = TechnicalMaxProposals;
+	type MaxProposals = ConstU32<100>;
 	type MaxMembers = TechnicalMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
@@ -1025,16 +1043,15 @@ impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
 
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
-	pub const ProposalBondMinimum: Balance = 1 * DOLLARS;
+	pub ProposalBondMinimum: Balance = 1 * dollar(ZERO);
 	pub const SpendPeriod: BlockNumber = 1 * DAYS;
 	pub const Burn: Permill = Permill::from_percent(50);
 	pub const TipCountdown: BlockNumber = 1 * DAYS;
 	pub const TipFindersFee: Percent = Percent::from_percent(20);
-	pub const TipReportDepositBase: Balance = 1 * DOLLARS;
-	pub const DataDepositPerByte: Balance = 1 * CENTS;
-	pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+	pub TipReportDepositBase: Balance = 1 * dollar(ZERO);
+	pub DataDepositPerByte: Balance = 1 * cent(ZERO);
+	// pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
 	pub const MaximumReasonLength: u32 = 300;
-	pub const MaxApprovals: u32 = 100;
 }
 
 impl pallet_treasury::Config for Runtime {
@@ -1058,17 +1075,17 @@ impl pallet_treasury::Config for Runtime {
 	type BurnDestination = ();
 	type SpendFunds = Bounties;
 	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
-	type MaxApprovals = MaxApprovals;
+	type MaxApprovals = ConstU32<100>;
 	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
 
 parameter_types! {
 	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
-	pub const BountyValueMinimum: Balance = 5 * DOLLARS;
-	pub const BountyDepositBase: Balance = 1 * DOLLARS;
+	pub BountyValueMinimum: Balance = 5 * dollar(ZERO);
+	pub BountyDepositBase: Balance = 1 * dollar(ZERO);
 	pub const CuratorDepositMultiplier: Permill = Permill::from_percent(50);
-	pub const CuratorDepositMin: Balance = 1 * DOLLARS;
-	pub const CuratorDepositMax: Balance = 100 * DOLLARS;
+	pub CuratorDepositMin: Balance = 1 * dollar(ZERO);
+	pub CuratorDepositMax: Balance = 100 * dollar(ZERO);
 	pub const BountyDepositPayoutDelay: BlockNumber = 1 * DAYS;
 	pub const BountyUpdatePeriod: BlockNumber = 14 * DAYS;
 }
@@ -1089,7 +1106,7 @@ impl pallet_bounties::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ChildBountyValueMinimum: Balance = 1 * DOLLARS;
+	pub ChildBountyValueMinimum: Balance = 1 * dollar(ZERO);
 }
 
 impl pallet_child_bounties::Config for Runtime {
@@ -1167,9 +1184,6 @@ parameter_types! {
 	/// We prioritize im-online heartbeats over election solution submission.
 	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
 	pub const MaxAuthorities: u32 = 100;
-	pub const MaxKeys: u32 = 10_000;
-	pub const MaxPeerInHeartbeats: u32 = 10_000;
-	pub const MaxPeerDataEncodingSize: u32 = 1_000;
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
@@ -1235,9 +1249,9 @@ impl pallet_im_online::Config for Runtime {
 	type ReportUnresponsiveness = Offences;
 	type UnsignedPriority = ImOnlineUnsignedPriority;
 	type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
-	type MaxKeys = MaxKeys;
-	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
-	type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
+	type MaxKeys = ConstU32<10_000>;
+	type MaxPeerInHeartbeats = ConstU32<10_000>;
+	type MaxPeerDataEncodingSize = ConstU32<1_000>;
 }
 
 impl pallet_offences::Config for Runtime {
@@ -1275,12 +1289,9 @@ impl pallet_grandpa::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BasicDeposit: Balance = 10 * DOLLARS;       // 258 bytes on-chain
-	pub const FieldDeposit: Balance = 250 * CENTS;        // 66 bytes on-chain
-	pub const SubAccountDeposit: Balance = 2 * DOLLARS;   // 53 bytes on-chain
-	pub const MaxSubAccounts: u32 = 100;
-	pub const MaxAdditionalFields: u32 = 100;
-	pub const MaxRegistrars: u32 = 20;
+	pub BasicDeposit: Balance = 10 * dollar(ZERO);       // 258 bytes on-chain
+	pub FieldDeposit: Balance = 250 * cent(ZERO);        // 66 bytes on-chain
+	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);   // 53 bytes on-chain
 }
 
 impl pallet_identity::Config for Runtime {
@@ -1289,9 +1300,9 @@ impl pallet_identity::Config for Runtime {
 	type BasicDeposit = BasicDeposit;
 	type FieldDeposit = FieldDeposit;
 	type SubAccountDeposit = SubAccountDeposit;
-	type MaxSubAccounts = MaxSubAccounts;
-	type MaxAdditionalFields = MaxAdditionalFields;
-	type MaxRegistrars = MaxRegistrars;
+	type MaxSubAccounts = ConstU32<100>;
+	type MaxAdditionalFields = ConstU32<100>;
+	type MaxRegistrars = ConstU32<20>;
 	type Slashed = Treasury;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type RegistrarOrigin = EnsureRootOrHalfCouncil;
@@ -1299,10 +1310,9 @@ impl pallet_identity::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ConfigDepositBase: Balance = 5 * DOLLARS;
-	pub const FriendDepositFactor: Balance = 50 * CENTS;
-	pub const MaxFriends: u16 = 9;
-	pub const RecoveryDeposit: Balance = 5 * DOLLARS;
+	pub ConfigDepositBase: Balance = 5 * dollar(ZERO);
+	pub FriendDepositFactor: Balance = 50 * cent(ZERO);
+	pub RecoveryDeposit: Balance = 5 * dollar(ZERO);
 }
 
 impl pallet_recovery::Config for Runtime {
@@ -1312,19 +1322,17 @@ impl pallet_recovery::Config for Runtime {
 	type Currency = Balances;
 	type ConfigDepositBase = ConfigDepositBase;
 	type FriendDepositFactor = FriendDepositFactor;
-	type MaxFriends = MaxFriends;
+	type MaxFriends = ConstU32<9>;
 	type RecoveryDeposit = RecoveryDeposit;
 }
 
 parameter_types! {
-	pub const CandidateDeposit: Balance = 10 * DOLLARS;
-	pub const WrongSideDeduction: Balance = 2 * DOLLARS;
-	pub const MaxStrikes: u32 = 10;
+	pub CandidateDeposit: Balance = 10 * dollar(ZERO);
+	pub WrongSideDeduction: Balance = 2 * dollar(ZERO);
 	pub const RotationPeriod: BlockNumber = 80 * HOURS;
-	pub const PeriodSpend: Balance = 500 * DOLLARS;
+	pub PeriodSpend: Balance = 500 * dollar(ZERO);
 	pub const MaxLockDuration: BlockNumber = 36 * 30 * DAYS;
 	pub const ChallengePeriod: BlockNumber = 7 * DAYS;
-	pub const MaxCandidateIntake: u32 = 10;
 	pub const SocietyPalletId: PalletId = PalletId(*b"py/socie");
 }
 
@@ -1335,7 +1343,7 @@ impl pallet_society::Config for Runtime {
 	type Randomness = RandomnessCollectiveFlip;
 	type CandidateDeposit = CandidateDeposit;
 	type WrongSideDeduction = WrongSideDeduction;
-	type MaxStrikes = MaxStrikes;
+	type MaxStrikes = ConstU32<10>;
 	type PeriodSpend = PeriodSpend;
 	type MembershipChanged = ();
 	type RotationPeriod = RotationPeriod;
@@ -1343,12 +1351,12 @@ impl pallet_society::Config for Runtime {
 	type FounderSetOrigin =
 		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>;
 	type SuspensionJudgementOrigin = pallet_society::EnsureFounder<Runtime>;
-	type MaxCandidateIntake = MaxCandidateIntake;
+	type MaxCandidateIntake = ConstU32<10>;
 	type ChallengePeriod = ChallengePeriod;
 }
 
 parameter_types! {
-	pub const MinVestedTransfer: Balance = 100 * DOLLARS;
+	pub MinVestedTransfer: Balance = 100 * dollar(ZERO);
 }
 
 impl pallet_vesting::Config for Runtime {
@@ -1373,8 +1381,6 @@ impl pallet_mmr::Config for Runtime {
 
 parameter_types! {
 	pub const LotteryPalletId: PalletId = PalletId(*b"py/lotto");
-	pub const MaxCalls: u32 = 10;
-	pub const MaxGenerateRandom: u32 = 10;
 }
 
 impl pallet_lottery::Config for Runtime {
@@ -1384,18 +1390,18 @@ impl pallet_lottery::Config for Runtime {
 	type Randomness = RandomnessCollectiveFlip;
 	type Event = Event;
 	type ManagerOrigin = EnsureRoot<AccountId>;
-	type MaxCalls = MaxCalls;
+	type MaxCalls = ConstU32<10>;
 	type ValidateCall = Lottery;
-	type MaxGenerateRandom = MaxGenerateRandom;
+	type MaxGenerateRandom = ConstU32<10>;
 	type WeightInfo = pallet_lottery::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
-	pub const AssetDeposit: Balance = 100 * DOLLARS;
-	pub const ApprovalDeposit: Balance = 1 * DOLLARS;
-	pub const StringLimit: u32 = 50;
-	pub const MetadataDepositBase: Balance = 10 * DOLLARS;
-	pub const MetadataDepositPerByte: Balance = 1 * DOLLARS;
+	pub AssetDeposit: Balance = 100 * dollar(ZERO);
+	pub ApprovalDeposit: Balance = 1 * dollar(ZERO);
+	pub MetadataDepositBase: Balance = 10 * dollar(ZERO);
+	pub MetadataDepositPerByte: Balance = 1 * dollar(ZERO);
+	pub AssetAccountDeposit: Balance = 1 * dollar(ZERO);
 }
 
 impl pallet_assets::Config for Runtime {
@@ -1405,7 +1411,7 @@ impl pallet_assets::Config for Runtime {
 	type Currency = Balances;
 	type ForceOrigin = EnsureRoot<AccountId>;
 	type AssetDeposit = AssetDeposit;
-	type AssetAccountDeposit = ConstU128<DOLLARS>;
+	type AssetAccountDeposit = AssetAccountDeposit;
 	type MetadataDepositBase = MetadataDepositBase;
 	type MetadataDepositPerByte = MetadataDepositPerByte;
 	type ApprovalDeposit = ApprovalDeposit;
@@ -1417,13 +1423,9 @@ impl pallet_assets::Config for Runtime {
 
 parameter_types! {
 	pub IgnoredIssuance: Balance = Treasury::pot();
-	pub const QueueCount: u32 = 300;
-	pub const MaxQueueLen: u32 = 1000;
-	pub const FifoQueueLen: u32 = 500;
 	pub const Period: BlockNumber = 30 * DAYS;
-	pub const MinFreeze: Balance = 100 * DOLLARS;
+	pub MinFreeze: Balance = 100 * dollar(ZERO);
 	pub const IntakePeriod: BlockNumber = 10;
-	pub const MaxIntakeBids: u32 = 10;
 }
 
 impl pallet_gilt::Config for Runtime {
@@ -1434,21 +1436,19 @@ impl pallet_gilt::Config for Runtime {
 	type Deficit = ();
 	type Surplus = ();
 	type IgnoredIssuance = IgnoredIssuance;
-	type QueueCount = QueueCount;
-	type MaxQueueLen = MaxQueueLen;
-	type FifoQueueLen = FifoQueueLen;
+	type QueueCount = ConstU32<300>;
+	type MaxQueueLen = ConstU32<1000>;
+	type FifoQueueLen = ConstU32<500>;
 	type Period = Period;
 	type MinFreeze = MinFreeze;
 	type IntakePeriod = IntakePeriod;
-	type MaxIntakeBids = MaxIntakeBids;
+	type MaxIntakeBids = ConstU32<10>;
 	type WeightInfo = pallet_gilt::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
-	pub const CollectionDeposit: Balance = 100 * DOLLARS;
-	pub const ItemDeposit: Balance = 1 * DOLLARS;
-	pub const KeyLimit: u32 = 32;
-	pub const ValueLimit: u32 = 256;
+	pub CollectionDeposit: Balance = 100 * dollar(ZERO);
+	pub ItemDeposit: Balance = 1 * dollar(ZERO);
 }
 
 impl pallet_uniques::Config for Runtime {
@@ -1463,8 +1463,8 @@ impl pallet_uniques::Config for Runtime {
 	type AttributeDepositBase = MetadataDepositBase;
 	type DepositPerByte = MetadataDepositPerByte;
 	type StringLimit = StringLimit;
-	type KeyLimit = KeyLimit;
-	type ValueLimit = ValueLimit;
+	type KeyLimit = ConstU32<32>;
+	type ValueLimit = ConstU32<256>;
 	type WeightInfo = pallet_uniques::weights::SubstrateWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type Helper = ();
@@ -1490,16 +1490,15 @@ impl pallet_whitelist::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MigrationSignedDepositPerItem: Balance = 1 * CENTS;
-	pub const MigrationSignedDepositBase: Balance = 20 * DOLLARS;
-	pub const MigrationMaxKeyLen: u32 = 512;
+	pub MigrationSignedDepositPerItem: Balance = 1 * cent(ZERO);
+	pub MigrationSignedDepositBase: Balance = 20 * dollar(ZERO);
 }
 
 impl pallet_state_trie_migration::Config for Runtime {
 	type Event = Event;
 	type ControlOrigin = EnsureRoot<AccountId>;
 	type Currency = Balances;
-	type MaxKeyLen = MigrationMaxKeyLen;
+	type MaxKeyLen = ConstU32<512>;
 	type SignedDepositPerItem = MigrationSignedDepositPerItem;
 	type SignedDepositBase = MigrationSignedDepositBase;
 	// Warning: this is not advised, as it might allow the chain to be temporarily DOS-ed.
@@ -1531,8 +1530,7 @@ impl pallet_collective::Config<AllianceCollective> for Runtime {
 parameter_types! {
 	pub const MaxFounders: u32 = 10;
 	pub const MaxFellows: u32 = AllianceMaxMembers::get() - MaxFounders::get();
-	pub const MaxAllies: u32 = 100;
-	pub const AllyDeposit: Balance = 10 * DOLLARS;
+	pub AllyDeposit: Balance = 10 * dollar(ZERO);
 }
 
 impl pallet_alliance::Config for Runtime {
@@ -1562,7 +1560,7 @@ impl pallet_alliance::Config for Runtime {
 	type MaxProposals = AllianceMaxProposals;
 	type MaxFounders = MaxFounders;
 	type MaxFellows = MaxFellows;
-	type MaxAllies = MaxAllies;
+	type MaxAllies = ConstU32<100>;
 	type MaxUnscrupulousItems = ConstU32<100>;
 	type MaxWebsiteUrlLength = ConstU32<255>;
 	type MaxAnnouncementsCount = ConstU32<100>;
@@ -1571,17 +1569,191 @@ impl pallet_alliance::Config for Runtime {
 	type WeightInfo = pallet_alliance::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_type_with_key! {
+	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
+		match currency_id {
+			CurrencyId::Token(symbol) => match symbol {
+				TokenSymbol::ZERO => cent(*currency_id),
+				TokenSymbol::PLAY => 10 * cent(*currency_id),
+				TokenSymbol::GAME => 10 * cent(*currency_id),
+
+				TokenSymbol::AUSD => 10 * cent(*currency_id),
+				TokenSymbol::DOT => cent(*currency_id),
+				TokenSymbol::LDOT => 5 * cent(*currency_id),
+
+				TokenSymbol::KAR |
+				TokenSymbol::KUSD |
+				TokenSymbol::KSM |
+				TokenSymbol::LKSM |
+				TokenSymbol::BNC |
+				TokenSymbol::PHA |
+				TokenSymbol::VSKSM |
+				TokenSymbol::ACA |
+				TokenSymbol::KBTC |
+				TokenSymbol::KINT |
+				TokenSymbol::TAI => Balance::max_value() // unsupported
+			},
+			// TODO: add module_asset_registry
+			// CurrencyId::ForeignAsset(_foreign_asset_id) => {
+			// 	AssetIdMaps::<Runtime>::get_foreign_asset_metadata(*foreign_asset_id).
+			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
+			// },
+		}
+	};
+}
+
+pub struct DustRemovalWhitelist;
+impl Contains<AccountId> for DustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		get_all_module_accounts().contains(a)
+	}
+}
+
+parameter_types! {
+	pub const GetNativeCurrencyId: CurrencyId = ZERO;
+	pub const GetStableCurrencyId: CurrencyId = PLAY;
+	pub const GetProtocolCurrencyId: CurrencyId = GAME;
+	pub const StringLimit: u32 = 64;
+}
+
+impl orml_tokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = CurrencyId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = orml_tokens::TransferDust<Runtime, TreasuryAccountId>;
+	type MaxLocks = MaxLocks;
+	type MaxReserves = MaxReserves;
+	type ReserveIdentifier = ReserveIdentifier;
+	type DustRemovalWhitelist = DustRemovalWhitelist;
+	type OnNewTokenAccount = ();
+	type OnKilledTokenAccount = ();
+}
+
+impl orml_currencies::Config for Runtime {
+	type MultiCurrency = Tokens;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type WeightInfo = ();
+}
+
+impl gamedao_signal::Config for Runtime {
+	type WeightInfo = gamedao_signal::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Currency = Currencies;
+	type Flow = Flow;
+	type Control = Control;
+
+	type MaxProposalsPerBlock = ConstU32<100>;
+	type MaxProposalDuration = ConstU32<864000>;
+	type MaxVotesPerProposal = ConstU32<10000>;
+	type MaxProposalsPerOrg = ConstU32<100000>;
+	type MaxProposalsPerAccount = ConstU32<100000>;
+	type PaymentTokenId = GetStableCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type StringLimit = StringLimit;
+}
+
+parameter_types! {
+	pub OrgMinimumDeposit: Balance = 1 * dollar(GAME);
+}
+
+impl gamedao_control::Config for Runtime {
+	type PalletId = ControlPalletId;
+	type WeightInfo = gamedao_control::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Currency = Currencies;
+	type PaymentTokenId = GetStableCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type MaxOrgsPerAccount = ConstU32<10>;
+	type MaxMembersPerOrg = ConstU32<1000>;
+	type MaxCreationsPerAccount = ConstU32<1000>;
+	type MaxCreationsPerBlock = ConstU32<100>;
+	type MaxOrgsPerController = ConstU32<100>;
+	type MinimumDeposit = OrgMinimumDeposit;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type Game3FoundationTreasury = Game3FoundationTreasuryAccountId;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
+	type StringLimit = StringLimit;
+}
+
+// TODO: move to runtime_common?
+pub type EnsureRootOrHalfGeneralCouncil = EitherOfDiverse<
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1, 2>,
+>;
+
+parameter_types! {
+
+	// TODO: more flexible account admin map
+	// pub const Admin: EnsureRootOrGameDAOAdmin = ();
+
+	// pub const SeedNonce: u64 = 1;
+
+	pub const MinCampaignDuration: BlockNumber = 1 * DAYS;
+	pub const MaxCampaignDuration: BlockNumber = 100 * DAYS;
+	pub MinContribution: Balance = 1 * dollar(PLAY);
+
+	// TODO: fees
+	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
+}
+
+impl gamedao_flow::Config for Runtime {
+	// ensure root or half council as admin role for campaigns.
+	// might need another instance of council as e.g. supervisor
+	// type ModuleAdmin = frame_system::EnsureRoot<AccountId>;
+	type WeightInfo = gamedao_flow::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type Currency = Currencies;
+	type PaymentTokenId = GetStableCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type UnixTime = Timestamp;
+	type Control = Control;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
+
+	type CampaignFee = CampaignFee;
+	type MinNameLength = ConstU32<4>;
+	type StringLimit = StringLimit;
+	type MaxCampaignsPerAddress = ConstU32<3>;
+	type MaxCampaignsPerOrg = ConstU32<64>;
+	type MaxCampaignsPerBlock = ConstU32<3>;
+	type MaxContributionsPerBlock = ConstU32<3>;
+	type MinCampaignDuration = MinCampaignDuration;
+	type MaxCampaignDuration = MaxCampaignDuration;
+	type MinContribution = MinContribution;
+	type MaxContributorsProcessing = ConstU32<20>;
+	type MaxCampaignContributions = ConstU32<10000>;
+	type MaxCampaignsPerStatus = ConstU32<10000>;
+}
+
+impl gamedao_sense::Config for Runtime {
+	type Event = Event;
+	type WeightInfo = gamedao_sense::weights::SubstrateWeight<Runtime>;
+	type StringLimit = StringLimit;
+}
+
+// impl module_migration::Config for Runtime {
+// 	type Event = Event;
+// }
+
 impl module_asset_registry::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
-	type RegisterOrigin = EnsureRootOrHalfCouncil;
+	type RegisterOrigin = EnsureRootOrHalfGeneralCouncil;
 	type WeightInfo = ();
 }
 
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
-		NodeBlock = node_primitives::Block,
+		NodeBlock = primitives::Block,
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
 		System: frame_system,
@@ -1641,7 +1813,18 @@ construct_runtime!(
 		RankedPolls: pallet_referenda::<Instance2>,
 		RankedCollective: pallet_ranked_collective,
 
+		// ORML pallets:
+		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
+		Currencies: orml_currencies::{Pallet, Call},
+
+		// GameDAO protocol pallets:
+		Flow: gamedao_flow,
+		Sense: gamedao_sense,
+		Control: gamedao_control,
+		Signal: gamedao_signal,
+
 		// Zero pallets:
+		// Migration: module_migration,
 		AssetRegistry: module_asset_registry,
 	}
 );
@@ -1748,6 +1931,11 @@ mod benches {
 		[pallet_utility, Utility]
 		[pallet_vesting, Vesting]
 		[pallet_whitelist, Whitelist]
+
+		[gamedao_sense, Sense]
+		[gamedao_control, Control]
+		[gamedao_flow, Flow]
+		[gamedao_signal, Signal]
 		[module_asset_registry, AssetRegistry]
 	);
 }

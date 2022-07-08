@@ -1,6 +1,6 @@
 [package]
 name = "zero-primitives"
-version = "1.28.0"
+version = "2.0.0"
 authors = ["zero collective <play@zero.io>"]
 edition = "2018"
 
