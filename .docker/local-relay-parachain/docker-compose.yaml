@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   relay-chain-a:
-    image: parity/polkadot:v0.9.13
+    image: parity/polkadot:v0.9.25
     user: "0:0"
     command:
       - "--alice"
@@ -19,7 +19,7 @@ services:
     ports:
       - "9944:9944"
   relay-chain-b:
-    image: parity/polkadot:v0.9.13
+    image: parity/polkadot:v0.9.25
     user: "0:0"
     command:
       - "--bob"

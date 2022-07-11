@@ -1,11 +1,11 @@
 [package]
 name = "zero-runtime"
 version = "3.0.0-dev"
-authors = ["Parity Technologies <admin@parity.io>"]
+authors = ["ZERO <play@zero.io>"]
 edition = "2021"
 build = "build.rs"
 license = "Apache-2.0"
-homepage = "https://substrate.io"
+homepage = "https://zero.io"
 repository = "https://github.com/paritytech/substrate/"
 
 [package.metadata.docs.rs]
