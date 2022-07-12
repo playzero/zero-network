@@ -2,14 +2,14 @@ version: "3.7"
 
 services:
   relay-chain-a:
-    image: parity/polkadot:v0.9.13
+    image: parity/polkadot:v0.9.25
     user: "0:0"
     command:
       - "--alice"
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
       - "--validator"
       - "--base-path=/tmp/relay/alice"
-      - "--chain=/chainspec/rococo-raw.json"
+      - "--chain=/chainspec/relay-raw.json"
       - "--port=30333"
       - "--ws-port=9944"
       - "--unsafe-ws-external"
@@ -19,14 +19,14 @@ services:
     ports:
       - "9944:9944"
   relay-chain-b:
-    image: parity/polkadot:v0.9.13
+    image: parity/polkadot:v0.9.25
     user: "0:0"
     command:
       - "--bob"
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
       - "--validator"
       - "--base-path=/tmp/relay/bob"
-      - "--chain=/chainspec/rococo-raw.json"
+      - "--chain=/chainspec/relay-raw.json"
       - "--port=30333"
       - "--ws-port=9944"
       - "--unsafe-ws-external"

@@ -4,6 +4,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
+#![allow(deprecated)] // TODO: clean transactional
 
 use frame_support::{
 	assert_ok,
@@ -12,13 +13,14 @@ use frame_support::{
 	pallet_prelude::*,
 	traits::{Currency, EnsureOrigin},
 	transactional,
-	RuntimeDebug,
 };
+use frame_system::pallet_prelude::*;
 use primitives::{
-	currency::{CurrencyIdType, TokenInfo, AssetMetadata, AssetIds},
+	currency::{
+		AssetIds, AssetMetadata, TokenInfo,
+	},
 	CurrencyId,
 };
-use scale_info::{prelude::format};
 use sp_std::{boxed::Box, vec::Vec};
 
 
@@ -37,12 +39,6 @@ pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system:
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
-	use frame_system::pallet_prelude::*;
-
-	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
-	pub struct Pallet<T>(_);
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -89,6 +85,10 @@ pub mod pallet {
 	#[pallet::getter(fn asset_metadatas)]
 	pub type AssetMetadatas<T: Config> =
 		StorageMap<_, Twox64Concat, AssetIds, AssetMetadata<BalanceOf<T>>, OptionQuery>;
+
+	#[pallet::pallet]
+	#[pallet::without_storage_info]
+	pub struct Pallet<T>(_);
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
@@ -163,7 +163,7 @@ pub mod pallet {
 }
 
 impl<T: Config> Pallet<T> {
-
+	
 	fn do_register_native_asset(asset: CurrencyId, metadata: &AssetMetadata<BalanceOf<T>>) -> DispatchResult {
 		AssetMetadatas::<T>::try_mutate(
 			AssetIds::NativeAssetId(asset),
@@ -190,4 +190,3 @@ impl<T: Config> Pallet<T> {
 		)
 	}
 }
-

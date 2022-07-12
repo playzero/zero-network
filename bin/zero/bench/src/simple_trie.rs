@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2020-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2020-2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use hash_db::{AsHashDB, HashDB, Hasher as _, Prefix};
 use kvdb::KeyValueDB;
-use node_primitives::Hash;
+use zero_primitives::Hash;
 use sp_trie::DBValue;
 
 pub type Hasher = sp_core::Blake2Hasher;
