@@ -1,10 +1,15 @@
 use cumulus_primitives_core::ParaId;
-use parachain_subzero_runtime::{AccountId, AuraId, Signature, EXISTENTIAL_DEPOSIT};
+use parachain_subzero_runtime::{AccountId, AuraId, Signature};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+
+use primitives::{
+	currency::ZERO,
+	cent
+};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec =
@@ -194,7 +199,7 @@ fn testnet_genesis(
 		parachain_info: parachain_subzero_runtime::ParachainInfoConfig { parachain_id: id },
 		collator_selection: parachain_subzero_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
-			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
+			candidacy_bond: cent(ZERO) * 16,
 			..Default::default()
 		},
 		session: parachain_subzero_runtime::SessionConfig {
@@ -217,5 +222,6 @@ fn testnet_genesis(
 		polkadot_xcm: parachain_subzero_runtime::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
+		tokens: Default::default()
 	}
 }
