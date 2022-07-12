@@ -60,7 +60,7 @@ pub use primitives::{
 	Amount, ReserveIdentifier
 };
 
-use orml_traits::parameter_type_with_key;
+use orml_traits::{parameter_type_with_key, GetByKey};
 use orml_currencies::BasicCurrencyAdapter;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
@@ -334,7 +334,7 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
-	pub ExistentialDeposit: Balance = cent(ZERO);
+	pub ExistentialDeposit: Balance = ExistentialDeposits::get(&ZERO);
 	pub const MaxLocks: u32 = 50;
 	pub const MaxReserves: u32 = ReserveIdentifier::Count as u32;
 }
