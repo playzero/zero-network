@@ -10,6 +10,9 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 pub type ChainSpec =
 	sc_service::GenericChainSpec<parachain_subzero_runtime::GenesisConfig, Extensions>;
 
+/// The default XCM version to set in genesis config.
+const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
+
 /// Helper function to generate a crypto pair from seed
 pub fn get_public_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
 	TPublic::Pair::from_string(&format!("//{}", seed), None)
@@ -54,7 +57,7 @@ where
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn template_session_keys(keys: AuraId) -> parachain_subzero_runtime::SessionKeys {
+pub fn subzero_session_keys(keys: AuraId) -> parachain_subzero_runtime::SessionKeys {
 	parachain_subzero_runtime::SessionKeys { aura: keys }
 }
 
@@ -102,6 +105,7 @@ pub fn development_config() -> ChainSpec {
 			)
 		},
 		Vec::new(),
+		None,
 		None,
 		None,
 		None,
@@ -160,7 +164,9 @@ pub fn local_testnet_config() -> ChainSpec {
 		// Telemetry
 		None,
 		// Protocol ID
-		Some("template-local"),
+		Some("subzero-local"),
+		// Fork ID
+		None,
 		// Properties
 		Some(properties),
 		// Extensions
@@ -198,7 +204,7 @@ fn testnet_genesis(
 					(
 						acc.clone(),                 // account id
 						acc,                         // validator id
-						template_session_keys(aura), // session keys
+						subzero_session_keys(aura), // session keys
 					)
 				})
 				.collect(),
@@ -208,5 +214,8 @@ fn testnet_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
+		polkadot_xcm: parachain_subzero_runtime::PolkadotXcmConfig {
+			safe_xcm_version: Some(SAFE_XCM_VERSION),
+		},
 	}
 }

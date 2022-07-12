@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2018-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2018-2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,16 +18,14 @@
 use codec::{Encode, Joiner};
 use frame_support::{
 	traits::Currency,
-	weights::{
-		constants::ExtrinsicBaseWeight, GetDispatchInfo, IdentityFee, WeightToFeePolynomial,
-	},
+	weights::{constants::ExtrinsicBaseWeight, GetDispatchInfo, IdentityFee, WeightToFee},
 };
-use node_primitives::Balance;
+use zero_primitives::Balance;
 use zero_runtime::{
 	constants::{currency::*, time::SLOT_DURATION},
 	Balances, Call, CheckedExtrinsic, Multiplier, Runtime, TransactionByteFee, TransactionPayment,
 };
-use node_testing::keyring::*;
+use zero_testing::keyring::*;
 use sp_core::NeverNativeValue;
 use sp_runtime::{traits::One, Perbill};
 
@@ -197,13 +195,13 @@ fn transaction_fee_is_correct() {
 		let mut balance_alice = (100 - 69) * DOLLARS;
 
 		let base_weight = ExtrinsicBaseWeight::get();
-		let base_fee = IdentityFee::<Balance>::calc(&base_weight);
+		let base_fee = IdentityFee::<Balance>::weight_to_fee(&base_weight);
 
 		let length_fee = TransactionByteFee::get() * (xt.clone().encode().len() as Balance);
 		balance_alice -= length_fee;
 
 		let weight = default_transfer_call().get_dispatch_info().weight;
-		let weight_fee = IdentityFee::<Balance>::calc(&weight);
+		let weight_fee = IdentityFee::<Balance>::weight_to_fee(&weight);
 
 		// we know that weight to fee multiplier is effect-less in block 1.
 		// current weight of transfer = 200_000_000
@@ -223,7 +221,7 @@ fn transaction_fee_is_correct() {
 fn block_weight_capacity_report() {
 	// Just report how many transfer calls you could fit into a block. The number should at least
 	// be a few hundred (250 at the time of writing but can change over time). Runs until panic.
-	use node_primitives::Index;
+	use zero_primitives::Index;
 
 	// execution ext.
 	let mut t = new_test_ext(compact_code_unwrap());
@@ -234,7 +232,7 @@ fn block_weight_capacity_report() {
 	let mut time = 10;
 	let mut nonce: Index = 0;
 	let mut block_number = 1;
-	let mut previous_hash: node_primitives::Hash = GENESIS_HASH.into();
+	let mut previous_hash: zero_primitives::Hash = GENESIS_HASH.into();
 
 	loop {
 		let num_transfers = block_number * factor;
@@ -300,7 +298,7 @@ fn block_length_capacity_report() {
 	// Just report how big a block can get. Executes until panic. Should be ignored unless if
 	// manually inspected. The number should at least be a few megabytes (5 at the time of
 	// writing but can change over time).
-	use node_primitives::Index;
+	use zero_primitives::Index;
 
 	// execution ext.
 	let mut t = new_test_ext(compact_code_unwrap());
@@ -311,7 +309,7 @@ fn block_length_capacity_report() {
 	let mut time = 10;
 	let mut nonce: Index = 0;
 	let mut block_number = 1;
-	let mut previous_hash: node_primitives::Hash = GENESIS_HASH.into();
+	let mut previous_hash: zero_primitives::Hash = GENESIS_HASH.into();
 
 	loop {
 		// NOTE: this is super slow. Can probably be improved.

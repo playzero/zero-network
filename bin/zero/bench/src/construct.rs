@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2020-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2020-2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -27,8 +27,8 @@
 use futures::Future;
 use std::{borrow::Cow, collections::HashMap, pin::Pin, sync::Arc};
 
-use node_primitives::Block;
-use node_testing::bench::{BenchDb, BlockType, DatabaseType, KeyTypes, Profile};
+use zero_primitives::Block;
+use zero_testing::bench::{BenchDb, BlockType, DatabaseType, KeyTypes, Profile};
 use sc_transaction_pool_api::{
 	ImportNotificationStream, PoolFuture, PoolStatus, ReadyTransactions, TransactionFor,
 	TransactionSource, TransactionStatusStreamFor, TxHash,
@@ -172,18 +172,18 @@ impl core::Benchmark for ConstructionBenchmark {
 #[derive(Clone, Debug)]
 pub struct PoolTransaction {
 	data: OpaqueExtrinsic,
-	hash: node_primitives::Hash,
+	hash: zero_primitives::Hash,
 }
 
 impl From<OpaqueExtrinsic> for PoolTransaction {
 	fn from(e: OpaqueExtrinsic) -> Self {
-		PoolTransaction { data: e, hash: node_primitives::Hash::zero() }
+		PoolTransaction { data: e, hash: zero_primitives::Hash::zero() }
 	}
 }
 
 impl sc_transaction_pool_api::InPoolTransaction for PoolTransaction {
 	type Transaction = OpaqueExtrinsic;
-	type Hash = node_primitives::Hash;
+	type Hash = zero_primitives::Hash;
 
 	fn data(&self) -> &Self::Transaction {
 		&self.data
@@ -232,7 +232,7 @@ impl ReadyTransactions for TransactionsIterator {
 
 impl sc_transaction_pool_api::TransactionPool for Transactions {
 	type Block = Block;
-	type Hash = node_primitives::Hash;
+	type Hash = zero_primitives::Hash;
 	type InPoolTransaction = PoolTransaction;
 	type Error = sc_transaction_pool_api::error::Error;
 
@@ -242,7 +242,7 @@ impl sc_transaction_pool_api::TransactionPool for Transactions {
 		_at: &BlockId<Self::Block>,
 		_source: TransactionSource,
 		_xts: Vec<TransactionFor<Self>>,
-	) -> PoolFuture<Vec<Result<node_primitives::Hash, Self::Error>>, Self::Error> {
+	) -> PoolFuture<Vec<Result<zero_primitives::Hash, Self::Error>>, Self::Error> {
 		unimplemented!()
 	}
 
