@@ -15,7 +15,7 @@ use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
+	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
 };
@@ -27,7 +27,7 @@ use sp_version::RuntimeVersion;
 
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::Everything,
+	traits::{Contains, Everything},
 	weights::{
 		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
@@ -53,6 +53,15 @@ use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 // XCM Imports
 use xcm::latest::prelude::BodyId;
 use xcm_executor::XcmExecutor;
+
+pub use primitives::{
+	currency::{ZERO, PLAY, GAME, CurrencyId, TokenSymbol},
+	dollar, cent, millicent,
+	Amount, ReserveIdentifier
+};
+
+use orml_traits::{parameter_type_with_key, GetByKey};
+use orml_currencies::BasicCurrencyAdapter;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -325,9 +334,9 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
+	pub ExistentialDeposit: Balance = ExistentialDeposits::get(&ZERO);
 	pub const MaxLocks: u32 = 50;
-	pub const MaxReserves: u32 = 50;
+	pub const MaxReserves: u32 = ReserveIdentifier::Count as u32;
 }
 
 impl pallet_balances::Config for Runtime {
@@ -341,7 +350,7 @@ impl pallet_balances::Config for Runtime {
 	type AccountStore = System;
 	type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 	type MaxReserves = MaxReserves;
-	type ReserveIdentifier = [u8; 8];
+	type ReserveIdentifier = ReserveIdentifier;
 }
 
 parameter_types! {
@@ -450,6 +459,94 @@ impl pallet_collator_selection::Config for Runtime {
 	type WeightInfo = ();
 }
 
+// Pallet accounts of runtime
+parameter_types! {
+	pub const TreasuryPalletId: PalletId = PalletId(*b"zr/zrtrs");
+	pub const ControlPalletId: PalletId = PalletId(*b"gd/cntrl");
+	pub TreasuryAccountId: AccountId = TreasuryPalletId::get().into_account_truncating();
+	pub Game3FoundationTreasuryAccountId: AccountId = PalletId(*b"gd/g3trs").into_account_truncating();
+	pub GameDAOTreasuryAccountId: AccountId = PalletId(*b"gd/gdtrs").into_account_truncating();
+}
+
+pub fn get_all_module_accounts() -> Vec<AccountId> {
+	vec![
+		TreasuryAccountId::get(),
+		ControlPalletId::get().into_account_truncating(),
+		Game3FoundationTreasuryAccountId::get(),
+		GameDAOTreasuryAccountId::get(),
+	]
+}
+
+parameter_type_with_key! {
+	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
+		match currency_id {
+			CurrencyId::Token(symbol) => match symbol {
+				TokenSymbol::ZERO => cent(*currency_id),
+				TokenSymbol::PLAY => 10 * cent(*currency_id),
+				TokenSymbol::GAME => 10 * cent(*currency_id),
+
+				TokenSymbol::AUSD => 10 * cent(*currency_id),
+				TokenSymbol::DOT => cent(*currency_id),
+				TokenSymbol::LDOT => 5 * cent(*currency_id),
+
+				TokenSymbol::KAR |
+				TokenSymbol::KUSD |
+				TokenSymbol::KSM |
+				TokenSymbol::LKSM |
+				TokenSymbol::BNC |
+				TokenSymbol::PHA |
+				TokenSymbol::VSKSM |
+				TokenSymbol::ACA |
+				TokenSymbol::KBTC |
+				TokenSymbol::KINT |
+				TokenSymbol::TAI => Balance::max_value() // unsupported
+			},
+			// TODO: add module_asset_registry
+			// CurrencyId::ForeignAsset(_foreign_asset_id) => {
+			// 	AssetIdMaps::<Runtime>::get_foreign_asset_metadata(*foreign_asset_id).
+			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
+			// },
+		}
+	};
+}
+
+pub struct DustRemovalWhitelist;
+impl Contains<AccountId> for DustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		get_all_module_accounts().contains(a)
+	}
+}
+
+parameter_types! {
+	pub const GetNativeCurrencyId: CurrencyId = ZERO;
+	pub const GetStableCurrencyId: CurrencyId = PLAY;
+	pub const GetProtocolCurrencyId: CurrencyId = GAME;
+	pub const StringLimit: u32 = 64;
+}
+
+impl orml_tokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = CurrencyId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = orml_tokens::TransferDust<Runtime, TreasuryAccountId>;
+	type MaxLocks = MaxLocks;
+	type MaxReserves = MaxReserves;
+	type ReserveIdentifier = ReserveIdentifier;
+	type DustRemovalWhitelist = DustRemovalWhitelist;
+	type OnNewTokenAccount = ();
+	type OnKilledTokenAccount = ();
+}
+
+impl orml_currencies::Config for Runtime {
+	type MultiCurrency = Tokens;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -481,6 +578,10 @@ construct_runtime!(
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Event<T>, Origin, Config} = 31,
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 32,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
+
+		// ORML pallets:
+		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
+		Currencies: orml_currencies::{Pallet, Call} = 41,
 	}
 );
 
