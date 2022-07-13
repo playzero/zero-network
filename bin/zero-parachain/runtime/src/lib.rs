@@ -27,7 +27,7 @@ use sp_version::RuntimeVersion;
 
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{Contains, Everything},
+	traits::{ConstU32, Contains, Everything},
 	weights::{
 		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
@@ -307,7 +307,7 @@ impl frame_system::Config for Runtime {
 	type SS58Prefix = SS58Prefix;
 	/// The action to take on a Runtime Upgrade
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
-	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type MaxConsumers = ConstU32<16>;
 }
 
 parameter_types! {
@@ -547,6 +547,89 @@ impl orml_currencies::Config for Runtime {
 	type WeightInfo = ();
 }
 
+impl gamedao_signal::Config for Runtime {
+	type WeightInfo = gamedao_signal::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Currency = Currencies;
+	type Flow = Flow;
+	type Control = Control;
+
+	type MaxProposalsPerBlock = ConstU32<100>;
+	type MaxProposalDuration = ConstU32<864000>;
+	type MaxVotesPerProposal = ConstU32<10000>;
+	type MaxProposalsPerOrg = ConstU32<100000>;
+	type MaxProposalsPerAccount = ConstU32<100000>;
+	type PaymentTokenId = GetStableCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type StringLimit = StringLimit;
+}
+
+parameter_types! {
+	pub OrgMinimumDeposit: Balance = 1 * dollar(GAME);
+}
+
+impl gamedao_control::Config for Runtime {
+	type PalletId = ControlPalletId;
+	type WeightInfo = gamedao_control::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Currency = Currencies;
+	type PaymentTokenId = GetStableCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type MaxOrgsPerAccount = ConstU32<10>;
+	type MaxMembersPerOrg = ConstU32<1000>;
+	type MaxCreationsPerAccount = ConstU32<1000>;
+	type MaxCreationsPerBlock = ConstU32<100>;
+	type MaxOrgsPerController = ConstU32<100>;
+	type MinimumDeposit = OrgMinimumDeposit;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type Game3FoundationTreasury = Game3FoundationTreasuryAccountId;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
+	type StringLimit = StringLimit;
+}
+
+parameter_types! {
+	pub const MinCampaignDuration: BlockNumber = 1 * DAYS;
+	pub const MaxCampaignDuration: BlockNumber = 100 * DAYS;
+	pub MinContribution: Balance = 1 * dollar(PLAY);
+	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
+}
+
+impl gamedao_flow::Config for Runtime {
+	type WeightInfo = gamedao_flow::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type Currency = Currencies;
+	type PaymentTokenId = GetStableCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type UnixTime = Timestamp;
+	type Control = Control;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
+
+	type CampaignFee = CampaignFee;
+	type MinNameLength = ConstU32<4>;
+	type StringLimit = StringLimit;
+	type MaxCampaignsPerAddress = ConstU32<3>;
+	type MaxCampaignsPerOrg = ConstU32<64>;
+	type MaxCampaignsPerBlock = ConstU32<3>;
+	type MaxContributionsPerBlock = ConstU32<3>;
+	type MinCampaignDuration = MinCampaignDuration;
+	type MaxCampaignDuration = MaxCampaignDuration;
+	type MinContribution = MinContribution;
+	type MaxContributorsProcessing = ConstU32<20>;
+	type MaxCampaignContributions = ConstU32<10000>;
+	type MaxCampaignsPerStatus = ConstU32<10000>;
+}
+
+impl gamedao_sense::Config for Runtime {
+	type Event = Event;
+	type WeightInfo = gamedao_sense::weights::SubstrateWeight<Runtime>;
+	type StringLimit = StringLimit;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -582,6 +665,12 @@ construct_runtime!(
 		// ORML pallets:
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
 		Currencies: orml_currencies::{Pallet, Call} = 41,
+
+		// GameDAO protocol pallets:
+		Flow: gamedao_flow,
+		Sense: gamedao_sense,
+		Control: gamedao_control,
+		Signal: gamedao_signal,
 	}
 );
 
