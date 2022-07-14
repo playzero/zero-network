@@ -555,10 +555,10 @@ impl gamedao_signal::Config for Runtime {
 	type Control = Control;
 
 	type MaxProposalsPerBlock = ConstU32<100>;
-	type MaxProposalDuration = ConstU32<864000>;
 	type MaxVotesPerProposal = ConstU32<10000>;
 	type MaxProposalsPerOrg = ConstU32<100000>;
 	type MaxProposalsPerAccount = ConstU32<100000>;
+	type MaxProposalDuration = ConstU32<864000>;
 	type PaymentTokenId = GetStableCurrencyId;
 	type ProtocolTokenId = GetProtocolCurrencyId;
 	type Balance = Balance;
@@ -578,10 +578,10 @@ impl gamedao_control::Config for Runtime {
 	type PaymentTokenId = GetStableCurrencyId;
 	type ProtocolTokenId = GetProtocolCurrencyId;
 	type MaxOrgsPerAccount = ConstU32<10>;
-	type MaxMembersPerOrg = ConstU32<1000>;
-	type MaxCreationsPerAccount = ConstU32<1000>;
 	type MaxCreationsPerBlock = ConstU32<100>;
 	type MaxOrgsPerController = ConstU32<100>;
+	type MaxMembersPerOrg = ConstU32<1000>;
+	type MaxCreationsPerAccount = ConstU32<1000>;
 	type MinimumDeposit = OrgMinimumDeposit;
 	type Balance = Balance;
 	type CurrencyId = CurrencyId;
@@ -610,16 +610,16 @@ impl gamedao_flow::Config for Runtime {
 	type GameDAOTreasury = GameDAOTreasuryAccountId;
 
 	type CampaignFee = CampaignFee;
-	type MinNameLength = ConstU32<4>;
 	type StringLimit = StringLimit;
-	type MaxCampaignsPerAddress = ConstU32<3>;
-	type MaxCampaignsPerOrg = ConstU32<64>;
-	type MaxCampaignsPerBlock = ConstU32<3>;
-	type MaxContributionsPerBlock = ConstU32<3>;
 	type MinCampaignDuration = MinCampaignDuration;
 	type MaxCampaignDuration = MaxCampaignDuration;
 	type MinContribution = MinContribution;
+	type MinNameLength = ConstU32<4>;
+	type MaxCampaignsPerAddress = ConstU32<3>;
+	type MaxCampaignsPerBlock = ConstU32<3>;
+	type MaxContributionsPerBlock = ConstU32<3>;
 	type MaxContributorsProcessing = ConstU32<20>;
+	type MaxCampaignsPerOrg = ConstU32<64>;
 	type MaxCampaignContributions = ConstU32<10000>;
 	type MaxCampaignsPerStatus = ConstU32<10000>;
 }
