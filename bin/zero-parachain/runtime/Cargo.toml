@@ -73,10 +73,17 @@ pallet-collator-selection = { git = 'https://github.com/paritytech/cumulus', bra
 parachain-info = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
 
 primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../primitives" }
+module-asset-registry = { path = "../../../modules/asset-registry", default-features = false }
 
 orml-tokens = { path = "../../../orml/tokens", default-features = false }
 orml-traits = { path = "../../../orml/traits", default-features = false }
 orml-currencies = { path = "../../../orml/currencies", default-features = false }
+
+gamedao-traits = { path = "../../../gamedao-protocol/traits", default-features = false }
+gamedao-flow = { path = "../../../gamedao-protocol/flow", default-features = false }
+gamedao-control = { path = "../../../gamedao-protocol/control", default-features = false }
+gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
+gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
 
 [features]
 default = [
@@ -127,11 +134,20 @@ std = [
 	"xcm-builder/std",
 	"xcm-executor/std",
 	"xcm/std",
+
 	"primitives/std",
+	"module-asset-registry/std",
+
 
 	"orml-tokens/std",
 	"orml-currencies/std",
 	"orml-traits/std",
+
+	"gamedao-sense/std",
+	"gamedao-traits/std",
+	"gamedao-flow/std",
+	"gamedao-control/std",
+	"gamedao-signal/std",
 ]
 
 runtime-benchmarks = [
@@ -148,6 +164,14 @@ runtime-benchmarks = [
 	"xcm-builder/runtime-benchmarks",
 	"cumulus-pallet-session-benchmarking/runtime-benchmarks",
 	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
+
+	"module-asset-registry/runtime-benchmarks",
+
+	"gamedao-traits/runtime-benchmarks",
+	"gamedao-sense/runtime-benchmarks",
+	"gamedao-control/runtime-benchmarks",
+	"gamedao-flow/runtime-benchmarks",
+	"gamedao-signal/runtime-benchmarks",
 ]
 
 try-runtime = [
