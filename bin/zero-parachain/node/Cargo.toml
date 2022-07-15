@@ -63,7 +63,12 @@ substrate-prometheus-endpoint = { git = "https://github.com/paritytech/substrate
 try-runtime-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 
 # Polkadot
-polkadot-cli = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.25" }
+polkadot-cli = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.25", features = [
+	# Set of features fixes next error:
+	#  Invalid input: `rococo-local` only supported with `rococo-native` feature enabled.
+	# Includes default features + rococo.
+	"wasmtime", "db", "cli", "full-node", "trie-memory-tracker", "polkadot-native", "rococo-native"
+] }
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.25" }
 polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.25" }
 polkadot-service = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.25" }
