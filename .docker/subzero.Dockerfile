@@ -30,7 +30,7 @@ cargo build "--$PROFILE"
 
 # ===== STAGE 3 ======
 
-FROM phusion/baseimage:0.11
+FROM phusion/baseimage:focal-1.2.0
 LABEL maintainer="devops@zero.io"
 LABEL description="This is the 2nd stage: a very small image where we copy the subzero binary."
 ARG PROFILE=release

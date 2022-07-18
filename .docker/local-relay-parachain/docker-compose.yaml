@@ -9,7 +9,7 @@ services:
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
       - "--validator"
       - "--base-path=/tmp/relay/alice"
-      - "--chain=/chainspec/relay-raw.json"
+      - "--chain=/chainspec/rococo-local-raw.json"
       - "--port=30333"
       - "--ws-port=9944"
       - "--unsafe-ws-external"
@@ -26,11 +26,11 @@ services:
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
       - "--validator"
       - "--base-path=/tmp/relay/bob"
-      - "--chain=/chainspec/relay-raw.json"
+      - "--chain=/chainspec/rococo-local-raw.json"
       - "--port=30333"
       - "--ws-port=9944"
       - "--unsafe-ws-external"
-      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     volumes:
       - "./chainspec:/chainspec"
       - "./tmp:/tmp"
@@ -50,16 +50,21 @@ services:
       - "--port=40333"
       - "--ws-port=8844"
       - "--unsafe-ws-external"
+      - "--rpc-cors=all"
       - "--"
       - "--execution=wasm"
-      - "--chain=/chainspec/rococo-raw.json"
+      - "--chain=/chainspec/rococo-local-raw.json"
       - "--port=30343"
       - "--ws-port=9944"
       - "--unsafe-ws-external"
-      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--rpc-cors=all"
+      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     volumes:
       - "./chainspec:/chainspec"
       - "./tmp:/tmp"
     ports:
       - "9954:9944"
       - "9955:8844"
+    depends_on:
+      - relay-chain-a
+      - relay-chain-b
