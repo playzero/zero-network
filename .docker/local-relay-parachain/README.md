@@ -24,10 +24,8 @@ docker-compose -f .docker/local-relay-parachain/docker-compose.yaml up
 1. Generate polkadot rococo chain spec
 2. Generate parachain chainspec
 3. Generate new chain spec, wasm and genesis binaries.
-   Note that `paraId` value should be updated in the plain chain spec file from 1000 to 2000 before creating raw spec file.
 ```bash
 ./target/release/subzero-collator build-spec --disable-default-bootnode > .docker/local-relay-parachain/chainspec/subzero-parachain-plain.json
-# Update plain spec file and replace paraId value (two mentions) from 1000 to 2000.
 ./target/release/subzero-collator build-spec --chain .docker/local-relay-parachain/chainspec/subzero-parachain-plain.json --raw --disable-default-bootnode > .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json
 ./target/release/subzero-collator export-genesis-wasm --chain .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json > .docker/local-relay-parachain/wasm/subzero-wasm
 ./target/release/subzero-collator export-genesis-state --chain .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json > .docker/local-relay-parachain/wasm/subzero-genesis
