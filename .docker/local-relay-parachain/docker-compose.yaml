@@ -73,3 +73,38 @@ services:
     depends_on:
       - relay-chain-a
       - relay-chain-b
+  parachain-b:
+    image: playzero/subzero:local
+    user: "0:0"
+    command:
+      - "/usr/local/bin/subzero-collator"
+      - "--bob"
+      - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
+      - "--collator"
+      - "--force-authoring"
+      - "--chain=/chainspec/subzero-parachain-raw.json"
+      - "--base-path=/tmp/parachain/bob"
+      - "--port=40333"
+      - "--ws-port=8844"
+      - "--unsafe-ws-external"
+      - "--rpc-cors=all"
+      - "--prometheus-port=9615"
+      - "--prometheus-external"
+      - "--"
+      - "--execution=wasm"
+      - "--chain=/chainspec/rococo-local-raw.json"
+      - "--port=30343"
+      - "--ws-port=9944"
+      - "--unsafe-ws-external"
+      - "--rpc-cors=all"
+      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    volumes:
+      - "./chainspec:/chainspec"
+      - "./tmp:/tmp"
+    ports:
+      - "9956:9944"
+      - "9957:8844"
+      - "9616:9615"
+    depends_on:
+      - relay-chain-a
+      - relay-chain-b
