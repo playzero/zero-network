@@ -222,6 +222,8 @@ fn testnet_genesis(
 		polkadot_xcm: parachain_subzero_runtime::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
+		council: Default::default(),
+		treasury: Default::default(),
 		tokens: Default::default(),
 		control: Default::default()
 	}
