@@ -2,35 +2,37 @@ version: "3.7"
 
 services:
   relay-chain-a:
-    image: parity/polkadot:v0.9.13
+    image: parity/polkadot:v0.9.25
     user: "0:0"
     command:
       - "--alice"
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
       - "--validator"
       - "--base-path=/tmp/relay/alice"
-      - "--chain=/chainspec/rococo-raw.json"
+      - "--chain=/chainspec/rococo-local-raw.json"
       - "--port=30333"
       - "--ws-port=9944"
       - "--unsafe-ws-external"
+      - "--rpc-cors=all"
     volumes:
       - "./chainspec:/chainspec"
       - "./tmp:/tmp"
     ports:
       - "9944:9944"
   relay-chain-b:
-    image: parity/polkadot:v0.9.13
+    image: parity/polkadot:v0.9.25
     user: "0:0"
     command:
       - "--bob"
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
       - "--validator"
       - "--base-path=/tmp/relay/bob"
-      - "--chain=/chainspec/rococo-raw.json"
+      - "--chain=/chainspec/rococo-local-raw.json"
       - "--port=30333"
       - "--ws-port=9944"
       - "--unsafe-ws-external"
-      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--rpc-cors=all"
+      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     volumes:
       - "./chainspec:/chainspec"
       - "./tmp:/tmp"
@@ -50,16 +52,59 @@ services:
       - "--port=40333"
       - "--ws-port=8844"
       - "--unsafe-ws-external"
+      - "--rpc-cors=all"
+      - "--prometheus-port=9615"
+      - "--prometheus-external"
       - "--"
       - "--execution=wasm"
-      - "--chain=/chainspec/rococo-raw.json"
+      - "--chain=/chainspec/rococo-local-raw.json"
       - "--port=30343"
       - "--ws-port=9944"
       - "--unsafe-ws-external"
-      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--rpc-cors=all"
+      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     volumes:
       - "./chainspec:/chainspec"
       - "./tmp:/tmp"
     ports:
       - "9954:9944"
       - "9955:8844"
+      - "9615:9615"
+    depends_on:
+      - relay-chain-a
+      - relay-chain-b
+  parachain-b:
+    image: playzero/subzero:local
+    user: "0:0"
+    command:
+      - "/usr/local/bin/subzero-collator"
+      - "--bob"
+      - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
+      - "--collator"
+      - "--force-authoring"
+      - "--chain=/chainspec/subzero-parachain-raw.json"
+      - "--base-path=/tmp/parachain/bob"
+      - "--port=40333"
+      - "--ws-port=8844"
+      - "--unsafe-ws-external"
+      - "--rpc-cors=all"
+      - "--prometheus-port=9615"
+      - "--prometheus-external"
+      - "--"
+      - "--execution=wasm"
+      - "--chain=/chainspec/rococo-local-raw.json"
+      - "--port=30343"
+      - "--ws-port=9944"
+      - "--unsafe-ws-external"
+      - "--rpc-cors=all"
+      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    volumes:
+      - "./chainspec:/chainspec"
+      - "./tmp:/tmp"
+    ports:
+      - "9956:9944"
+      - "9957:8844"
+      - "9616:9615"
+    depends_on:
+      - relay-chain-a
+      - relay-chain-b

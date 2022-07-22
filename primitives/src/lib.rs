@@ -18,7 +18,14 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use sp_runtime::{generic, traits::{BlakeTwo256, IdentifyAccount, Verify}, MultiSignature};
+use codec::{Decode, Encode, MaxEncodedLen};
+use scale_info::TypeInfo;
+use sp_runtime::{
+	generic,
+	traits::{BlakeTwo256, IdentifyAccount, Verify},
+	MultiSignature, OpaqueExtrinsic, RuntimeDebug
+};
+use sp_std::{prelude::*, convert::TryFrom};
 
 pub mod currency;
 pub use currency::{CurrencyId, TokenSymbol, TokenInfo};
@@ -63,17 +70,14 @@ pub type Amount = i128;
 /// Index of a transaction in the chain.
 pub type Index = u32;
 
+/// Digest item type.
+pub type DigestItem = generic::DigestItem;
 /// Header type.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
-
 /// Block type.
-pub type Block = generic::Block<Header, UncheckedExtrinsic>;
-
+pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 /// Block ID.
 pub type BlockId = generic::BlockId<Block>;
-
-/// Opaque, encoded, unchecked extrinsic.
-pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -91,6 +95,19 @@ pub type AssetId = u64;
 pub type RealmId = u64;
 /// NFT Balance
 pub type NFTBalance = u128;
+
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, MaxEncodedLen, TypeInfo)]
+#[repr(u8)]
+pub enum ReserveIdentifier {
+	CollatorSelection,
+	Nft,
+	TransactionPayment,
+	TransactionPaymentDeposit,
+
+	// always the last, indicate number of variants
+	Count
+}
+
 
 pub fn dollar(currency_id: CurrencyId) -> Balance {
 	10u128.saturating_pow(currency_id.decimals().expect("Not support Non-Token decimals").into())

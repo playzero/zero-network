@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2018-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2018-2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -21,12 +21,12 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
 use zero_runtime::{
-	wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
-	BalancesConfig, Block, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
-	ImOnlineConfig, IndicesConfig, SessionConfig, SessionKeys, SocietyConfig, StakerStatus,
-	StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, TokensConfig, MAX_NOMINATIONS,
-	// Game3FoundationTreasuryAccountId, GameDAOTreasuryAccountId, TreasuryAccountId as ZeroTreasuryAccountId,
-	CurrencyId, ControlConfig, ZERO, PLAY, GAME, dollar
+	constants::currency::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
+	BalancesConfig, Block, ControlConfig, CouncilConfig, CurrencyId, DemocracyConfig,
+	ElectionsConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, MaxNominations,
+	NominationPoolsConfig, SessionConfig, SessionKeys, SocietyConfig, StakerStatus,
+	StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, TokensConfig,
+	ZERO, PLAY, GAME, dollar
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
@@ -42,7 +42,7 @@ use sp_runtime::{
 };
 use std::collections::btree_map::BTreeMap;
 
-pub use node_primitives::{AccountId, Balance, Signature};
+pub use zero_primitives::{AccountId, Balance, Signature};
 pub use zero_runtime::GenesisConfig;
 
 type AccountPublic = <Signature as Verify>::Signer;
@@ -70,7 +70,6 @@ pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
 pub fn subzero_config() -> Result<ChainSpec, String> {
 	ChainSpec::from_json_bytes(&include_bytes!("../../../res/alphaville.json")[..])
 }
-
 // ZERO mainnet
 // pub fn zero_config() -> Result<ChainSpec, String> {
 // 	ChainSpec::from_json_bytes(&include_bytes!("../../../res/mainnet.json")[..])
@@ -204,6 +203,7 @@ pub fn staging_testnet_config() -> ChainSpec {
 		),
 		None,
 		None,
+		None,
 		Default::default(),
 	)
 }
@@ -288,7 +288,7 @@ pub fn testnet_genesis(
 		.map(|x| (x.0.clone(), x.1.clone(), stash, StakerStatus::Validator))
 		.chain(initial_nominators.iter().map(|x| {
 			use rand::{seq::SliceRandom, Rng};
-			let limit = (MAX_NOMINATIONS as usize).min(initial_authorities.len());
+			let limit = (MaxNominations::get() as usize).min(initial_authorities.len());
 			let count = rng.gen::<usize>() % limit;
 			let nominations = initial_authorities
 				.as_slice()
@@ -346,7 +346,7 @@ pub fn testnet_genesis(
 				.collect(),
 			phantom: Default::default(),
 		},
-		sudo: SudoConfig { key: root_key },
+		sudo: SudoConfig { key: Some(root_key) },
 		babe: BabeConfig {
 			authorities: vec![],
 			epoch_config: Some(zero_runtime::BABE_GENESIS_EPOCH_CONFIG),
@@ -369,8 +369,14 @@ pub fn testnet_genesis(
 		assets: Default::default(),
 		gilt: Default::default(),
 		transaction_storage: Default::default(),
-		scheduler: Default::default(),
 		transaction_payment: Default::default(),
+		alliance: Default::default(),
+		alliance_motion: Default::default(),
+		nomination_pools: NominationPoolsConfig {
+			min_create_bond: 10 * DOLLARS,
+			min_join_bond: 1 * DOLLARS,
+			..Default::default()
+		},
 		tokens: TokensConfig { balances: Default::default() },
 		control: ControlConfig { orgs: Default::default() },
 		asset_registry: Default::default(),
@@ -405,7 +411,7 @@ fn _balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) ->
 		)
 		.into_iter()
 		.collect::<Vec<(AccountId, Balance)>>();
-	
+
 	zero_issuance = zero_issuance.saturating_sub(game3_zero).saturating_sub(gamedao_zero);
 	let mut balances = vec![
 		(zero_treasury, zero_issuance),
@@ -415,7 +421,7 @@ fn _balances_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId) ->
 }
 
 fn _tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
-		game3_treasury: AccountId, gamedao_treasury: AccountId) -> Vec<(AccountId, CurrencyId, Balance)> {	
+		game3_treasury: AccountId, gamedao_treasury: AccountId) -> Vec<(AccountId, CurrencyId, Balance)> {
 	// Game3 Foundation Treasury owns GAME & PLAY issuance:
 	let mut game_issuance = 100_000_000 * dollar(GAME);
 	let mut play_issuance = 10_000_000 * dollar(PLAY);
@@ -446,7 +452,7 @@ fn _tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
 		)
 		.into_iter()
 		.collect::<Vec<(AccountId, CurrencyId, Balance)>>();
-	
+
 	game_issuance = game_issuance.saturating_sub(zeronet_game).saturating_sub(gamedao_game);
 	play_issuance = play_issuance.saturating_sub(zeronet_play).saturating_sub(gamedao_play);
 
@@ -461,6 +467,7 @@ fn _tokens_distribution(accounts: Vec<AccountId>, zero_treasury: AccountId,
 	token_balances.extend(account_token_balances);
 	token_balances
 }
+
 
 fn development_config_genesis() -> GenesisConfig {
 	testnet_genesis(
@@ -479,6 +486,7 @@ pub fn development_config() -> ChainSpec {
 		ChainType::Development,
 		development_config_genesis,
 		vec![],
+		None,
 		None,
 		None,
 		None,
@@ -503,6 +511,7 @@ pub fn local_testnet_config() -> ChainSpec {
 		ChainType::Local,
 		local_testnet_genesis,
 		vec![],
+		None,
 		None,
 		None,
 		None,
@@ -537,6 +546,7 @@ pub(crate) mod tests {
 			None,
 			None,
 			None,
+			None,
 			Default::default(),
 		)
 	}
@@ -552,6 +562,7 @@ pub(crate) mod tests {
 			None,
 			None,
 			None,
+			None,
 			Default::default(),
 		)
 	}
@@ -563,7 +574,7 @@ pub(crate) mod tests {
 
 		sc_service_test::connectivity(integration_test_config_with_two_authorities(), |config| {
 			let NewFullBase { task_manager, client, network, transaction_pool, .. } =
-				new_full_base(config, |_, _| ())?;
+				new_full_base(config, false, |_, _| ())?;
 			Ok(sc_service_test::TestNetComponents::new(
 				task_manager,
 				client,

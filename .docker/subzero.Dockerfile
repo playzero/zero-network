@@ -2,7 +2,7 @@
 # because they're too often out of date,
 # preventing them from being used to build subzero/Polkadot.
 
-FROM phusion/baseimage:0.11 as baseimage
+FROM phusion/baseimage:focal-1.2.0 as baseimage
 ENV DEBIAN_FRONTEND=noninteractive
 
 
@@ -15,9 +15,9 @@ COPY . /subzero
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 	export PATH="$PATH:$HOME/.cargo/bin" && \
-	rustup toolchain install nightly-2021-11-07 && \
-	rustup target add wasm32-unknown-unknown --toolchain nightly-2021-11-07 && \
-	rustup default nightly-2021-11-07 &&\
+	rustup toolchain install nightly-2022-06-24 && \
+	rustup target add wasm32-unknown-unknown --toolchain nightly-2022-06-24 && \
+	rustup default nightly-2022-06-24 &&\
 	rustup show
 
 # ===== STAGE 2 ======
@@ -26,11 +26,11 @@ FROM baseimage as builder
 ARG PROFILE=release
 
 RUN	export PATH="$PATH:$HOME/.cargo/bin" && \
-cargo build --features parachain "--$PROFILE"
+cargo build "--$PROFILE"
 
 # ===== STAGE 3 ======
 
-FROM phusion/baseimage:0.11
+FROM phusion/baseimage:focal-1.2.0
 LABEL maintainer="devops@zero.io"
 LABEL description="This is the 2nd stage: a very small image where we copy the subzero binary."
 ARG PROFILE=release
