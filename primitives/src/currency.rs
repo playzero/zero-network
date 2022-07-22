@@ -5,7 +5,7 @@ use codec::{Decode, Encode, MaxEncodedLen};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
-use sp_std::{prelude::*, convert::TryFrom};
+use sp_std::prelude::*;
 
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -159,7 +159,19 @@ impl CurrencyId {
 
 /// H160 CurrencyId Type enum
 #[derive(
-	Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TryFromPrimitive, IntoPrimitive, TypeInfo,
+	Encode,
+	Decode,
+	Eq,
+	PartialEq,
+	Copy,
+	Clone,
+	RuntimeDebug,
+	PartialOrd,
+	Ord,
+	TryFromPrimitive,
+	IntoPrimitive,
+	TypeInfo,
+	MaxEncodedLen
 )]
 #[repr(u8)]
 pub enum CurrencyIdType {
