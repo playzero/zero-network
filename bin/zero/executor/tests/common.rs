@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2018-2022 Parity Technologies (UK) Ltd.
+// Copyright (C) 2018-2021 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,13 +35,13 @@ use sp_runtime::{
 };
 use sp_state_machine::TestExternalities as CoreTestExternalities;
 
-use zero_executor::ExecutorDispatch;
-use zero_primitives::{BlockNumber, Hash};
+use node_executor::ExecutorDispatch;
+use node_primitives::{BlockNumber, Hash};
 use zero_runtime::{
 	constants::currency::*, Block, BuildStorage, CheckedExtrinsic, Header, Runtime,
 	UncheckedExtrinsic,
 };
-use zero_testing::keyring::*;
+use node_testing::keyring::*;
 use sp_externalities::Externalities;
 
 pub const TEST_KEY_TYPE_ID: KeyTypeId = KeyTypeId(*b"test");
@@ -84,7 +84,7 @@ pub const TRANSACTION_VERSION: u32 = zero_runtime::VERSION.transaction_version;
 pub type TestExternalities<H> = CoreTestExternalities<H>;
 
 pub fn sign(xt: CheckedExtrinsic) -> UncheckedExtrinsic {
-	zero_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
+	node_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
 }
 
 pub fn default_transfer_call() -> pallet_balances::Call<Runtime> {
@@ -96,7 +96,7 @@ pub fn from_block_number(n: u32) -> Header {
 }
 
 pub fn executor() -> NativeElseWasmExecutor<ExecutorDispatch> {
-	NativeElseWasmExecutor::new(WasmExecutionMethod::Interpreted, None, 8, 2)
+	NativeElseWasmExecutor::new(WasmExecutionMethod::Interpreted, None, 8)
 }
 
 pub fn executor_call<
@@ -119,14 +119,14 @@ pub fn executor_call<
 		hash: sp_core::blake2_256(&code).to_vec(),
 		heap_pages: heap_pages.and_then(|hp| Decode::decode(&mut &hp[..]).ok()),
 	};
-	sp_tracing::try_init_simple();
+
 	executor().call::<R, NC>(&mut t, &runtime_code, method, data, use_native, native_call)
 }
 
 pub fn new_test_ext(code: &[u8]) -> TestExternalities<BlakeTwo256> {
 	let ext = TestExternalities::new_with_code(
 		code,
-		zero_testing::genesis::config(Some(code)).build_storage().unwrap(),
+		node_testing::genesis::config(Some(code)).build_storage().unwrap(),
 	);
 	ext
 }
@@ -142,7 +142,7 @@ pub fn construct_block(
 	extrinsics: Vec<CheckedExtrinsic>,
 	babe_slot: Slot,
 ) -> (Vec<u8>, Hash) {
-	use sp_trie::{LayoutV1 as Layout, TrieConfiguration};
+	use sp_trie::{trie_types::Layout, TrieConfiguration};
 
 	// sign extrinsics.
 	let extrinsics = extrinsics.into_iter().map(sign).collect::<Vec<_>>();

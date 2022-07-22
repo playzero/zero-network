@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2021-2022 Parity Technologies (UK) Ltd.
+// Copyright (C) 2021 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,14 @@
 
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion, Throughput};
 use futures::{future, StreamExt};
-use zero_cli::service::{create_extrinsic, fetch_nonce, FullClient, TransactionPool};
-use zero_primitives::AccountId;
+use node_cli::service::{create_extrinsic, fetch_nonce, FullClient, TransactionPool};
+use node_primitives::AccountId;
 use zero_runtime::{constants::currency::*, BalancesCall, SudoCall};
 use sc_client_api::execution_extensions::ExecutionStrategies;
 use sc_service::{
 	config::{
 		DatabaseSource, KeepBlocks, KeystoreConfig, NetworkConfiguration, OffchainWorkerConfig,
-		PruningMode, TransactionPoolOptions, WasmExecutionMethod,
+		PruningMode, TransactionPoolOptions, TransactionStorageMode, WasmExecutionMethod,
 	},
 	BasePath, Configuration, Role,
 };
@@ -36,7 +36,7 @@ use sp_keyring::Sr25519Keyring;
 use sp_runtime::{generic::BlockId, OpaqueExtrinsic};
 use tokio::runtime::Handle;
 
-fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
+fn new_node(tokio_handle: Handle) -> node_cli::service::NewFullBase {
 	let base_path = BasePath::new_temp_dir().expect("Creates base path");
 	let root = base_path.path().to_path_buf();
 
@@ -47,7 +47,7 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		None,
 	);
 
-	let spec = Box::new(zero_cli::chain_spec::development_config());
+	let spec = Box::new(node_cli::chain_spec::development_config());
 
 	let config = Configuration {
 		impl_name: "BenchmarkImpl".into(),
@@ -65,8 +65,9 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		database: DatabaseSource::RocksDb { path: root.join("db"), cache_size: 128 },
 		state_cache_size: 67108864,
 		state_cache_child_ratio: None,
-		state_pruning: Some(PruningMode::ArchiveAll),
+		state_pruning: PruningMode::ArchiveAll,
 		keep_blocks: KeepBlocks::All,
+		transaction_storage: TransactionStorageMode::BlockBody,
 		chain_spec: spec,
 		wasm_method: WasmExecutionMethod::Interpreted,
 		// NOTE: we enforce the use of the native runtime to make the errors more debuggable
@@ -84,10 +85,6 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		rpc_cors: None,
 		rpc_methods: Default::default(),
 		rpc_max_payload: None,
-		rpc_max_request_size: None,
-		rpc_max_response_size: None,
-		rpc_id_provider: None,
-		rpc_max_subs_per_conn: None,
 		ws_max_out_buffer_capacity: None,
 		prometheus_config: None,
 		telemetry_endpoints: None,
@@ -99,14 +96,13 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		tracing_targets: None,
 		tracing_receiver: Default::default(),
 		max_runtime_instances: 8,
-		runtime_cache_size: 2,
 		announce_block: true,
 		base_path: Some(base_path),
 		informant_output_format: Default::default(),
 		wasm_runtime_overrides: None,
 	};
 
-	zero_cli::service::new_full_base(config, false, |_, _| ()).expect("Creates node")
+	node_cli::service::new_full_base(config, |_, _| ()).expect("Creates node")
 }
 
 fn create_accounts(num: usize) -> Vec<sr25519::Pair> {
@@ -130,7 +126,7 @@ fn create_account_extrinsics(
 	accounts
 		.iter()
 		.enumerate()
-		.flat_map(|(i, a)| {
+		.map(|(i, a)| {
 			vec![
 				// Reset the nonce by removing any funds
 				create_extrinsic(
@@ -166,6 +162,7 @@ fn create_account_extrinsics(
 				),
 			]
 		})
+		.flatten()
 		.map(OpaqueExtrinsic::from)
 		.collect()
 }
@@ -177,7 +174,7 @@ fn create_benchmark_extrinsics(
 ) -> Vec<OpaqueExtrinsic> {
 	accounts
 		.iter()
-		.flat_map(|account| {
+		.map(|account| {
 			(0..extrinsics_per_account).map(move |nonce| {
 				create_extrinsic(
 					client,
@@ -190,6 +187,7 @@ fn create_benchmark_extrinsics(
 				)
 			})
 		})
+		.flatten()
 		.map(OpaqueExtrinsic::from)
 		.collect()
 }

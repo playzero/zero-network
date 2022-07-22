@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2020-2022 Parity Technologies (UK) Ltd.
+// Copyright (C) 2020-2021 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0
 
 // This program is free software: you can redistribute it and/or modify
@@ -19,25 +19,27 @@
 //! Structs to easily compose inspect sub-command for CLI.
 
 use sc_cli::{ImportParams, SharedParams};
+use std::fmt::Debug;
+use structopt::StructOpt;
 
 /// The `inspect` command used to print decoded chain data.
-#[derive(Debug, clap::Parser)]
+#[derive(Debug, StructOpt)]
 pub struct InspectCmd {
 	#[allow(missing_docs)]
-	#[clap(subcommand)]
+	#[structopt(flatten)]
 	pub command: InspectSubCmd,
 
 	#[allow(missing_docs)]
-	#[clap(flatten)]
+	#[structopt(flatten)]
 	pub shared_params: SharedParams,
 
 	#[allow(missing_docs)]
-	#[clap(flatten)]
+	#[structopt(flatten)]
 	pub import_params: ImportParams,
 }
 
 /// A possible inspect sub-commands.
-#[derive(Debug, clap::Subcommand)]
+#[derive(Debug, StructOpt)]
 pub enum InspectSubCmd {
 	/// Decode block with native version of runtime and print out the details.
 	Block {
@@ -46,7 +48,7 @@ pub enum InspectSubCmd {
 		/// Can be either a block hash (no 0x prefix) or a number to retrieve existing block,
 		/// or a 0x-prefixed bytes hex string, representing SCALE encoding of
 		/// a block.
-		#[clap(value_name = "HASH or NUMBER or BYTES")]
+		#[structopt(value_name = "HASH or NUMBER or BYTES")]
 		input: String,
 	},
 	/// Decode extrinsic with native version of runtime and print out the details.
@@ -56,7 +58,7 @@ pub enum InspectSubCmd {
 		/// Can be either a block hash (no 0x prefix) or number and the index, in the form
 		/// of `{block}:{index}` or a 0x-prefixed bytes hex string,
 		/// representing SCALE encoding of an extrinsic.
-		#[clap(value_name = "BLOCK:INDEX or BYTES")]
+		#[structopt(value_name = "BLOCK:INDEX or BYTES")]
 		input: String,
 	},
 }

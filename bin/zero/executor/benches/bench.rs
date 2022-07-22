@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2018-2022 Parity Technologies (UK) Ltd.
+// Copyright (C) 2018-2021 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,15 +18,13 @@
 use codec::{Decode, Encode};
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 use frame_support::Hashable;
-use zero_executor::ExecutorDispatch;
-use zero_primitives::{BlockNumber, Hash};
+use node_executor::ExecutorDispatch;
+use node_primitives::{BlockNumber, Hash};
 use zero_runtime::{
 	constants::currency::*, Block, BuildStorage, Call, CheckedExtrinsic, GenesisConfig, Header,
 	UncheckedExtrinsic,
 };
-use zero_testing::keyring::*;
-#[cfg(feature = "wasmtime")]
-use sc_executor::WasmtimeInstantiationStrategy;
+use node_testing::keyring::*;
 use sc_executor::{Externalities, NativeElseWasmExecutor, RuntimeVersionOf, WasmExecutionMethod};
 use sp_core::{
 	storage::well_known_keys,
@@ -64,7 +62,7 @@ enum ExecutionMethod {
 }
 
 fn sign(xt: CheckedExtrinsic) -> UncheckedExtrinsic {
-	zero_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
+	node_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
 }
 
 fn new_test_ext(genesis_config: &GenesisConfig) -> TestExternalities<BlakeTwo256> {
@@ -85,14 +83,14 @@ fn construct_block<E: Externalities>(
 	parent_hash: Hash,
 	extrinsics: Vec<CheckedExtrinsic>,
 ) -> (Vec<u8>, Hash) {
-	use sp_trie::{LayoutV0, TrieConfiguration};
+	use sp_trie::{trie_types::Layout, TrieConfiguration};
 
 	// sign extrinsics.
 	let extrinsics = extrinsics.into_iter().map(sign).collect::<Vec<_>>();
 
 	// calculate the header fields that we can.
 	let extrinsics_root =
-		LayoutV0::<BlakeTwo256>::ordered_trie_root(extrinsics.iter().map(Encode::encode))
+		Layout::<BlakeTwo256>::ordered_trie_root(extrinsics.iter().map(Encode::encode))
 			.to_fixed_bytes()
 			.into();
 
@@ -185,20 +183,18 @@ fn bench_execute_block(c: &mut Criterion) {
 		ExecutionMethod::Native,
 		ExecutionMethod::Wasm(WasmExecutionMethod::Interpreted),
 		#[cfg(feature = "wasmtime")]
-		ExecutionMethod::Wasm(WasmExecutionMethod::Compiled {
-			instantiation_strategy: WasmtimeInstantiationStrategy::PoolingCopyOnWrite,
-		}),
+		ExecutionMethod::Wasm(WasmExecutionMethod::Compiled),
 	];
 
 	for strategy in execution_methods {
 		group.bench_function(format!("{:?}", strategy), |b| {
-			let genesis_config = zero_testing::genesis::config(Some(compact_code_unwrap()));
+			let genesis_config = node_testing::genesis::config(Some(compact_code_unwrap()));
 			let (use_native, wasm_method) = match strategy {
 				ExecutionMethod::Native => (true, WasmExecutionMethod::Interpreted),
 				ExecutionMethod::Wasm(wasm_method) => (false, wasm_method),
 			};
 
-			let executor = NativeElseWasmExecutor::new(wasm_method, None, 8, 2);
+			let executor = NativeElseWasmExecutor::new(wasm_method, None, 8);
 			let runtime_code = RuntimeCode {
 				code_fetcher: &sp_core::traits::WrappedRuntimeCode(compact_code_unwrap().into()),
 				hash: vec![1, 2, 3],
