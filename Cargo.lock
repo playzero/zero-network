@@ -2991,7 +2991,7 @@ dependencies = [
 
 [[package]]
 name = "gamedao-control"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -3016,7 +3016,7 @@ dependencies = [
 
 [[package]]
 name = "gamedao-flow"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -3040,7 +3040,7 @@ dependencies = [
 
 [[package]]
 name = "gamedao-sense"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -3056,7 +3056,7 @@ dependencies = [
 
 [[package]]
 name = "gamedao-signal"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -3081,7 +3081,7 @@ dependencies = [
 
 [[package]]
 name = "gamedao-traits"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -13112,7 +13112,7 @@ dependencies = [
 
 [[package]]
 name = "zero-cli"
-version = "3.0.56"
+version = "3.0.58"
 dependencies = [
  "assert_cmd",
  "async-std",
