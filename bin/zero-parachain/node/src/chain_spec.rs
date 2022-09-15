@@ -225,6 +225,7 @@ fn testnet_genesis(
 		council: Default::default(),
 		treasury: Default::default(),
 		tokens: Default::default(),
-		control: Default::default()
+		control: Default::default(),
+		asset_registry: Default::default(),
 	}
 }

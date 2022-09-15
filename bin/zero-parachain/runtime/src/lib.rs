@@ -15,7 +15,7 @@ use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
+	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, Convert, IdentifyAccount, Verify},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
 };
@@ -55,13 +55,15 @@ use xcm::latest::prelude::BodyId;
 use xcm_executor::XcmExecutor;
 
 pub use primitives::{
-	currency::{ZERO, PLAY, GAME, CurrencyId, TokenSymbol},
+	currency::{ZERO, PLAY, GAME, AssetIds, AssetIdMapping, CurrencyId, TokenSymbol},
 	dollar, cent, millicent,
 	Amount, ReserveIdentifier
 };
 
 use orml_traits::{parameter_type_with_key, GetByKey};
 use orml_currencies::BasicCurrencyAdapter;
+
+use module_asset_registry::{AssetIdMaps};
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -420,6 +422,11 @@ type EnsureRootOrHalfCouncil = EitherOfDiverse<
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 >;
 
+type EnsureRootOrThreeFourthsCouncil = EitherOfDiverse<
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 3, 4>,
+>;
+
 type CouncilCollective = pallet_collective::Instance1;
 impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type Origin = Origin;
@@ -624,11 +631,10 @@ parameter_type_with_key! {
 				TokenSymbol::KINT |
 				TokenSymbol::TAI => Balance::max_value() // unsupported
 			},
-			// TODO: add module_asset_registry
-			// CurrencyId::ForeignAsset(_foreign_asset_id) => {
-			// 	AssetIdMaps::<Runtime>::get_foreign_asset_metadata(*foreign_asset_id).
-			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
-			// },
+			CurrencyId::ForeignAsset(foreign_asset_id) => {
+				AssetIdMaps::<Runtime>::get_asset_metadata(AssetIds::ForeignAssetId(*foreign_asset_id)).
+					map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
+			},
 		}
 	};
 }
@@ -669,6 +675,23 @@ impl orml_currencies::Config for Runtime {
 	type GetNativeCurrencyId = GetNativeCurrencyId;
 	type WeightInfo = ();
 }
+
+impl orml_unknown_tokens::Config for Runtime {
+	type Event = Event;
+}
+
+impl orml_xcm::Config for Runtime {
+	type Event = Event;
+	type SovereignOrigin = EnsureRootOrThreeFourthsCouncil;
+}
+
+impl module_asset_registry::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type RegisterOrigin = EnsureRootOrHalfCouncil;
+	type WeightInfo = ();
+}
+
 
 parameter_types! {
 	pub MinProposalDeposit: Balance = 100 * dollar(GAME);
@@ -788,15 +811,21 @@ construct_runtime!(
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 32,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
 
-		// ORML pallets:
+		// ORML:
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
 		Currencies: orml_currencies::{Pallet, Call} = 41,
+		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 44,
+		UnknownTokens: orml_unknown_tokens::{Pallet, Storage, Event} = 45,
+		OrmlXcm: orml_xcm::{Pallet, Call, Event<T>} = 46,
 
-		// GameDAO protocol pallets:
+		// GameDAO protocol:
 		Flow: gamedao_flow = 50,
 		Sense: gamedao_sense = 51,
 		Control: gamedao_control = 52,
 		Signal: gamedao_signal = 53,
+
+		// Zero protocol:
+		AssetRegistry: module_asset_registry = 60,
 	}
 );
 
