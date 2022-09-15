@@ -80,9 +80,13 @@ parachain-info = { git = 'https://github.com/paritytech/cumulus', branch = 'polk
 primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../modules/primitives" }
 module-asset-registry = { path = "../../../modules/asset-registry", default-features = false }
 
-orml-tokens = { path = "../../../modules/orml/tokens", default-features = false }
-orml-traits = { path = "../../../modules/orml/traits", default-features = false }
-orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
+orml-currencies = { path = "../../../orml/currencies", default-features = false }
+orml-tokens = { path = "../../../orml/tokens", default-features = false }
+orml-traits = { path = "../../../orml/traits", default-features = false }
+orml-unknown-tokens = { path = "../../../orml/unknown-tokens", default-features = false }
+orml-xcm = { path = "../../../orml/xcm", default-features = false }
+orml-xcm-support = { path = "../../../orml/xcm-support", default-features = false }
+orml-xtokens = { path = "../../../orml/xtokens", default-features = false }
 
 gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
 gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-features = false }
@@ -148,9 +152,13 @@ std = [
 	"primitives/std",
 	"module-asset-registry/std",
 
-	"orml-tokens/std",
 	"orml-currencies/std",
+	"orml-tokens/std",
 	"orml-traits/std",
+	"orml-unknown-tokens/std",
+	"orml-xcm-support/std",
+	"orml-xcm/std",
+	"orml-xtokens/std",
 
 	"gamedao-sense/std",
 	"gamedao-traits/std",

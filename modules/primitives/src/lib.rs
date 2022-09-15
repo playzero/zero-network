@@ -25,10 +25,10 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
 	MultiSignature, OpaqueExtrinsic, RuntimeDebug
 };
-use sp_std::{prelude::*, convert::TryFrom};
+use sp_std::{prelude::*};
 
 pub mod currency;
-pub use currency::{CurrencyId, TokenSymbol, TokenInfo};
+pub use currency::{AssetIdMapping, CurrencyId, TokenSymbol, TokenInfo};
 
 /// An index to a block.
 pub type BlockNumber = u32;
