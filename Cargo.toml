@@ -5,11 +5,12 @@ resolver = "2"
 
 members = [
 
-	"bin/zero-parachain/runtime",
-	"bin/zero-parachain/node",
+	"bin/zero/cli",
+	"bin/zero/runtime",
 
-	# "bin/zero/runtime",
-	# "bin/zero/cli",
+	"bin/zero-parachain/node",
+	"bin/zero-parachain/runtime"
+
 ]
 
 # The list of dependencies below (which can be both direct and indirect dependencies) are crates
