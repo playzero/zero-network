@@ -28,7 +28,6 @@ sp-authority-discovery = { default-features = false, git = "https://github.com/p
 sp-consensus-babe = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sp-block-builder = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sp-inherents = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
-primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../primitives" }
 sp-offchain = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sp-core = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 sp-std = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
@@ -108,15 +107,17 @@ pallet-uniques = { default-features = false, git = "https://github.com/paritytec
 pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 pallet-whitelist = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 
-orml-tokens = { path = "../../../orml/tokens", default-features = false }
-orml-traits = { path = "../../../orml/traits", default-features = false }
-orml-currencies = { path = "../../../orml/currencies", default-features = false }
+primitives = { path = "../../../modules/primitives", version = "2.0.0", package = "zero-primitives", default-features = false }
 
-gamedao-traits = { path = "../../../gamedao-protocol/traits", default-features = false }
-gamedao-flow = { path = "../../../gamedao-protocol/flow", default-features = false }
-gamedao-control = { path = "../../../gamedao-protocol/control", default-features = false }
-gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
-gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
+orml-tokens = { path = "../../../modules/orml/tokens", default-features = false }
+orml-traits = { path = "../../../modules/orml/traits", default-features = false }
+orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
+
+gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
+gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-features = false }
+gamedao-control = { path = "../../../modules/gamedao-protocol/control", default-features = false }
+gamedao-signal = { path = "../../../modules/gamedao-protocol/signal", default-features = false }
+gamedao-sense = { path = "../../../modules/gamedao-protocol/sense", default-features = false }
 
 module-asset-registry = { path = "../../../modules/asset-registry", default-features = false }
 
