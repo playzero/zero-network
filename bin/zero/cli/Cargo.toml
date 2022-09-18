@@ -87,7 +87,7 @@ pallet-asset-tx-payment = { git = "https://github.com/paritytech/substrate", bra
 pallet-im-online = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 
 # node-specific dependencies
-zero-primitives = { version = "2.0.0", path = "../../../primitives" }
+zero-primitives = { version = "2.0.0", path = "../../../modules/primitives" }
 zero-runtime = { version = "3.0.0-dev", path = "../runtime" }
 zero-rpc = { version = "3.0.0-dev", path = "../rpc" }
 zero-executor = { version = "3.0.0-dev", path = "../executor" }

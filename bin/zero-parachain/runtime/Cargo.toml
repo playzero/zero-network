@@ -1,5 +1,5 @@
 [package]
-name = "parachain-subzero-runtime"
+name = "subzero-parachain-runtime"
 version = "0.1.0"
 authors = ["Anonymous"]
 description = "A new Cumulus FRAME-based Substrate Runtime, ready for hacking together a parachain."
@@ -77,18 +77,18 @@ cumulus-primitives-utility = { git = 'https://github.com/paritytech/cumulus', br
 pallet-collator-selection = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
 parachain-info = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
 
-primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../primitives" }
+primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../modules/primitives" }
 module-asset-registry = { path = "../../../modules/asset-registry", default-features = false }
 
-orml-tokens = { path = "../../../orml/tokens", default-features = false }
-orml-traits = { path = "../../../orml/traits", default-features = false }
-orml-currencies = { path = "../../../orml/currencies", default-features = false }
+orml-tokens = { path = "../../../modules/orml/tokens", default-features = false }
+orml-traits = { path = "../../../modules/orml/traits", default-features = false }
+orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
 
-gamedao-traits = { path = "../../../gamedao-protocol/traits", default-features = false }
-gamedao-flow = { path = "../../../gamedao-protocol/flow", default-features = false }
-gamedao-control = { path = "../../../gamedao-protocol/control", default-features = false }
-gamedao-signal = { path = "../../../gamedao-protocol/signal", default-features = false }
-gamedao-sense = { path = "../../../gamedao-protocol/sense", default-features = false }
+gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
+gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-features = false }
+gamedao-control = { path = "../../../modules/gamedao-protocol/control", default-features = false }
+gamedao-signal = { path = "../../../modules/gamedao-protocol/signal", default-features = false }
+gamedao-sense = { path = "../../../modules/gamedao-protocol/sense", default-features = false }
 
 [features]
 default = [
