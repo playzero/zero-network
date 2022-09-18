@@ -11,7 +11,7 @@ license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 [dependencies]
 clap = { version = "3.1.18", features = ["derive"] }
 log = "0.4.17"
-zero-primitives = { version = "2.0.0", path = "../../primitives" }
+zero-primitives = { version = "2.0.0", path = "../../modules/primitives" }
 zero-testing = { version = "3.0.0-dev", path = "../testing" }
 zero-runtime = { version = "3.0.0-dev", path = "../runtime" }
 sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
