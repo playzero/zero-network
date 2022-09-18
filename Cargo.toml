@@ -10,6 +10,7 @@ members = [
 
 	"bin/zero-parachain/node",
 	"bin/zero-parachain/runtime"
+
 ]
 
 # The list of dependencies below (which can be both direct and indirect dependencies) are crates
