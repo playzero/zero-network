@@ -179,7 +179,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("subzero"),
 	impl_name: create_runtime_str!("alphaville"),
 	authoring_version: 75,
-	spec_version: 59,
+	spec_version: 60,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
