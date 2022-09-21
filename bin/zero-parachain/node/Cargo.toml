@@ -1,6 +1,6 @@
 [package]
 name = "subzero-parachain-node"
-version = "3.1.59"
+version = "3.1.60"
 authors = ["Anonymous"]
 description = "A new Cumulus FRAME-based Substrate Node, ready for hacking together a parachain."
 license = "Unlicense"
