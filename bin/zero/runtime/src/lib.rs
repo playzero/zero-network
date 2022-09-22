@@ -1593,7 +1593,6 @@ parameter_type_with_key! {
 				TokenSymbol::KINT |
 				TokenSymbol::TAI => Balance::max_value() // unsupported
 			},
-			// TODO: add module_asset_registry
 			// CurrencyId::ForeignAsset(_foreign_asset_id) => {
 			// 	AssetIdMaps::<Runtime>::get_foreign_asset_metadata(*foreign_asset_id).
 			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
@@ -1725,13 +1724,6 @@ impl gamedao_sense::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
-impl module_asset_registry::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type RegisterOrigin = EnsureRootOrHalfGeneralCouncil;
-	type WeightInfo = ();
-}
-
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1807,7 +1799,6 @@ construct_runtime!(
 
 		// Zero pallets:
 		// Migration: module_migration,
-		AssetRegistry: module_asset_registry,
 	}
 );
 
@@ -1918,7 +1909,6 @@ mod benches {
 		[gamedao_control, Control]
 		[gamedao_flow, Flow]
 		[gamedao_signal, Signal]
-		[module_asset_registry, AssetRegistry]
 	);
 }
 
