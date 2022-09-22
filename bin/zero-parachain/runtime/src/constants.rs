@@ -30,9 +30,12 @@ pub mod fee {
 	pub fn base_tx_in_token(token: TokenSymbol) -> Balance {
 		match token {
 			TokenSymbol::DOT => (cent(DOT) * 30 / 10000),
-			TokenSymbol::ZERO => (cent(ZERO) * 5 / 10000),
-			TokenSymbol::GAME => (cent(GAME) * 5 / 10000),
-			TokenSymbol::PLAY => (cent(PLAY) * 5 / 10000),
+			// ZERO:DOT = 6:1
+			TokenSymbol::ZERO => (cent(ZERO) * 18 / 1000),
+			// GAME:DOT = 6:1
+			TokenSymbol::GAME => (cent(GAME) * 18 / 1000),
+			// PLAY:DOT = 6:1
+			TokenSymbol::PLAY => (cent(PLAY) * 18 / 1000),
 		}
 	}
 

@@ -1,6 +1,6 @@
 use cumulus_primitives_core::ParaId;
 use subzero_parachain_runtime::{AccountId, AuraId, SS58Prefix, Signature, SudoConfig};
-use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
+use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup, Properties};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
@@ -67,9 +67,9 @@ pub fn subzero_session_keys(keys: AuraId) -> subzero_parachain_runtime::SessionK
 	subzero_parachain_runtime::SessionKeys { aura: keys }
 }
 
-pub fn development_config() -> ChainSpec {
-	// Give your base currency a unit name and decimal places
-	let mut properties = sc_chain_spec::Properties::new();
+/// Give your currencies a unit name and decimal places
+pub fn get_properties() -> Properties {
+	let mut properties = Properties::new();
 	let mut token_symbol: Vec<String> = vec![];
 	let mut token_decimals: Vec<u32> = vec![];
 	[ZERO, PLAY, GAME, DOT].iter().for_each(|token| {
@@ -79,6 +79,12 @@ pub fn development_config() -> ChainSpec {
 	properties.insert("tokenSymbol".into(), token_symbol.into());
 	properties.insert("tokenDecimals".into(), token_decimals.into());
 	properties.insert("ss58Format".into(), SS58Prefix::get().into());
+	properties
+}
+
+pub fn development_config() -> ChainSpec {
+	// Give your base currency a unit name and decimal places
+	let properties = get_properties();
 	ChainSpec::from_genesis(
 		// Name
 		"Development",
@@ -129,17 +135,7 @@ pub fn development_config() -> ChainSpec {
 }
 
 pub fn local_testnet_config() -> ChainSpec {
-	// Give your base currency a unit name and decimal places
-	let mut properties = sc_chain_spec::Properties::new();
-	let mut token_symbol: Vec<String> = vec![];
-	let mut token_decimals: Vec<u32> = vec![];
-	[ZERO, PLAY, GAME, DOT].iter().for_each(|token| {
-		token_symbol.push(token.symbol().unwrap().to_string());
-		token_decimals.push(token.decimals().unwrap() as u32);
-	});
-	properties.insert("tokenSymbol".into(), token_symbol.into());
-	properties.insert("tokenDecimals".into(), token_decimals.into());
-	properties.insert("ss58Format".into(), SS58Prefix::get().into());
+	let properties = get_properties();
 
 	ChainSpec::from_genesis(
 		// Name

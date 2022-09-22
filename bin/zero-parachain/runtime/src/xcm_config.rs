@@ -1,7 +1,8 @@
 use super::{
 	constants::{fee::*, parachains},
 	AccountId, AssetRegistry, Balance, Call, Convert,
-	CurrencyId::{self, ForeignAsset}, Currencies, EnsureRootOrHalfCouncil,
+	CurrencyId::{self, ForeignAsset}, Currencies,
+	EnsureRootOrHalfCouncil, EnsureRootOrThreeFourthsCouncil,
 	Event, Origin, ParachainInfo, ParachainSystem, PolkadotXcm,
 	Runtime, TreasuryAccountId, UnknownTokens, XcmpQueue,
 	ZERO, PLAY, GAME, DOT,
@@ -97,30 +98,30 @@ parameter_types! {
 	pub UnitWeightCost: Weight = 200_000_000;
 	pub const MaxInstructions: u32 = 100;
 	pub DotPerSecond: (AssetId, u128) = (
-    	MultiLocation::parent().into(),
-    	dot_per_second()
+		MultiLocation::parent().into(),
+		dot_per_second()
 	);
 	pub ZeroPerSecond: (AssetId, u128) = (
-        native_currency_location(
-        	ParachainInfo::get().into(),
-        	ZERO
-    	).into(),
-        zero_per_second()
-    );
-    pub PlayPerSecond: (AssetId, u128) = (
-        native_currency_location(
-        	ParachainInfo::get().into(),
-        	PLAY
-    	).into(),
-        play_per_second()
-    );
-    pub GamePerSecond: (AssetId, u128) = (
-        native_currency_location(
-        	ParachainInfo::get().into(),
-        	GAME
-    	).into(),
-        game_per_second()
-    );
+		native_currency_location(
+			ParachainInfo::get().into(),
+			ZERO
+		).into(),
+		zero_per_second()
+	);
+	pub PlayPerSecond: (AssetId, u128) = (
+		native_currency_location(
+			ParachainInfo::get().into(),
+			PLAY
+		).into(),
+		play_per_second()
+	);
+	pub GamePerSecond: (AssetId, u128) = (
+		native_currency_location(
+			ParachainInfo::get().into(),
+			GAME
+		).into(),
+		game_per_second()
+	);
 }
 
 pub struct ToAuthor;
@@ -133,10 +134,10 @@ impl TakeRevenue for ToAuthor {
 		{
 			if let Some(currency_id) = CurrencyIdConvert::convert(location) {
 				if let Some(author) = pallet_authorship::Pallet::<Runtime>::author() {
-                    let _ = Currencies::deposit(currency_id, &author, amount);
-                } else {
-                    let _ = Currencies::deposit(currency_id, &TreasuryAccountId::get(), amount);
-                }
+					let _ = Currencies::deposit(currency_id, &author, amount);
+				} else {
+					let _ = Currencies::deposit(currency_id, &TreasuryAccountId::get(), amount);
+				}
 			}
 		}
 	}
@@ -144,18 +145,18 @@ impl TakeRevenue for ToAuthor {
 
 pub struct ChainFixedConversionRateProvider;
 impl FixedConversionRateProvider for ChainFixedConversionRateProvider {
-    fn get_fee_per_second(location: &MultiLocation) -> Option<u128> {
-        let metadata = AssetRegistry::fetch_metadata_by_location(location)?;
-        Some(metadata.additional.fee_per_second)
-    }
+	fn get_fee_per_second(location: &MultiLocation) -> Option<u128> {
+		let metadata = AssetRegistry::fetch_metadata_by_location(location)?;
+		Some(metadata.additional.fee_per_second)
+	}
 }
 
 pub type Trader = (
-    FixedRateOfFungible<DotPerSecond, ToAuthor>,
-    FixedRateOfFungible<PlayPerSecond, ToAuthor>,
-    FixedRateOfFungible<GamePerSecond, ToAuthor>,
-    FixedRateOfFungible<ZeroPerSecond, ToAuthor>,
-    AssetRegistryTrader<FixedRateAssetRegistryTrader<ChainFixedConversionRateProvider>, ToAuthor>,
+	FixedRateOfFungible<DotPerSecond, ToAuthor>,
+	FixedRateOfFungible<PlayPerSecond, ToAuthor>,
+	FixedRateOfFungible<GamePerSecond, ToAuthor>,
+	FixedRateOfFungible<ZeroPerSecond, ToAuthor>,
+	AssetRegistryTrader<FixedRateAssetRegistryTrader<ChainFixedConversionRateProvider>, ToAuthor>,
 );
 
 pub struct XcmConfig;
@@ -259,31 +260,31 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 	fn convert(location: MultiLocation) -> Option<CurrencyId> {
 
 		fn decode_currency_id(key: Vec<u8>) -> Option<CurrencyId> {
-            if let Ok(currency_id) = CurrencyId::decode(&mut &key[..]) {
-                // check `currency_id` is cross-chain asset
-                match currency_id {
-                    ZERO | GAME | PLAY => Some(currency_id),
-                    _ => None,
-                }
-            } else {
-                None
-            }
-        }
+			if let Ok(currency_id) = CurrencyId::decode(&mut &key[..]) {
+				// check `currency_id` is cross-chain asset
+				match currency_id {
+					ZERO | GAME | PLAY => Some(currency_id),
+					_ => None,
+				}
+			} else {
+				None
+			}
+		}
 
-        match location.clone() {
-        	x if x == MultiLocation::parent() => Some(DOT),
-        	MultiLocation {
-                parents: 1,
-                interior: X2(Parachain(id), GeneralKey(key)),
-            } if ParaId::from(id) == ParachainInfo::get() => decode_currency_id(key),
-            MultiLocation {
-                parents: 0,
-                interior: X1(GeneralKey(key)),
-            } => decode_currency_id(key),
-            _ => None,
-        }
-        .or_else(|| AssetRegistry::location_to_asset_id(&location)
-        .map(|id| CurrencyId::ForeignAsset(id)))
+		match location.clone() {
+			x if x == MultiLocation::parent() => Some(DOT),
+			MultiLocation {
+				parents: 1,
+				interior: X2(Parachain(id), GeneralKey(key)),
+			} if ParaId::from(id) == ParachainInfo::get() => decode_currency_id(key),
+			MultiLocation {
+				parents: 0,
+				interior: X1(GeneralKey(key)),
+			} => decode_currency_id(key),
+			_ => None,
+		}
+		.or_else(|| AssetRegistry::location_to_asset_id(&location)
+		.map(|id| CurrencyId::ForeignAsset(id)))
 	}
 }
 impl Convert<MultiAsset, Option<CurrencyId>> for CurrencyIdConvert {
@@ -342,4 +343,13 @@ impl orml_xtokens::Config for Runtime {
 	type MinXcmFee = ParachainMinFee;
 	type MultiLocationsFilter = Everything;
 	type ReserveProvider = AbsoluteReserveProvider;
+}
+
+impl orml_unknown_tokens::Config for Runtime {
+	type Event = Event;
+}
+
+impl orml_xcm::Config for Runtime {
+	type Event = Event;
+	type SovereignOrigin = EnsureRootOrThreeFourthsCouncil;
 }

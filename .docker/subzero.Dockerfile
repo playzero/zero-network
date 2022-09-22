@@ -44,7 +44,6 @@ RUN mv /usr/share/ca* /tmp && \
 	ln -s /subzero/.local/share/subzero /data
 
 COPY --from=builder /subzero/target/$PROFILE/subzero /usr/local/bin
-COPY --from=builder /subzero/target/$PROFILE/subzero-collator /usr/local/bin
 
 # checks
 RUN ldd /usr/local/bin/subzero && \

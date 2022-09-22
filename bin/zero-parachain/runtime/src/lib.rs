@@ -62,8 +62,6 @@ use orml_asset_registry::SequentialId;
 use orml_currencies::BasicCurrencyAdapter;
 use orml_traits::{parameter_type_with_key, GetByKey};
 
-// use module_asset_registry::{AssetIdMaps};
-
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
 
@@ -432,8 +430,8 @@ impl pallet_treasury::Config for Runtime {
 }
 
 parameter_types! {
-	pub BasicDeposit: Balance = 10 * dollar(ZERO);       // 258 bytes on-chain
-	pub FieldDeposit: Balance = 250 * cent(ZERO);        // 66 bytes on-chain
+	pub BasicDeposit: Balance = 10 * dollar(ZERO);	   // 258 bytes on-chain
+	pub FieldDeposit: Balance = 250 * cent(ZERO);		// 66 bytes on-chain
 	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);   // 53 bytes on-chain
 }
 
@@ -552,28 +550,11 @@ parameter_type_with_key! {
 				TokenSymbol::ZERO => cent(*currency_id),
 				TokenSymbol::PLAY => 10 * cent(*currency_id),
 				TokenSymbol::GAME => 10 * cent(*currency_id),
-
-				// TokenSymbol::AUSD => 10 * cent(*currency_id),
 				TokenSymbol::DOT => cent(*currency_id),
-				// TokenSymbol::LDOT => 5 * cent(*currency_id),
-
-				// TokenSymbol::KAR |
-				// TokenSymbol::KUSD |
-				// TokenSymbol::KSM |
-				// TokenSymbol::LKSM |
-				// TokenSymbol::BNC |
-				// TokenSymbol::PHA |
-				// TokenSymbol::VSKSM |
-				// TokenSymbol::ACA |
-				// TokenSymbol::KBTC |
-				// TokenSymbol::KINT |
-				// TokenSymbol::TAI => Balance::max_value() // unsupported
 			},
 			CurrencyId::ForeignAsset(id) => {
 				AssetRegistry::metadata(&id)
 					.map_or(Balance::max_value(), |metadata| metadata.existential_deposit)
-			// 	AssetIdMaps::<Runtime>::get_asset_metadata(AssetIds::ForeignAssetId(*foreign_asset_id)).
-			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
 			},
 		}
 	};
@@ -582,26 +563,26 @@ parameter_type_with_key! {
 /// Allow asset registration only from root origin
 pub struct AssetAuthority;
 impl EnsureOriginWithArg<Origin, Option<u32>> for AssetAuthority {
-    type Success = ();
+	type Success = ();
 
-    fn try_origin(origin: Origin, _asset_id: &Option<u32>) -> Result<Self::Success, Origin> {
-        EnsureRoot::try_origin(origin)
-    }
+	fn try_origin(origin: Origin, _asset_id: &Option<u32>) -> Result<Self::Success, Origin> {
+		EnsureRoot::try_origin(origin)
+	}
 
-    #[cfg(feature = "runtime-benchmarks")]
-    fn successful_origin(_asset_id: &Option<u32>) -> Origin {
-        EnsureRoot::successful_origin()
-    }
+	#[cfg(feature = "runtime-benchmarks")]
+	fn successful_origin(_asset_id: &Option<u32>) -> Origin {
+		EnsureRoot::successful_origin()
+	}
 }
 
 impl orml_asset_registry::Config for Runtime {
-    type Event = Event;
-    type Balance = Balance;
-    type CustomMetadata = CustomMetadata;
-    type AssetProcessor = SequentialId<Runtime>;
-    type AssetId = ForeignAssetId;
-    type AuthorityOrigin = AssetAuthority;
-    type WeightInfo = ();
+	type Event = Event;
+	type Balance = Balance;
+	type CustomMetadata = CustomMetadata;
+	type AssetProcessor = SequentialId<Runtime>;
+	type AssetId = ForeignAssetId;
+	type AuthorityOrigin = AssetAuthority;
+	type WeightInfo = ();
 }
 
 pub struct DustRemovalWhitelist;
@@ -640,23 +621,6 @@ impl orml_currencies::Config for Runtime {
 	type GetNativeCurrencyId = GetNativeCurrencyId;
 	type WeightInfo = ();
 }
-
-impl orml_unknown_tokens::Config for Runtime {
-	type Event = Event;
-}
-
-impl orml_xcm::Config for Runtime {
-	type Event = Event;
-	type SovereignOrigin = EnsureRootOrThreeFourthsCouncil;
-}
-
-// impl module_asset_registry::Config for Runtime {
-// 	type Event = Event;
-// 	type Currency = Balances;
-// 	type RegisterOrigin = EnsureRootOrHalfCouncil;
-// 	type WeightInfo = ();
-// }
-
 
 parameter_types! {
 	pub MinProposalDeposit: Balance = 100 * dollar(GAME);
