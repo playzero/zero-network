@@ -378,8 +378,7 @@ pub fn testnet_genesis(
 			..Default::default()
 		},
 		tokens: TokensConfig { balances: Default::default() },
-		control: ControlConfig { orgs: Default::default() },
-		asset_registry: Default::default(),
+		control: ControlConfig { orgs: Default::default() }
 	}
 }
 

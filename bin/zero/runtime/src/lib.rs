@@ -1576,27 +1576,9 @@ parameter_type_with_key! {
 				TokenSymbol::ZERO => cent(*currency_id),
 				TokenSymbol::PLAY => 10 * cent(*currency_id),
 				TokenSymbol::GAME => 10 * cent(*currency_id),
-
-				TokenSymbol::AUSD => 10 * cent(*currency_id),
 				TokenSymbol::DOT => cent(*currency_id),
-				TokenSymbol::LDOT => 5 * cent(*currency_id),
-
-				TokenSymbol::KAR |
-				TokenSymbol::KUSD |
-				TokenSymbol::KSM |
-				TokenSymbol::LKSM |
-				TokenSymbol::BNC |
-				TokenSymbol::PHA |
-				TokenSymbol::VSKSM |
-				TokenSymbol::ACA |
-				TokenSymbol::KBTC |
-				TokenSymbol::KINT |
-				TokenSymbol::TAI => Balance::max_value() // unsupported
 			},
-			// CurrencyId::ForeignAsset(_foreign_asset_id) => {
-			// 	AssetIdMaps::<Runtime>::get_foreign_asset_metadata(*foreign_asset_id).
-			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
-			// },
+			_ => Balance::max_value()
 		}
 	};
 }
