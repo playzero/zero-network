@@ -8,14 +8,14 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 mod weights;
 pub mod xcm_config;
+pub mod constants;
 
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
-use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
+	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, Convert, IdentifyAccount, Verify},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
 };
@@ -27,10 +27,9 @@ use sp_version::RuntimeVersion;
 
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU32, Contains, EitherOfDiverse, Everything},
+	traits::{ConstU32, Contains, EitherOfDiverse, EnsureOrigin, EnsureOriginWithArg, Everything},
 	weights::{
-		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
-		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
+		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight
 	},
 	PalletId,
 };
@@ -40,7 +39,6 @@ use frame_system::{
 };
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
-use xcm_config::{XcmConfig, XcmOriginToTransactDispatchOrigin};
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -52,16 +50,17 @@ use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 
 // XCM Imports
 use xcm::latest::prelude::BodyId;
-use xcm_executor::XcmExecutor;
 
+pub use constants::{fee::*, time::*};
 pub use primitives::{
-	currency::{ZERO, PLAY, GAME, CurrencyId, TokenSymbol},
+	currency::{ZERO, PLAY, GAME, DOT, AssetIds, AssetIdMapping, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
 	dollar, cent, millicent,
 	Amount, ReserveIdentifier
 };
 
-use orml_traits::{parameter_type_with_key, GetByKey};
+use orml_asset_registry::SequentialId;
 use orml_currencies::BasicCurrencyAdapter;
+use orml_traits::{parameter_type_with_key, GetByKey};
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -124,33 +123,6 @@ pub type Executive = frame_executive::Executive<
 	AllPalletsWithSystem,
 >;
 
-/// Handles converting a weight scalar to a fee value, based on the scale and granularity of the
-/// node's balance type.
-///
-/// This should typically create a mapping between the following ranges:
-///   - `[0, MAXIMUM_BLOCK_WEIGHT]`
-///   - `[Balance::min, Balance::max]`
-///
-/// Yet, it can be used for any other sort of change to weight-fee. Some examples being:
-///   - Setting it to `0` will essentially disable the weight fee.
-///   - Setting it to `1` will cause the literal `#[weight = x]` values to be charged.
-pub struct WeightToFee;
-impl WeightToFeePolynomial for WeightToFee {
-	type Balance = Balance;
-	fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
-		// in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1 MILLIUNIT:
-		// in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
-		let p = MILLIUNIT / 10;
-		let q = 100 * Balance::from(ExtrinsicBaseWeight::get());
-		smallvec![WeightToFeeCoefficient {
-			degree: 1,
-			negative: false,
-			coeff_frac: Perbill::from_rational(p % q, q),
-			coeff_integer: p / q,
-		}]
-	}
-}
-
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
@@ -179,29 +151,12 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("subzero"),
 	impl_name: create_runtime_str!("alphaville"),
 	authoring_version: 75,
-	spec_version: 60,
+	spec_version: 61,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
 	state_version: 1
 };
-
-/// This determines the average expected block time that we are targeting.
-/// Blocks will be produced at a minimum duration defined by `SLOT_DURATION`.
-/// `SLOT_DURATION` is picked up by `pallet_timestamp` which is in turn picked
-/// up by `pallet_aura` to implement `fn slot_duration()`.
-///
-/// Change this to adjust the block time.
-pub const MILLISECS_PER_BLOCK: u64 = 12000;
-
-// NOTE: Currently it is not possible to change the slot duration after the chain has started.
-//       Attempting to do so will brick block production.
-pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
-
-// Time is measured by number of blocks.
-pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
-pub const HOURS: BlockNumber = MINUTES * 60;
-pub const DAYS: BlockNumber = HOURS * 24;
 
 // Unit = the base number of indivisible units for balances
 pub const UNIT: Balance = 1_000_000_000_000;
@@ -420,6 +375,11 @@ type EnsureRootOrHalfCouncil = EitherOfDiverse<
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 >;
 
+type EnsureRootOrThreeFourthsCouncil = EitherOfDiverse<
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 3, 4>,
+>;
+
 type CouncilCollective = pallet_collective::Instance1;
 impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type Origin = Origin;
@@ -470,8 +430,8 @@ impl pallet_treasury::Config for Runtime {
 }
 
 parameter_types! {
-	pub BasicDeposit: Balance = 10 * dollar(ZERO);       // 258 bytes on-chain
-	pub FieldDeposit: Balance = 250 * cent(ZERO);        // 66 bytes on-chain
+	pub BasicDeposit: Balance = 10 * dollar(ZERO);	   // 258 bytes on-chain
+	pub FieldDeposit: Balance = 250 * cent(ZERO);		// 66 bytes on-chain
 	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);   // 53 bytes on-chain
 }
 
@@ -510,23 +470,6 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 impl parachain_info::Config for Runtime {}
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
-
-impl cumulus_pallet_xcmp_queue::Config for Runtime {
-	type Event = Event;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type ChannelInfo = ParachainSystem;
-	type VersionWrapper = ();
-	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
-	type ControllerOrigin = EnsureRoot<AccountId>;
-	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
-	type WeightInfo = ();
-}
-
-impl cumulus_pallet_dmp_queue::Config for Runtime {
-	type Event = Event;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
-}
 
 parameter_types! {
 	pub const Period: u32 = 6 * HOURS;
@@ -607,30 +550,39 @@ parameter_type_with_key! {
 				TokenSymbol::ZERO => cent(*currency_id),
 				TokenSymbol::PLAY => 10 * cent(*currency_id),
 				TokenSymbol::GAME => 10 * cent(*currency_id),
-
-				TokenSymbol::AUSD => 10 * cent(*currency_id),
 				TokenSymbol::DOT => cent(*currency_id),
-				TokenSymbol::LDOT => 5 * cent(*currency_id),
-
-				TokenSymbol::KAR |
-				TokenSymbol::KUSD |
-				TokenSymbol::KSM |
-				TokenSymbol::LKSM |
-				TokenSymbol::BNC |
-				TokenSymbol::PHA |
-				TokenSymbol::VSKSM |
-				TokenSymbol::ACA |
-				TokenSymbol::KBTC |
-				TokenSymbol::KINT |
-				TokenSymbol::TAI => Balance::max_value() // unsupported
 			},
-			// TODO: add module_asset_registry
-			// CurrencyId::ForeignAsset(_foreign_asset_id) => {
-			// 	AssetIdMaps::<Runtime>::get_foreign_asset_metadata(*foreign_asset_id).
-			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
-			// },
+			CurrencyId::ForeignAsset(id) => {
+				AssetRegistry::metadata(&id)
+					.map_or(Balance::max_value(), |metadata| metadata.existential_deposit)
+			},
 		}
 	};
+}
+
+/// Allow asset registration only from root origin
+pub struct AssetAuthority;
+impl EnsureOriginWithArg<Origin, Option<u32>> for AssetAuthority {
+	type Success = ();
+
+	fn try_origin(origin: Origin, _asset_id: &Option<u32>) -> Result<Self::Success, Origin> {
+		EnsureRoot::try_origin(origin)
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn successful_origin(_asset_id: &Option<u32>) -> Origin {
+		EnsureRoot::successful_origin()
+	}
+}
+
+impl orml_asset_registry::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type CustomMetadata = CustomMetadata;
+	type AssetProcessor = SequentialId<Runtime>;
+	type AssetId = ForeignAssetId;
+	type AuthorityOrigin = AssetAuthority;
+	type WeightInfo = ();
 }
 
 pub struct DustRemovalWhitelist;
@@ -759,9 +711,6 @@ construct_runtime!(
 	{
 		// System support stuff.
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>} = 0,
-		ParachainSystem: cumulus_pallet_parachain_system::{
-			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
-		} = 1,
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 2,
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 3,
 		Council: pallet_collective::<Instance1> = 4,
@@ -788,11 +737,19 @@ construct_runtime!(
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 32,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
 
-		// ORML pallets:
-		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
-		Currencies: orml_currencies::{Pallet, Call} = 41,
+		ParachainSystem: cumulus_pallet_parachain_system::{
+			Pallet, Call, Config, Storage, Inherent, Event<T>,
+		} = 1,
 
-		// GameDAO protocol pallets:
+		// ORML:
+		AssetRegistry: orml_asset_registry::{Pallet, Storage, Call, Event<T>, Config<T>} = 40,
+		Currencies: orml_currencies::{Pallet, Call} = 41,
+		OrmlXcm: orml_xcm::{Pallet, Call, Event<T>} = 42,
+		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 43,
+		UnknownTokens: orml_unknown_tokens::{Pallet, Storage, Event} = 44,
+		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 45,
+
+		// GameDAO protocol:
 		Flow: gamedao_flow = 50,
 		Sense: gamedao_sense = 51,
 		Control: gamedao_control = 52,

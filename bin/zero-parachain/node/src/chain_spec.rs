@@ -1,13 +1,13 @@
 use cumulus_primitives_core::ParaId;
-use subzero_parachain_runtime::{AccountId, AuraId, Signature, SudoConfig};
-use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
+use subzero_parachain_runtime::{AccountId, AuraId, SS58Prefix, Signature, SudoConfig};
+use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup, Properties};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 use primitives::{
-	currency::ZERO,
+	currency::{ZERO, PLAY, GAME, DOT, TokenInfo},
 	cent
 };
 
@@ -67,8 +67,24 @@ pub fn subzero_session_keys(keys: AuraId) -> subzero_parachain_runtime::SessionK
 	subzero_parachain_runtime::SessionKeys { aura: keys }
 }
 
-pub fn development_config() -> ChainSpec {
+/// Give your currencies a unit name and decimal places
+pub fn get_properties() -> Properties {
+	let mut properties = Properties::new();
+	let mut token_symbol: Vec<String> = vec![];
+	let mut token_decimals: Vec<u32> = vec![];
+	[ZERO, PLAY, GAME, DOT].iter().for_each(|token| {
+		token_symbol.push(token.symbol().unwrap().to_string());
+		token_decimals.push(token.decimals().unwrap() as u32);
+	});
+	properties.insert("tokenSymbol".into(), token_symbol.into());
+	properties.insert("tokenDecimals".into(), token_decimals.into());
+	properties.insert("ss58Format".into(), SS58Prefix::get().into());
+	properties
+}
 
+pub fn development_config() -> ChainSpec {
+	// Give your base currency a unit name and decimal places
+	let properties = get_properties();
 	ChainSpec::from_genesis(
 		// Name
 		"Development",
@@ -110,7 +126,7 @@ pub fn development_config() -> ChainSpec {
 		None,
 		None,
 		None,
-		None,
+		Some(properties),
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: DEFAULT_PARA_ID,
@@ -119,11 +135,7 @@ pub fn development_config() -> ChainSpec {
 }
 
 pub fn local_testnet_config() -> ChainSpec {
-	// Give your base currency a unit name and decimal places
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "ZERO".into());
-	properties.insert("tokenDecimals".into(), 18.into());
-	properties.insert("ss58Format".into(), 25.into());
+	let properties = get_properties();
 
 	ChainSpec::from_genesis(
 		// Name
@@ -225,6 +237,7 @@ fn testnet_genesis(
 		council: Default::default(),
 		treasury: Default::default(),
 		tokens: Default::default(),
-		control: Default::default()
+		control: Default::default(),
+		asset_registry: Default::default(),
 	}
 }

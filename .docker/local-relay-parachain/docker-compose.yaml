@@ -1,110 +1,82 @@
 version: "3.7"
-
 services:
-  relay-chain-a:
+  relaychain-alice:
     image: parity/polkadot:v0.9.25
     user: "0:0"
-    command:
-      - "--alice"
-      - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
-      - "--validator"
-      - "--base-path=/tmp/relay/alice"
-      - "--chain=/chainspec/rococo-local-raw.json"
-      - "--port=30333"
-      - "--ws-port=9944"
-      - "--unsafe-ws-external"
-      - "--rpc-cors=all"
+    ports:
+      - 9944:9944
+      - 9933:9933
+      - 30333:30333
     volumes:
       - "./chainspec:/chainspec"
       - "./tmp:/tmp"
-    ports:
-      - "9944:9944"
-  relay-chain-b:
+    command:
+      - --base-path=/tmp/relay/alice
+      - --chain=/chainspec/rococo-local.json
+      - --validator
+      - --ws-external
+      - --rpc-external
+      - --rpc-cors=all
+      - --name=alice
+      - --alice
+      - --rpc-methods=unsafe
+      - --wasm-execution=compiled
+      - --execution=wasm
+    environment:
+      RUST_LOG: parachain::candidate-backing=trace,parachain::candidate-selection=trace,parachain::pvf=trace,parachain::collator-protocol=trace,parachain::provisioner=trace
+  relaychain-bob:
     image: parity/polkadot:v0.9.25
     user: "0:0"
-    command:
-      - "--bob"
-      - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
-      - "--validator"
-      - "--base-path=/tmp/relay/bob"
-      - "--chain=/chainspec/rococo-local-raw.json"
-      - "--port=30333"
-      - "--ws-port=9944"
-      - "--unsafe-ws-external"
-      - "--rpc-cors=all"
-      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    ports:
+      - 9945:9944
+      - 9934:9933
+      - 30334:30333
     volumes:
       - "./chainspec:/chainspec"
       - "./tmp:/tmp"
-    ports:
-      - "9945:9944"
-  parachain-a:
+    command:
+      - --base-path=/tmp/relay/bob
+      - --chain=/chainspec/rococo-local.json
+      - --validator
+      - --ws-external
+      - --rpc-external
+      - --rpc-cors=all
+      - --name=bob
+      - --bob
+      - --rpc-methods=unsafe
+      - --wasm-execution=compiled
+      - --execution=wasm
+    environment:
+      RUST_LOG: parachain::candidate-backing=trace,parachain::candidate-selection=trace,parachain::pvf=trace,parachain::collator-protocol=trace,parachain::provisioner=trace
+  parachain-alice:
     image: playzero/subzero:local
     user: "0:0"
-    command:
-      - "/usr/local/bin/subzero-collator"
-      - "--alice"
-      - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
-      - "--collator"
-      - "--force-authoring"
-      - "--chain=/chainspec/subzero-parachain-raw.json"
-      - "--base-path=/tmp/parachain/alice"
-      - "--port=40333"
-      - "--ws-port=8844"
-      - "--unsafe-ws-external"
-      - "--rpc-cors=all"
-      - "--prometheus-port=9615"
-      - "--prometheus-external"
-      - "--"
-      - "--execution=wasm"
-      - "--chain=/chainspec/rococo-local-raw.json"
-      - "--port=30343"
-      - "--ws-port=9944"
-      - "--unsafe-ws-external"
-      - "--rpc-cors=all"
-      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    ports:
+      - 9946:9944
+      - 9935:9933
+      - 30335:30333
     volumes:
       - "./chainspec:/chainspec"
       - "./tmp:/tmp"
-    ports:
-      - "9954:9944"
-      - "9955:8844"
-      - "9615:9615"
-    depends_on:
-      - relay-chain-a
-      - relay-chain-b
-  parachain-b:
-    image: playzero/subzero:local
-    user: "0:0"
     command:
-      - "/usr/local/bin/subzero-collator"
-      - "--bob"
-      - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
-      - "--collator"
-      - "--force-authoring"
-      - "--chain=/chainspec/subzero-parachain-raw.json"
-      - "--base-path=/tmp/parachain/bob"
-      - "--port=40333"
-      - "--ws-port=8844"
-      - "--unsafe-ws-external"
-      - "--rpc-cors=all"
-      - "--prometheus-port=9615"
-      - "--prometheus-external"
-      - "--"
-      - "--execution=wasm"
-      - "--chain=/chainspec/rococo-local-raw.json"
-      - "--port=30343"
-      - "--ws-port=9944"
-      - "--unsafe-ws-external"
-      - "--rpc-cors=all"
-      - "--bootnodes=/dns/relay-chain-a/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
-    volumes:
-      - "./chainspec:/chainspec"
-      - "./tmp:/tmp"
-    ports:
-      - "9956:9944"
-      - "9957:8844"
-      - "9616:9615"
-    depends_on:
-      - relay-chain-a
-      - relay-chain-b
+      - /usr/local/bin/subzero
+      - --chain=/chainspec/subzero.json
+      - --base-path=/tmp/parachain/alice
+      - --ws-external
+      - --rpc-external
+      - --rpc-cors=all
+      - --name=parachain-4040-0
+      - --collator
+      - --rpc-methods=unsafe
+      - --force-authoring
+      - --wasm-execution=compiled
+      - --execution=wasm
+      - --alice
+      - --node-key=bb4c6473c146d05a48d8b87fcd15229b825031d0ff5cca3a94024861306fe7aa
+      - --listen-addr=/ip4/0.0.0.0/tcp/30333
+      - --
+      - --chain=/chainspec/rococo-local.json
+      - --wasm-execution=compiled
+      - --execution=wasm
+    environment:
+      RUST_LOG: sc_basic_authorship=trace,cumulus-consensus=trace,cumulus-collator=trace,collator_protocol=trace,collation_generation=trace,aura=debug,xcm=trace

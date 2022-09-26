@@ -1,11 +1,10 @@
 [package]
 name = "subzero-parachain-runtime"
-version = "0.1.0"
-authors = ["Anonymous"]
-description = "A new Cumulus FRAME-based Substrate Runtime, ready for hacking together a parachain."
-license = "Unlicense"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/cumulus/"
+version = "3.1.61"
+authors = ["ZERO <play@zero.io>"]
+license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
+homepage = "https://zero.io"
+repository = "https://github.com/playzero/zero-network/"
 edition = "2021"
 
 [package.metadata.docs.rs]
@@ -78,11 +77,15 @@ pallet-collator-selection = { git = 'https://github.com/paritytech/cumulus', bra
 parachain-info = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
 
 primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../modules/primitives" }
-module-asset-registry = { path = "../../../modules/asset-registry", default-features = false }
 
+orml-asset-registry = { path = "../../../modules/orml/asset-registry", default-features = false }
+orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
 orml-tokens = { path = "../../../modules/orml/tokens", default-features = false }
 orml-traits = { path = "../../../modules/orml/traits", default-features = false }
-orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
+orml-unknown-tokens = { path = "../../../modules/orml/unknown-tokens", default-features = false }
+orml-xcm = { path = "../../../modules/orml/xcm", default-features = false }
+orml-xcm-support = { path = "../../../modules/orml/xcm-support", default-features = false }
+orml-xtokens = { path = "../../../modules/orml/xtokens", default-features = false }
 
 gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
 gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-features = false }
@@ -146,11 +149,15 @@ std = [
 	"xcm/std",
 
 	"primitives/std",
-	"module-asset-registry/std",
 
-	"orml-tokens/std",
+	"orml-asset-registry/std",
 	"orml-currencies/std",
+	"orml-tokens/std",
 	"orml-traits/std",
+	"orml-unknown-tokens/std",
+	"orml-xcm-support/std",
+	"orml-xcm/std",
+	"orml-xtokens/std",
 
 	"gamedao-sense/std",
 	"gamedao-traits/std",
@@ -178,8 +185,6 @@ runtime-benchmarks = [
 	"xcm-builder/runtime-benchmarks",
 	"cumulus-pallet-session-benchmarking/runtime-benchmarks",
 	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
-
-	"module-asset-registry/runtime-benchmarks",
 
 	"gamedao-traits/runtime-benchmarks",
 	"gamedao-sense/runtime-benchmarks",

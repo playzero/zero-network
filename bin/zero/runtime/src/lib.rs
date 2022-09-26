@@ -133,7 +133,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 60,
+	spec_version: 61,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1576,28 +1576,9 @@ parameter_type_with_key! {
 				TokenSymbol::ZERO => cent(*currency_id),
 				TokenSymbol::PLAY => 10 * cent(*currency_id),
 				TokenSymbol::GAME => 10 * cent(*currency_id),
-
-				TokenSymbol::AUSD => 10 * cent(*currency_id),
 				TokenSymbol::DOT => cent(*currency_id),
-				TokenSymbol::LDOT => 5 * cent(*currency_id),
-
-				TokenSymbol::KAR |
-				TokenSymbol::KUSD |
-				TokenSymbol::KSM |
-				TokenSymbol::LKSM |
-				TokenSymbol::BNC |
-				TokenSymbol::PHA |
-				TokenSymbol::VSKSM |
-				TokenSymbol::ACA |
-				TokenSymbol::KBTC |
-				TokenSymbol::KINT |
-				TokenSymbol::TAI => Balance::max_value() // unsupported
 			},
-			// TODO: add module_asset_registry
-			// CurrencyId::ForeignAsset(_foreign_asset_id) => {
-			// 	AssetIdMaps::<Runtime>::get_foreign_asset_metadata(*foreign_asset_id).
-			// 		map_or(Balance::max_value(), |metatata| metatata.minimal_balance)
-			// },
+			_ => Balance::max_value()
 		}
 	};
 }
@@ -1725,13 +1706,6 @@ impl gamedao_sense::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
-impl module_asset_registry::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type RegisterOrigin = EnsureRootOrHalfGeneralCouncil;
-	type WeightInfo = ();
-}
-
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1807,7 +1781,6 @@ construct_runtime!(
 
 		// Zero pallets:
 		// Migration: module_migration,
-		AssetRegistry: module_asset_registry,
 	}
 );
 
@@ -1918,7 +1891,6 @@ mod benches {
 		[gamedao_control, Control]
 		[gamedao_flow, Flow]
 		[gamedao_signal, Signal]
-		[module_asset_registry, AssetRegistry]
 	);
 }
 
