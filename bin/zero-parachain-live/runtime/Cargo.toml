@@ -1,6 +1,6 @@
 [package]
-name = "parachain-subzero-runtime-live"
-version = "0.1.0"
+name = "subzero-parachain-runtime-live"
+version = "3.1.62"
 authors = ["ZERO <play@zero.io>"]
 license = "Apache-2.0"
 homepage = "https://zero.io"
@@ -42,6 +42,7 @@ pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-fe
 pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.25" }
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.25" }
 pallet-treasury = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.25" }
+pallet-uniques = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.25" }
 sp-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.25" }
 sp-block-builder = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.25" }
 sp-consensus-aura = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.25" }
@@ -76,16 +77,17 @@ cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", de
 pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
 parachain-info = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
 
-primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../primitives" }
+primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../modules/primitives" }
 
 # ORML
-orml-currencies = { path = "../../../orml/currencies", default-features = false }
-orml-tokens = { path = "../../../orml/tokens", default-features = false }
-orml-traits = { path = "../../../orml/traits", default-features = false }
-orml-unknown-tokens = { path = "../../../orml/unknown-tokens", default-features = false }
-orml-xcm = { path = "../../../orml/xcm", default-features = false }
-orml-xcm-support = { path = "../../../orml/xcm-support", default-features = false }
-orml-xtokens = { path = "../../../orml/xtokens", default-features = false }
+orml-asset-registry = { path = "../../../modules/orml/asset-registry", default-features = false }
+orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
+orml-tokens = { path = "../../../modules/orml/tokens", default-features = false }
+orml-traits = { path = "../../../modules/orml/traits", default-features = false }
+orml-unknown-tokens = { path = "../../../modules/orml/unknown-tokens", default-features = false }
+orml-xcm = { path = "../../../modules/orml/xcm", default-features = false }
+orml-xcm-support = { path = "../../../modules/orml/xcm-support", default-features = false }
+orml-xtokens = { path = "../../../modules/orml/xtokens", default-features = false }
 
 [features]
 default = [
@@ -122,6 +124,7 @@ std = [
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
+	"pallet-uniques/std",
 	"pallet-xcm/std",
 	"parachain-info/std",
 	"polkadot-parachain/std",
@@ -144,6 +147,7 @@ std = [
 
 	"primitives/std",
 
+	"orml-asset-registry/std",
 	"orml-currencies/std",
 	"orml-tokens/std",
 	"orml-traits/std",
@@ -160,7 +164,12 @@ runtime-benchmarks = [
 	"frame-system-benchmarking",
 	"frame-system/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
+	"pallet-bounties/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
+	"pallet-collective/runtime-benchmarks",
+	"pallet-child-bounties/runtime-benchmarks",
+	"pallet-identity/runtime-benchmarks",
+	"pallet-treasury/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",

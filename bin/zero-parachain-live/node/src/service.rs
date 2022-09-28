@@ -8,7 +8,7 @@ use jsonrpsee::RpcModule;
 
 use cumulus_client_cli::CollatorOptions;
 // Local Runtime Types
-use parachain_subzero_runtime_live::{
+use subzero_parachain_runtime_live::{
 	opaque::Block, AccountId, Balance, Hash, Index as Nonce, RuntimeApi,
 };
 
@@ -44,11 +44,11 @@ impl sc_executor::NativeExecutionDispatch for SubzeroRuntimeExecutor {
 	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		parachain_subzero_runtime_live::api::dispatch(method, data)
+		subzero_parachain_runtime_live::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		parachain_subzero_runtime_live::native_version()
+		subzero_parachain_runtime_live::native_version()
 	}
 }
 

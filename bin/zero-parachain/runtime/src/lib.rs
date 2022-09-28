@@ -27,7 +27,7 @@ use sp_version::RuntimeVersion;
 
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{ConstU32, Contains, EitherOfDiverse, EnsureOrigin, EnsureOriginWithArg, Everything},
+	traits::{AsEnsureOriginWithArg, ConstU32, Contains, EitherOfDiverse, EnsureOrigin, EnsureOriginWithArg, Everything},
 	weights::{
 		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight
 	},
@@ -35,7 +35,7 @@ use frame_support::{
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
-	EnsureRoot,
+	EnsureRoot, EnsureSigned
 };
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
@@ -151,7 +151,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("subzero"),
 	impl_name: create_runtime_str!("alphaville"),
 	authoring_version: 75,
-	spec_version: 61,
+	spec_version: 62,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -379,6 +379,34 @@ type EnsureRootOrThreeFourthsCouncil = EitherOfDiverse<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 3, 4>,
 >;
+
+parameter_types! {
+	pub CollectionDeposit: Balance = dollar(ZERO) * 100;
+	pub ItemDeposit: Balance = dollar(ZERO);
+	pub MetadataDepositBase: Balance = dollar(ZERO) * 10;
+	pub MetadataDepositPerByte: Balance = dollar(ZERO);
+}
+
+impl pallet_uniques::Config for Runtime {
+	type Event = Event;
+	type CollectionId = u32;
+	type ItemId = u32;
+	type Currency = Balances;
+	type ForceOrigin = EnsureRoot<AccountId>;
+	type CollectionDeposit = CollectionDeposit;
+	type ItemDeposit = ItemDeposit;
+	type MetadataDepositBase = MetadataDepositBase;
+	type AttributeDepositBase = MetadataDepositBase;
+	type DepositPerByte = MetadataDepositPerByte;
+	type StringLimit = StringLimit;
+	type KeyLimit = ConstU32<32>;
+	type ValueLimit = ConstU32<256>;
+	type WeightInfo = pallet_uniques::weights::SubstrateWeight<Runtime>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type Helper = ();
+	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+	type Locker = ();
+}
 
 type CouncilCollective = pallet_collective::Instance1;
 impl pallet_collective::Config<CouncilCollective> for Runtime {
@@ -723,6 +751,9 @@ construct_runtime!(
 		// Monetary stuff.
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 10,
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 11,
+
+		// NFT
+		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>} = 18,
 
 		// Collator support. The order of these 4 are important and shall not change.
 		Authorship: pallet_authorship::{Pallet, Call, Storage} = 20,

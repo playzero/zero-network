@@ -1,5 +1,5 @@
 use cumulus_primitives_core::ParaId;
-use parachain_subzero_runtime_live::{AccountId, AuraId, Signature, SudoConfig};
+use subzero_parachain_runtime_live::{AccountId, AuraId, Signature, SudoConfig};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,7 @@ use primitives::{
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec =
-	sc_service::GenericChainSpec<parachain_subzero_runtime_live::GenesisConfig, Extensions>;
+	sc_service::GenericChainSpec<subzero_parachain_runtime_live::GenesisConfig, Extensions>;
 
 /// The default XCM version to set in genesis config.
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
@@ -63,8 +63,8 @@ where
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn subzero_session_keys(keys: AuraId) -> parachain_subzero_runtime_live::SessionKeys {
-	parachain_subzero_runtime_live::SessionKeys { aura: keys }
+pub fn subzero_session_keys(keys: AuraId) -> subzero_parachain_runtime_live::SessionKeys {
+	subzero_parachain_runtime_live::SessionKeys { aura: keys }
 }
 
 pub fn development_config() -> ChainSpec {
@@ -185,24 +185,24 @@ fn testnet_genesis(
 	endowed_accounts: Vec<AccountId>,
 	root_key: AccountId,
 	id: ParaId,
-) -> parachain_subzero_runtime_live::GenesisConfig {
-	parachain_subzero_runtime_live::GenesisConfig {
-		system: parachain_subzero_runtime_live::SystemConfig {
-			code: parachain_subzero_runtime_live::WASM_BINARY
+) -> subzero_parachain_runtime_live::GenesisConfig {
+	subzero_parachain_runtime_live::GenesisConfig {
+		system: subzero_parachain_runtime_live::SystemConfig {
+			code: subzero_parachain_runtime_live::WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 		},
 		sudo: SudoConfig { key: Some(root_key) },
-		balances: parachain_subzero_runtime_live::BalancesConfig {
+		balances: subzero_parachain_runtime_live::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
-		parachain_info: parachain_subzero_runtime_live::ParachainInfoConfig { parachain_id: id },
-		collator_selection: parachain_subzero_runtime_live::CollatorSelectionConfig {
+		parachain_info: subzero_parachain_runtime_live::ParachainInfoConfig { parachain_id: id },
+		collator_selection: subzero_parachain_runtime_live::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
 			candidacy_bond: cent(ZERO) * 16,
 			..Default::default()
 		},
-		session: parachain_subzero_runtime_live::SessionConfig {
+		session: subzero_parachain_runtime_live::SessionConfig {
 			keys: invulnerables
 				.into_iter()
 				.map(|(acc, aura)| {
@@ -219,11 +219,12 @@ fn testnet_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
-		polkadot_xcm: parachain_subzero_runtime_live::PolkadotXcmConfig {
+		polkadot_xcm: subzero_parachain_runtime_live::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
 		council: Default::default(),
 		treasury: Default::default(),
 		tokens: Default::default(),
+		asset_registry: Default::default(),
 	}
 }
