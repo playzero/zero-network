@@ -10,11 +10,11 @@ services:
     volumes:
       - ${PWD}/tmp/alice:/tmp/alice
 # add this one for using the local build vs docker
-#      - ../../target/release/subzero:/usr/local/bin/subzero
+#      - ../../target/release/subzero:/usr/local/bin/subzero-standalone
     networks:
       - int
     command:
-      - "/usr/local/bin/subzero"
+      - "/usr/local/bin/subzero-standalone"
       - "--node-key"
       - "0000000000000000000000000000000000000000000000000000000000000001"
       - "--base-path"
@@ -45,11 +45,11 @@ services:
     volumes:
       - ${PWD}/tmp/bob:/tmp/bob
 # add this one for using the local build vs docker
-#      - ../../target/release/subzero:/usr/local/bin/subzero
+#      - ../../target/release/subzero:/usr/local/bin/subzero-standalone
     networks:
       - int
     command:
-      - "/usr/local/bin/subzero"
+      - "/usr/local/bin/subzero-standalone"
       - "--node-key"
       - "0000000000000000000000000000000000000000000000000000000000000002"
       - "--base-path"
@@ -79,11 +79,11 @@ services:
     volumes:
       - ${PWD}/tmp/charlie:/tmp/charlie
 # add this one for using the local build vs docker
-#      - ../../target/release/subzero:/usr/local/bin/subzero
+#      - ../../target/release/subzero:/usr/local/bin/subzero-standalone
     networks:
       - int
     command:
-      - "/usr/local/bin/subzero"
+      - "/usr/local/bin/subzero-standalone"
       - "--node-key"
       - "0000000000000000000000000000000000000000000000000000000000000003"
       - "--base-path"
@@ -113,11 +113,11 @@ services:
     volumes:
       - ${pwd}/tmp/light:/tmp/light
 # add this one for using the local build vs docker:
-#     - ../../target/release/subzero:/usr/local/bin/subzero
+#     - ../../target/release/subzero:/usr/local/bin/subzero-standalone
     networks:
       - int
     command:
-      - "/usr/local/bin/subzero"
+      - "/usr/local/bin/subzero-standalone"
       - "--node-key"
       - "0000000000000000000000000000000000000000000000000000000000000004"
       - "--base-path"
