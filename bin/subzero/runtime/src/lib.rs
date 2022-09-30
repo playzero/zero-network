@@ -29,7 +29,7 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU32, Contains, EitherOfDiverse, EnsureOrigin, EnsureOriginWithArg, Everything},
 	weights::{
-		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
+		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight
 	},
 	PalletId,
 };
@@ -53,7 +53,7 @@ use xcm::latest::prelude::BodyId;
 
 pub use constants::{fee::*, time::*};
 pub use primitives::{
-	currency::{ZERO, PLAY, GAME, DOT, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
+	currency::{ZERO, PLAY, GAME, DOT, AssetIds, AssetIdMapping, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
 	dollar, cent, millicent,
 	Amount, ReserveIdentifier
 };
@@ -148,8 +148,8 @@ impl_opaque_keys! {
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("zero"),
-	impl_name: create_runtime_str!("live"),
+	spec_name: create_runtime_str!("subzero"),
+	impl_name: create_runtime_str!("dev"),
 	authoring_version: 75,
 	spec_version: 62,
 	impl_version: 0,
@@ -328,6 +328,7 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
+	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
 	pub BountyValueMinimum: Balance = 5 * dollar(ZERO);
 	pub BountyDepositBase: Balance = 1 * dollar(ZERO);
 	pub const CuratorDepositMultiplier: Permill = Permill::from_percent(50);
@@ -362,6 +363,7 @@ impl pallet_child_bounties::Config for Runtime {
 	type ChildBountyValueMinimum = ChildBountyValueMinimum;
 	type WeightInfo = pallet_child_bounties::weights::SubstrateWeight<Runtime>;
 }
+
 
 parameter_types! {
 	pub const CouncilMotionDuration: BlockNumber = 5 * DAYS;
@@ -423,6 +425,9 @@ parameter_types! {
 	pub ProposalBondMinimum: Balance = 1 * dollar(ZERO);
 	pub const SpendPeriod: BlockNumber = 1 * DAYS;
 	pub const Burn: Permill = Permill::from_percent(50);
+	// pub const TipCountdown: BlockNumber = 1 * DAYS;
+	// pub const TipFindersFee: Percent = Percent::from_percent(20);
+	// pub TipReportDepositBase: Balance = 1 * dollar(ZERO);
 	pub DataDepositPerByte: Balance = 1 * cent(ZERO);
 	pub const MaximumReasonLength: u32 = 300;
 }
@@ -453,9 +458,9 @@ impl pallet_treasury::Config for Runtime {
 }
 
 parameter_types! {
-	pub BasicDeposit: Balance = 10 * dollar(ZERO);		// 258 bytes on-chain
+	pub BasicDeposit: Balance = 10 * dollar(ZERO);	   // 258 bytes on-chain
 	pub FieldDeposit: Balance = 250 * cent(ZERO);		// 66 bytes on-chain
-	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);	// 53 bytes on-chain
+	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);   // 53 bytes on-chain
 }
 
 impl pallet_identity::Config for Runtime {
@@ -645,6 +650,86 @@ impl orml_currencies::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub MinProposalDeposit: Balance = 100 * dollar(GAME);
+	pub SlashingMajority: Permill = Permill::from_rational(2u32, 3u32);
+	pub GameDAOGetsFromSlashing: Permill = Permill::from_rational(1u32, 10u32);
+	pub const MaxMembersPerOrg: u32 = 1000;
+	pub const ProposalDurationLimits: (BlockNumber, BlockNumber) = (100, 864000);
+}
+
+impl gamedao_signal::Config for Runtime {
+	type WeightInfo = gamedao_signal::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Currency = Currencies;
+	type CurrencyId = CurrencyId;
+	type PaymentTokenId = GetStableCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type Balance = Balance;
+	type Flow = Flow;
+	type Control = Control;
+	type MinProposalDeposit = MinProposalDeposit;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
+	type SlashingMajority = SlashingMajority;
+	type GameDAOGetsFromSlashing = GameDAOGetsFromSlashing;
+	type MaxMembers = MaxMembersPerOrg;
+	type ProposalDurationLimits = ProposalDurationLimits;
+	type MaxProposalsPerBlock = ConstU32<100>;
+	type StringLimit = StringLimit;
+}
+
+parameter_types! {
+	pub OrgMinimumDeposit: Balance = 1 * dollar(GAME);
+}
+
+impl gamedao_control::Config for Runtime {
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type WeightInfo = gamedao_control::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Currency = Currencies;
+	type MaxMembers = MaxMembersPerOrg;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type PaymentTokenId = GetStableCurrencyId;
+	type MinimumDeposit = OrgMinimumDeposit;
+	type PalletId = ControlPalletId;
+	type StringLimit = StringLimit;
+}
+
+parameter_types! {
+	pub MinContribution: Balance = 1 * dollar(PLAY);
+	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
+	pub MinCampaignDeposit: Permill = Permill::from_rational(1u32, 10u32); // 10%
+	pub const CampaignDurationLimits: (BlockNumber, BlockNumber) = (24 * HOURS, 60 * DAYS);
+}
+
+impl gamedao_flow::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type WeightInfo = gamedao_flow::weights::SubstrateWeight<Runtime>;
+	type Currency = Currencies;
+	type Control = Control;
+	type GameDAOTreasury = GameDAOTreasuryAccountId;
+	type MinNameLength = ConstU32<4>;
+	type MaxCampaignsPerBlock = ConstU32<10>;
+	type MaxCampaignContributors = ConstU32<10000>;
+	type MaxContributorsProcessing = ConstU32<100>;
+	type MinContribution = MinContribution;
+	type MinCampaignDeposit = MinCampaignDeposit;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type PaymentTokenId = GetStableCurrencyId;
+	type CampaignFee = CampaignFee;
+	type StringLimit = StringLimit;
+	type CampaignDurationLimits = CampaignDurationLimits;
+}
+
+impl gamedao_sense::Config for Runtime {
+	type Event = Event;
+	type WeightInfo = gamedao_sense::weights::SubstrateWeight<Runtime>;
+	type StringLimit = StringLimit;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -654,9 +739,6 @@ construct_runtime!(
 	{
 		// System support stuff.
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>} = 0,
-		ParachainSystem: cumulus_pallet_parachain_system::{
-			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
-		} = 1,
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 2,
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 3,
 		Council: pallet_collective::<Instance1> = 4,
@@ -686,6 +768,10 @@ construct_runtime!(
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 32,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
 
+		ParachainSystem: cumulus_pallet_parachain_system::{
+			Pallet, Call, Config, Storage, Inherent, Event<T>,
+		} = 1,
+
 		// ORML:
 		AssetRegistry: orml_asset_registry::{Pallet, Storage, Call, Event<T>, Config<T>} = 40,
 		Currencies: orml_currencies::{Pallet, Call} = 41,
@@ -693,6 +779,12 @@ construct_runtime!(
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 43,
 		UnknownTokens: orml_unknown_tokens::{Pallet, Storage, Event} = 44,
 		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 45,
+
+		// GameDAO protocol:
+		Flow: gamedao_flow = 50,
+		Sense: gamedao_sense = 51,
+		Control: gamedao_control = 52,
+		Signal: gamedao_signal = 53,
 	}
 );
 

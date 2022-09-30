@@ -1,8 +1,8 @@
 [package]
-name = "zero-runtime"
+name = "subzero-runtime"
 version = "3.1.62"
 authors = ["ZERO <play@zero.io>"]
-license = "Apache-2.0"
+license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 homepage = "https://zero.io"
 repository = "https://github.com/playzero/zero-network/"
 edition = "2021"
@@ -65,21 +65,20 @@ xcm-builder = { git = "https://github.com/paritytech/polkadot", default-features
 xcm-executor = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.25" }
 
 # Cumulus
-cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-cumulus-pallet-dmp-queue = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-cumulus-pallet-session-benchmarking = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25", version = "3.0.0"}
-cumulus-pallet-xcm = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-cumulus-primitives-core = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-cumulus-primitives-timestamp = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
-parachain-info = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.25" }
+cumulus-pallet-aura-ext = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+cumulus-pallet-dmp-queue = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+cumulus-pallet-parachain-system = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+cumulus-pallet-session-benchmarking = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false}
+cumulus-pallet-xcm = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+cumulus-pallet-xcmp-queue = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+cumulus-primitives-core = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+cumulus-primitives-timestamp = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+cumulus-primitives-utility = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+pallet-collator-selection = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
+parachain-info = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.25', default-features = false }
 
 primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../modules/primitives" }
 
-# ORML
 orml-asset-registry = { path = "../../../modules/orml/asset-registry", default-features = false }
 orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
 orml-tokens = { path = "../../../modules/orml/tokens", default-features = false }
@@ -88,6 +87,12 @@ orml-unknown-tokens = { path = "../../../modules/orml/unknown-tokens", default-f
 orml-xcm = { path = "../../../modules/orml/xcm", default-features = false }
 orml-xcm-support = { path = "../../../modules/orml/xcm-support", default-features = false }
 orml-xtokens = { path = "../../../modules/orml/xtokens", default-features = false }
+
+gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
+gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-features = false }
+gamedao-control = { path = "../../../modules/gamedao-protocol/control", default-features = false }
+gamedao-signal = { path = "../../../modules/gamedao-protocol/signal", default-features = false }
+gamedao-sense = { path = "../../../modules/gamedao-protocol/sense", default-features = false }
 
 [features]
 default = [
@@ -155,6 +160,12 @@ std = [
 	"orml-xcm-support/std",
 	"orml-xcm/std",
 	"orml-xtokens/std",
+
+	"gamedao-sense/std",
+	"gamedao-traits/std",
+	"gamedao-flow/std",
+	"gamedao-control/std",
+	"gamedao-signal/std",
 ]
 
 runtime-benchmarks = [
@@ -176,6 +187,12 @@ runtime-benchmarks = [
 	"xcm-builder/runtime-benchmarks",
 	"cumulus-pallet-session-benchmarking/runtime-benchmarks",
 	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
+
+	"gamedao-traits/runtime-benchmarks",
+	"gamedao-sense/runtime-benchmarks",
+	"gamedao-control/runtime-benchmarks",
+	"gamedao-flow/runtime-benchmarks",
+	"gamedao-signal/runtime-benchmarks",
 ]
 
 try-runtime = [

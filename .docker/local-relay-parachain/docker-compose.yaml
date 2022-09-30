@@ -49,7 +49,8 @@ services:
     environment:
       RUST_LOG: parachain::candidate-backing=trace,parachain::candidate-selection=trace,parachain::pvf=trace,parachain::collator-protocol=trace,parachain::provisioner=trace
   parachain-alice:
-    image: playzero/subzero:local
+    # image: playzero/subzero:local
+    image: subzero:local
     user: "0:0"
     ports:
       - 9946:9944
