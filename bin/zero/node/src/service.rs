@@ -22,13 +22,14 @@ use cumulus_client_service::{
 use cumulus_primitives_core::ParaId;
 use cumulus_relay_chain_inprocess_interface::build_inprocess_relay_chain;
 use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayChainResult};
-use cumulus_relay_chain_rpc_interface::RelayChainRPCInterface;
+use cumulus_relay_chain_rpc_interface::{create_client_and_start_worker, RelayChainRpcInterface};
 
 // Substrate Imports
 use sc_client_api::ExecutorProvider;
 use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkService;
-use sc_service::{Configuration, PartialComponents, Role, TFullBackend, TFullClient, TaskManager};
+use sc_network_common::service::NetworkBlock;
+use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sp_api::ConstructRuntimeApi;
 use sp_keystore::SyncCryptoStorePtr;
@@ -38,9 +39,9 @@ use substrate_prometheus_endpoint::Registry;
 use polkadot_service::CollatorPair;
 
 /// Native executor instance.
-pub struct SubzeroRuntimeExecutor;
+pub struct ZeroRuntimeExecutor;
 
-impl sc_executor::NativeExecutionDispatch for SubzeroRuntimeExecutor {
+impl sc_executor::NativeExecutionDispatch for ZeroRuntimeExecutor {
 	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
@@ -176,8 +177,10 @@ async fn build_relay_chain_interface(
 	hwbench: Option<sc_sysinfo::HwBench>,
 ) -> RelayChainResult<(Arc<(dyn RelayChainInterface + 'static)>, Option<CollatorPair>)> {
 	match collator_options.relay_chain_rpc_url {
-		Some(relay_chain_url) =>
-			Ok((Arc::new(RelayChainRPCInterface::new(relay_chain_url).await?) as Arc<_>, None)),
+		Some(relay_chain_url) => {
+			let client = create_client_and_start_worker(relay_chain_url, task_manager).await?;
+			Ok((Arc::new(RelayChainRpcInterface::new(client)) as Arc<_>, None))
+		},
 		None => build_inprocess_relay_chain(
 			polkadot_config,
 			parachain_config,
@@ -257,10 +260,6 @@ where
 		bool,
 	) -> Result<Box<dyn ParachainConsensus<Block>>, sc_service::Error>,
 {
-	if matches!(parachain_config.role, Role::Light) {
-		return Err("Light client not supported!".into())
-	}
-
 	let parachain_config = prepare_node_config(parachain_config);
 
 	let params = new_partial::<RuntimeApi, Executor, BIQ>(&parachain_config, build_import_queue)?;
@@ -405,14 +404,14 @@ where
 /// Build the import queue for the parachain runtime.
 #[allow(clippy::type_complexity)]
 pub fn parachain_build_import_queue(
-	client: Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<SubzeroRuntimeExecutor>>>,
+	client: Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ZeroRuntimeExecutor>>>,
 	config: &Configuration,
 	telemetry: Option<TelemetryHandle>,
 	task_manager: &TaskManager,
 ) -> Result<
 	sc_consensus::DefaultImportQueue<
 		Block,
-		TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<SubzeroRuntimeExecutor>>,
+		TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ZeroRuntimeExecutor>>,
 	>,
 	sc_service::Error,
 > {
@@ -457,9 +456,9 @@ pub async fn start_parachain_node(
 	hwbench: Option<sc_sysinfo::HwBench>,
 ) -> sc_service::error::Result<(
 	TaskManager,
-	Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<SubzeroRuntimeExecutor>>>,
+	Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ZeroRuntimeExecutor>>>,
 )> {
-	start_node_impl::<RuntimeApi, SubzeroRuntimeExecutor, _, _, _>(
+	start_node_impl::<RuntimeApi, ZeroRuntimeExecutor, _, _, _>(
 		parachain_config,
 		polkadot_config,
 		collator_options,

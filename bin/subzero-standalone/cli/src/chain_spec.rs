@@ -70,10 +70,6 @@ pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
 pub fn subzero_standalone_config() -> Result<ChainSpec, String> {
 	ChainSpec::from_json_bytes(&include_bytes!("../../../res/alphaville.json")[..])
 }
-// ZERO mainnet
-// pub fn zero_config() -> Result<ChainSpec, String> {
-// 	ChainSpec::from_json_bytes(&include_bytes!("../../../res/mainnet.json")[..])
-// }
 
 fn session_keys(
 	grandpa: GrandpaId,

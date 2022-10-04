@@ -20,7 +20,7 @@ use sp_runtime::traits::{AccountIdConversion, Block as BlockT};
 use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
-	service::{new_partial, SubzeroRuntimeExecutor},
+	service::{new_partial, ZeroRuntimeExecutor},
 };
 
 fn load_spec(id: &str) -> std::result::Result<Box<dyn ChainSpec>, String> {
@@ -42,11 +42,13 @@ impl SubstrateCli for Cli {
 	}
 
 	fn description() -> String {
-		"Zero Collator\n\nThe command-line arguments provided first will be \
+		format!(
+			"Zero Collator\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relay chain node.\n\n\
-		parachain-collator <parachain-args> -- <relay-chain-args>"
-			.into()
+		{} <parachain-args> -- <relay-chain-args>",
+			Self::executable_name()
+		)
 	}
 
 	fn author() -> String {
@@ -80,11 +82,13 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn description() -> String {
-		"Zero Collator\n\nThe command-line arguments provided first will be \
+		format!(
+			"Zero Collator\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relay chain node.\n\n\
-		parachain-collator <parachain-args> -- <relay-chain-args>"
-			.into()
+		{} <parachain-args> -- <relay-chain-args>",
+			Self::executable_name()
+		)
 	}
 
 	fn author() -> String {
@@ -114,7 +118,7 @@ macro_rules! construct_async_run {
 		runner.async_run(|$config| {
 			let $components = new_partial::<
 				RuntimeApi,
-				SubzeroRuntimeExecutor,
+				ZeroRuntimeExecutor,
 				_
 			>(
 				&$config,
@@ -200,21 +204,21 @@ pub fn run() -> Result<()> {
 			match cmd {
 				BenchmarkCmd::Pallet(cmd) =>
 					if cfg!(feature = "runtime-benchmarks") {
-						runner.sync_run(|config| cmd.run::<Block, SubzeroRuntimeExecutor>(config))
+						runner.sync_run(|config| cmd.run::<Block, ZeroRuntimeExecutor>(config))
 					} else {
 						Err("Benchmarking wasn't enabled when building the node. \
 					You can enable it with `--features runtime-benchmarks`."
 							.into())
 					},
 				BenchmarkCmd::Block(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, SubzeroRuntimeExecutor, _>(
+					let partials = new_partial::<RuntimeApi, ZeroRuntimeExecutor, _>(
 						&config,
 						crate::service::parachain_build_import_queue,
 					)?;
 					cmd.run(partials.client)
 				}),
 				BenchmarkCmd::Storage(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, SubzeroRuntimeExecutor, _>(
+					let partials = new_partial::<RuntimeApi, ZeroRuntimeExecutor, _>(
 						&config,
 						crate::service::parachain_build_import_queue,
 					)?;
@@ -223,9 +227,12 @@ pub fn run() -> Result<()> {
 
 					cmd.run(config, partials.client.clone(), db, storage)
 				}),
-				BenchmarkCmd::Overhead(_) => Err("Unsupported benchmarking command".into()),
 				BenchmarkCmd::Machine(cmd) =>
 					runner.sync_run(|config| cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone())),
+				// NOTE: this allows the Client to leniently implement
+				// new benchmark commands without requiring a companion MR.
+				#[allow(unreachable_patterns)]
+				_ => Err("Benchmarking sub-command unsupported".into()),
 			}
 		},
 		Some(Subcommand::TryRuntime(cmd)) => {
@@ -239,7 +246,7 @@ pub fn run() -> Result<()> {
 						.map_err(|e| format!("Error: {:?}", e))?;
 
 				runner.async_run(|config| {
-					Ok((cmd.run::<Block, SubzeroRuntimeExecutor>(config), task_manager))
+					Ok((cmd.run::<Block, ZeroRuntimeExecutor>(config), task_manager))
 				})
 			} else {
 				Err("Try-runtime must be enabled by `--features try-runtime`.".into())
@@ -388,8 +395,8 @@ impl CliConfiguration<Self> for RelayChainCli {
 		self.base.base.role(is_dev)
 	}
 
-	fn transaction_pool(&self) -> Result<sc_service::config::TransactionPoolOptions> {
-		self.base.base.transaction_pool()
+	fn transaction_pool(&self, is_dev: bool) -> Result<sc_service::config::TransactionPoolOptions> {
+		self.base.base.transaction_pool(is_dev)
 	}
 
 	fn state_cache_child_ratio(&self) -> Result<Option<usize>> {

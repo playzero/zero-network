@@ -1,13 +1,13 @@
 use cumulus_primitives_core::ParaId;
-use zero_runtime::{AccountId, AuraId, Signature, SudoConfig};
-use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
+use zero_runtime::{AccountId, AuraId, SS58Prefix, Signature, SudoConfig};
+use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup, Properties};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 use primitives::{
-	currency::ZERO,
+	currency::{ZERO, PLAY, GAME, DOT, TokenInfo},
 	cent
 };
 
@@ -17,10 +17,10 @@ pub type ChainSpec =
 
 /// The default XCM version to set in genesis config.
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
-const DEFAULT_PARA_ID: u32 = 4040;
+const DEFAULT_PARA_ID: u32 = 2000;
 
 /// Helper function to generate a crypto pair from seed
-pub fn get_public_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
+pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
 	TPublic::Pair::from_string(&format!("//{}", seed), None)
 		.expect("static values are valid; qed")
 		.public()
@@ -49,7 +49,7 @@ type AccountPublic = <Signature as Verify>::Signer;
 ///
 /// This function's return type must always match the session keys of the chain in tuple format.
 pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
-	get_public_from_seed::<AuraId>(seed)
+	get_from_seed::<AuraId>(seed)
 }
 
 /// Helper function to generate an account ID from seed
@@ -57,7 +57,7 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
 where
 	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
-	AccountPublic::from(get_public_from_seed::<TPublic>(seed)).into_account()
+	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
 /// Generate the session keys from individual elements.
@@ -67,8 +67,24 @@ pub fn zero_session_keys(keys: AuraId) -> zero_runtime::SessionKeys {
 	zero_runtime::SessionKeys { aura: keys }
 }
 
-pub fn development_config() -> ChainSpec {
+/// Give your currencies a unit name and decimal places
+pub fn get_properties() -> Properties {
+	let mut properties = Properties::new();
+	let mut token_symbol: Vec<String> = vec![];
+	let mut token_decimals: Vec<u32> = vec![];
+	[ZERO, PLAY, GAME, DOT].iter().for_each(|token| {
+		token_symbol.push(token.symbol().unwrap().to_string());
+		token_decimals.push(token.decimals().unwrap() as u32);
+	});
+	properties.insert("tokenSymbol".into(), token_symbol.into());
+	properties.insert("tokenDecimals".into(), token_decimals.into());
+	properties.insert("ss58Format".into(), SS58Prefix::get().into());
+	properties
+}
 
+pub fn development_config() -> ChainSpec {
+	// Give your base currency a unit name and decimal places
+	let properties = get_properties();
 	ChainSpec::from_genesis(
 		// Name
 		"Development",
@@ -110,7 +126,7 @@ pub fn development_config() -> ChainSpec {
 		None,
 		None,
 		None,
-		None,
+		Some(properties),
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: DEFAULT_PARA_ID,
@@ -119,11 +135,7 @@ pub fn development_config() -> ChainSpec {
 }
 
 pub fn local_testnet_config() -> ChainSpec {
-	// Give your base currency a unit name and decimal places
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "ZERO".into());
-	properties.insert("tokenDecimals".into(), 18.into());
-	properties.insert("ss58Format".into(), 25.into());
+	let properties = get_properties();
 
 	ChainSpec::from_genesis(
 		// Name
