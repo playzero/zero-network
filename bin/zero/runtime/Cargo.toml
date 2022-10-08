@@ -43,6 +43,7 @@ pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", 
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-treasury = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-uniques = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
+pallet-utility = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
 sp-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
 sp-block-builder = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
 sp-consensus-aura = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
@@ -89,6 +90,13 @@ orml-xcm = { path = "../../../modules/orml/xcm", default-features = false }
 orml-xcm-support = { path = "../../../modules/orml/xcm-support", default-features = false }
 orml-xtokens = { path = "../../../modules/orml/xtokens", default-features = false }
 
+# RMRK
+pallet-rmrk-core = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
+pallet-rmrk-equip = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
+pallet-rmrk-market = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
+rmrk-traits = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
+pallet-rmrk-rpc-runtime-api = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
+
 [features]
 default = [
 	"std",
@@ -125,6 +133,7 @@ std = [
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
 	"pallet-uniques/std",
+	"pallet-utility/std",
 	"pallet-xcm/std",
 	"parachain-info/std",
 	"polkadot-parachain/std",
@@ -155,6 +164,12 @@ std = [
 	"orml-xcm-support/std",
 	"orml-xcm/std",
 	"orml-xtokens/std",
+
+	"pallet-rmrk-core/std",
+	"pallet-rmrk-market/std",
+	"pallet-rmrk-equip/std",
+	"rmrk-traits/std",
+	"pallet-rmrk-rpc-runtime-api/std",
 ]
 
 runtime-benchmarks = [
