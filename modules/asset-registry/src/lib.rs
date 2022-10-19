@@ -4,6 +4,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
+// SBP-M2 review: #TODO comment
 #![allow(deprecated)] // TODO: clean transactional
 
 use frame_support::{
@@ -16,18 +17,15 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use primitives::{
-	currency::{
-		AssetIds, AssetMetadata, TokenInfo,
-	},
+	currency::{AssetIds, AssetMetadata, TokenInfo},
 	CurrencyId,
 };
 use sp_std::{boxed::Box, vec::Vec};
 
-
-mod mock;
-mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+mod mock;
+mod tests;
 pub mod weights;
 
 pub use pallet::*;
@@ -63,6 +61,9 @@ pub mod pallet {
 		AssetIdExisted,
 	}
 
+	// SBP-M2 review: you should not include asset metadata in event while it can contain huge data
+	// amount
+	// If someone is interested there should be possibility to query it from chain state
 	#[pallet::event]
 	#[pallet::generate_deposit(fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -108,6 +109,7 @@ pub mod pallet {
 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
 		fn build(&self) {
 			self.assets.iter().for_each(|(asset, ed)| {
+				// SBP-M2 review: consider adding some log when sth go wrong during genesis build
 				assert_ok!(Pallet::<T>::do_register_native_asset(
 					*asset,
 					&AssetMetadata {
@@ -123,7 +125,6 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-
 		#[pallet::weight(T::WeightInfo::register_native_asset())]
 		#[transactional]
 		pub fn register_native_asset(
@@ -147,6 +148,7 @@ pub mod pallet {
 		pub fn update_native_asset(
 			origin: OriginFor<T>,
 			currency_id: CurrencyId,
+			// SBP-M2 review: why `Box` is used for extrinsic parameters?
 			metadata: Box<AssetMetadata<BalanceOf<T>>>,
 		) -> DispatchResult {
 			T::RegisterOrigin::ensure_origin(origin)?;
@@ -163,13 +165,14 @@ pub mod pallet {
 }
 
 impl<T: Config> Pallet<T> {
-	
 	fn do_register_native_asset(asset: CurrencyId, metadata: &AssetMetadata<BalanceOf<T>>) -> DispatchResult {
 		AssetMetadatas::<T>::try_mutate(
 			AssetIds::NativeAssetId(asset),
 			|maybe_asset_metadatas| -> DispatchResult {
 				ensure!(maybe_asset_metadatas.is_none(), Error::<T>::AssetIdExisted);
 
+				// SBP-M2 review: without adding metadate to event
+				// You would not need to clone metadata here
 				*maybe_asset_metadatas = Some(metadata.clone());
 				Ok(())
 			},
@@ -178,12 +181,16 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
+	// SBP-M2 review: these two functions look almost the same
+	// Think about merging them into single one with possibility to provide appropriate check
+	// mechanism
 	fn do_update_native_asset(currency_id: CurrencyId, metadata: &AssetMetadata<BalanceOf<T>>) -> DispatchResult {
 		AssetMetadatas::<T>::try_mutate(
 			AssetIds::NativeAssetId(currency_id),
 			|maybe_asset_metadatas| -> DispatchResult {
 				ensure!(maybe_asset_metadatas.is_some(), Error::<T>::AssetIdNotExists);
 
+				// SBP-M2 review: same as above
 				*maybe_asset_metadatas = Some(metadata.clone());
 				Ok(())
 			},

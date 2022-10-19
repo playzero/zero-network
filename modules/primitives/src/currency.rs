@@ -5,7 +5,7 @@ use codec::{Decode, Encode, MaxEncodedLen};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
-use sp_std::{prelude::*, convert::TryFrom};
+use sp_std::{convert::TryFrom, prelude::*};
 
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -121,13 +121,12 @@ pub trait AssetIdMapping<ForeignAssetId, MultiLocation, AssetMetadata> {
 	fn get_currency_id(multi_location: MultiLocation) -> Option<CurrencyId>;
 }
 
-
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "std", serde(rename_all = "camelCase"))]
 pub enum CurrencyId {
 	Token(TokenSymbol),
-	ForeignAsset(ForeignAssetId)
+	ForeignAsset(ForeignAssetId),
 }
 
 impl CurrencyId {
@@ -154,6 +153,8 @@ pub enum AssetIds {
 
 #[derive(Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, TypeInfo)]
 pub struct AssetMetadata<Balance> {
+	// SBP-M2 review: unbounded vectors are high security issues
+	// You should have limited length for name&symbol
 	pub name: Vec<u8>,
 	pub symbol: Vec<u8>,
 	pub decimals: u8,
@@ -162,5 +163,5 @@ pub struct AssetMetadata<Balance> {
 
 #[derive(scale_info::TypeInfo, Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CustomMetadata {
-    pub fee_per_second: u128
+	pub fee_per_second: u128,
 }
