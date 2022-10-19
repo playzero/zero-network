@@ -238,5 +238,7 @@ fn testnet_genesis(
 		treasury: Default::default(),
 		tokens: Default::default(),
 		asset_registry: Default::default(),
+		democracy: Default::default(),
+		technical_committee: Default::default()
 	}
 }
