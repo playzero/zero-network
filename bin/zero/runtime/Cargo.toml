@@ -81,6 +81,7 @@ parachain-info = { git = "https://github.com/paritytech/cumulus", default-featur
 primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../modules/primitives" }
 
 # ORML
+# SBP-M2 review: why you use your copy of orml instead of following main implementation?
 orml-asset-registry = { path = "../../../modules/orml/asset-registry", default-features = false }
 orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
 orml-tokens = { path = "../../../modules/orml/tokens", default-features = false }

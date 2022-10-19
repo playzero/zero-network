@@ -6,9 +6,9 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+pub mod constants;
 mod weights;
 pub mod xcm_config;
-pub mod constants;
 
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use sp_api::impl_runtime_apis;
@@ -28,18 +28,15 @@ use sp_version::RuntimeVersion;
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{
-		tokens::nonfungibles::*,
-		AsEnsureOriginWithArg, ConstU32, Contains, EitherOfDiverse, EnsureOrigin, EnsureOriginWithArg
+		tokens::nonfungibles::*, AsEnsureOriginWithArg, ConstU32, Contains, EitherOfDiverse, EnsureOrigin,
+		EnsureOriginWithArg,
 	},
-	weights::{
-		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
-	},
-	BoundedVec,
-	PalletId,
+	weights::{constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight},
+	BoundedVec, PalletId,
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
-	EnsureRoot, EnsureSigned
+	EnsureRoot, EnsureSigned,
 };
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{DispatchError, MultiAddress, Perbill, Permill};
@@ -57,9 +54,11 @@ use xcm::latest::prelude::BodyId;
 
 pub use constants::{fee::*, time::*};
 pub use primitives::{
-	currency::{ZERO, PLAY, GAME, DOT, AssetIds, AssetIdMapping, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
-	dollar, cent, millicent,
-	Amount, ReserveIdentifier
+	cent,
+	currency::{
+		AssetIdMapping, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol, DOT, GAME, PLAY, ZERO,
+	},
+	dollar, millicent, Amount, ReserveIdentifier,
 };
 
 use orml_asset_registry::SequentialId;
@@ -123,13 +122,8 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-	Runtime,
-	Block,
-	frame_system::ChainContext<Runtime>,
-	Runtime,
-	AllPalletsWithSystem,
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -163,7 +157,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
-	state_version: 1
+	state_version: 1,
 };
 
 // Unit = the base number of indivisible units for balances
@@ -188,7 +182,10 @@ const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
-	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
+	NativeVersion {
+		runtime_version: VERSION,
+		can_author_with: Default::default(),
+	}
 }
 
 parameter_types! {
@@ -227,22 +224,22 @@ impl Contains<Call> for BaseFilter {
 		// Disable direct calls to pallet_uniques
 		!matches!(
 			call,
-			Call::Uniques(pallet_uniques::Call::approve_transfer { .. }) |
-				Call::Uniques(pallet_uniques::Call::burn { .. }) |
-				Call::Uniques(pallet_uniques::Call::cancel_approval { .. }) |
-				Call::Uniques(pallet_uniques::Call::clear_collection_metadata { .. }) |
-				Call::Uniques(pallet_uniques::Call::clear_metadata { .. }) |
-				Call::Uniques(pallet_uniques::Call::create { .. }) |
-				Call::Uniques(pallet_uniques::Call::destroy { .. }) |
-				Call::Uniques(pallet_uniques::Call::force_item_status { .. }) |
-				Call::Uniques(pallet_uniques::Call::force_create { .. }) |
-				Call::Uniques(pallet_uniques::Call::freeze_collection { .. }) |
-				Call::Uniques(pallet_uniques::Call::mint { .. }) |
-				Call::Uniques(pallet_uniques::Call::redeposit { .. }) |
-				Call::Uniques(pallet_uniques::Call::set_collection_metadata { .. }) |
-				Call::Uniques(pallet_uniques::Call::thaw_collection { .. }) |
-				Call::Uniques(pallet_uniques::Call::transfer { .. }) |
-				Call::Uniques(pallet_uniques::Call::transfer_ownership { .. })
+			Call::Uniques(pallet_uniques::Call::approve_transfer { .. })
+				| Call::Uniques(pallet_uniques::Call::burn { .. })
+				| Call::Uniques(pallet_uniques::Call::cancel_approval { .. })
+				| Call::Uniques(pallet_uniques::Call::clear_collection_metadata { .. })
+				| Call::Uniques(pallet_uniques::Call::clear_metadata { .. })
+				| Call::Uniques(pallet_uniques::Call::create { .. })
+				| Call::Uniques(pallet_uniques::Call::destroy { .. })
+				| Call::Uniques(pallet_uniques::Call::force_item_status { .. })
+				| Call::Uniques(pallet_uniques::Call::force_create { .. })
+				| Call::Uniques(pallet_uniques::Call::freeze_collection { .. })
+				| Call::Uniques(pallet_uniques::Call::mint { .. })
+				| Call::Uniques(pallet_uniques::Call::redeposit { .. })
+				| Call::Uniques(pallet_uniques::Call::set_collection_metadata { .. })
+				| Call::Uniques(pallet_uniques::Call::thaw_collection { .. })
+				| Call::Uniques(pallet_uniques::Call::transfer { .. })
+				| Call::Uniques(pallet_uniques::Call::transfer_ownership { .. })
 		)
 	}
 }
@@ -357,6 +354,9 @@ impl pallet_transaction_payment::Config for Runtime {
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 }
 
+// SBP-M2 review: get rid of pallet_sudo
+// Sudo actions deny true decentralization
+// Use mechanisms like council instead.
 impl pallet_sudo::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
@@ -398,7 +398,6 @@ impl pallet_child_bounties::Config for Runtime {
 	type ChildBountyValueMinimum = ChildBountyValueMinimum;
 	type WeightInfo = pallet_child_bounties::weights::SubstrateWeight<Runtime>;
 }
-
 
 parameter_types! {
 	pub const CouncilMotionDuration: BlockNumber = 5 * DAYS;
@@ -605,6 +604,8 @@ parameter_types! {
 }
 
 // We allow root only to execute privileged collator selection operations.
+// SBP-M2 review: you should have an entity like a council
+// instead of providing the whole power to the single user (Root account)
 pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
 
 impl pallet_collator_selection::Config for Runtime {
@@ -659,6 +660,8 @@ parameter_type_with_key! {
 }
 
 /// Allow asset registration only from root origin
+// SBP-M2 review: root account has too much power
+// Need for a council
 pub struct AssetAuthority;
 impl EnsureOriginWithArg<Origin, Option<u32>> for AssetAuthority {
 	type Success = ();
@@ -885,14 +888,16 @@ fn option_filter_keys_to_set<StringLimit: frame_support::traits::Get<u32>>(
 		Some(filter_keys) => {
 			let tree = filter_keys
 				.into_iter()
-				.map(|filter_keys| -> pallet_rmrk_rpc_runtime_api::Result<BoundedVec<u8, StringLimit>> {
-					filter_keys
-						.try_into()
-						.map_err(|_| DispatchError::Other("Can't read filter key"))
-				})
+				.map(
+					|filter_keys| -> pallet_rmrk_rpc_runtime_api::Result<BoundedVec<u8, StringLimit>> {
+						filter_keys
+							.try_into()
+							.map_err(|_| DispatchError::Other("Can't read filter key"))
+					},
+				)
 				.collect::<pallet_rmrk_rpc_runtime_api::Result<BTreeSet<_>>>()?;
 			Ok(Some(tree))
-		},
+		}
 		None => Ok(None),
 	}
 }
@@ -1184,13 +1189,12 @@ impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
 			.read_slot()
 			.expect("Could not read the relay chain slot from the proof");
 
-		let inherent_data =
-			cumulus_primitives_timestamp::InherentDataProvider::from_relay_chain_slot_and_duration(
-				relay_chain_slot,
-				sp_std::time::Duration::from_secs(6),
-			)
-			.create_inherent_data()
-			.expect("Could not create the timestamp inherent data");
+		let inherent_data = cumulus_primitives_timestamp::InherentDataProvider::from_relay_chain_slot_and_duration(
+			relay_chain_slot,
+			sp_std::time::Duration::from_secs(6),
+		)
+		.create_inherent_data()
+		.expect("Could not create the timestamp inherent data");
 
 		inherent_data.check_extrinsics(block)
 	}
