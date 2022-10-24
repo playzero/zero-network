@@ -18,13 +18,14 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, Convert, IdentifyAccount, Verify},
 	transaction_validity::{TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, MultiSignature,
+	ApplyExtrinsicResult, MultiSignature, Percent
 };
 
 use sp_std::{collections::btree_set::BTreeSet, prelude::*};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+use static_assertions::const_assert;
 
 use frame_support::{
 	construct_runtime, parameter_types,
@@ -32,7 +33,8 @@ use frame_support::{
 	traits::{
 		tokens::nonfungibles::*,
 		AsEnsureOriginWithArg, ConstU16, ConstU32, Contains, EitherOfDiverse,
-		EnsureOrigin, EnsureOriginWithArg, EqualPrivilegeOnly, InstanceFilter
+		EnsureOrigin, EnsureOriginWithArg, EqualPrivilegeOnly, InstanceFilter,
+		LockIdentifier, U128CurrencyToVote
 	},
 	weights::{
 		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
@@ -452,7 +454,8 @@ impl InstanceFilter<Call> for ProxyType {
 					Call::TechnicalCommittee(..) |
 					Call::Treasury(..) |
 					Call::Bounties(..) | Call::ChildBounties(..) |
-					Call::Utility(..)
+					Call::Utility(..) |
+					Call::Elections(..)
 			)
 		}
 	}
@@ -690,6 +693,72 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 	type MaxMembers = TechnicalMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
+	type Event = Event;
+	type AddOrigin = EnsureRootOrHalfCouncil;
+	type RemoveOrigin = EnsureRootOrHalfCouncil;
+	type SwapOrigin = EnsureRootOrHalfCouncil;
+	type ResetOrigin = EnsureRootOrHalfCouncil;
+	type PrimeOrigin = EnsureRootOrHalfCouncil;
+	type MembershipInitialized = TechnicalCommittee;
+	type MembershipChanged = TechnicalCommittee;
+	type MaxMembers = TechnicalMaxMembers;
+	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+	pub CandidacyBond: Balance = 10 * dollar(ZERO);
+	// 1 storage item created, key size is 32 bytes, value size is 16+16.
+	pub VotingBondBase: Balance = deposit(1, 64);
+	// additional data per vote is 32 bytes (account id).
+	pub VotingBondFactor: Balance = deposit(0, 32);
+	pub const TermDuration: BlockNumber = 7 * DAYS;
+	pub const DesiredMembers: u32 = 13;
+	pub const ElectionsPhragmenPalletId: LockIdentifier = *b"phrelect";
+}
+
+// Make sure that there are no more than `MaxMembers` members elected via elections-phragmen.
+const_assert!(DesiredMembers::get() <= CouncilMaxMembers::get());
+
+impl pallet_elections_phragmen::Config for Runtime {
+	type Event = Event;
+	type PalletId = ElectionsPhragmenPalletId;
+	type Currency = Balances;
+	type ChangeMembers = Council;
+	// NOTE: this implies that council's genesis members cannot be set directly and must come from
+	// this module.
+	type InitializeMembers = Council;
+	type CurrencyToVote = U128CurrencyToVote;
+	type CandidacyBond = CandidacyBond;
+	type VotingBondBase = VotingBondBase;
+	type VotingBondFactor = VotingBondFactor;
+	type LoserCandidate = Treasury;
+	type KickedMember = Treasury;
+	type DesiredMembers = DesiredMembers;
+	type DesiredRunnersUp = ConstU32<7>;
+	type TermDuration = TermDuration;
+	type MaxVoters = ConstU32<{10 * 1000}>;
+	type MaxCandidates = ConstU32<1000>;
+	type WeightInfo = pallet_elections_phragmen::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+	pub const TipCountdown: BlockNumber = 1 * DAYS;
+	pub const TipFindersFee: Percent = Percent::from_percent(20);
+	pub TipReportDepositBase: Balance = 1 * dollar(ZERO);
+}
+
+impl pallet_tips::Config for Runtime {
+	type Event = Event;
+	type DataDepositPerByte = DataDepositPerByte;
+	type MaximumReasonLength = MaximumReasonLength;
+	type Tippers = Elections;
+	type TipCountdown = TipCountdown;
+	type TipFindersFee = TipFindersFee;
+	type TipReportDepositBase = TipReportDepositBase;
+	type WeightInfo = pallet_tips::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1029,11 +1098,14 @@ construct_runtime!(
 		Sudo: pallet_sudo = 13,
 		Proxy: pallet_proxy = 14,
 		Democracy: pallet_democracy = 15,
+		Elections: pallet_elections_phragmen::{Pallet, Call, Storage, Config<T>, Event<T>} = 16,
+		TechnicalMembership: pallet_membership::<Instance1> = 17,
 
 		// Monetary stuff.
 		Treasury: pallet_treasury = 20,
-		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 21,
-		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>} = 22,
+		Tips: pallet_tips = 21,
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 22,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>} = 23,
 
 		// NFT
 		RmrkEquip: pallet_rmrk_equip::{Pallet, Call, Event<T>, Storage} = 30,
