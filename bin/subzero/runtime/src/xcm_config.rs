@@ -97,6 +97,17 @@ pub type Barrier = (
 	AllowSubscriptionsFrom<Everything>
 );
 
+// todo: move this to common runtimes module
+pub fn local_currency_location(key: CurrencyId) -> MultiLocation {
+	MultiLocation::new(
+		0,
+		X1(GeneralKey(WeakBoundedVec::<u8, ConstU32<32>>::force_from(
+			key.encode(),
+			None,
+		))),
+	)
+}
+
 parameter_types! {
 	pub UnitWeightCost: Weight = 200_000_000;
 	pub const MaxInstructions: u32 = 100;
@@ -105,24 +116,15 @@ parameter_types! {
 		dot_per_second()
 	);
 	pub ZeroPerSecond: (AssetId, u128) = (
-		native_currency_location(
-			ParachainInfo::get().into(),
-			ZERO
-		).into(),
+		local_currency_location(ZERO).into(),
 		zero_per_second()
 	);
 	pub PlayPerSecond: (AssetId, u128) = (
-		native_currency_location(
-			ParachainInfo::get().into(),
-			PLAY
-		).into(),
+		local_currency_location(PLAY).into(),
 		play_per_second()
 	);
 	pub GamePerSecond: (AssetId, u128) = (
-		native_currency_location(
-			ParachainInfo::get().into(),
-			GAME
-		).into(),
+		local_currency_location(GAME).into(),
 		game_per_second()
 	);
 }
