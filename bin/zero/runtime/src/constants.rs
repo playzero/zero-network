@@ -1,5 +1,9 @@
 pub mod time {
-	use primitives::{BlockNumber, Moment};
+	use primitives::{
+		currency::ZERO,
+		cent,
+		Balance, BlockNumber, Moment,
+	};
 
 	pub const SECS_PER_BLOCK: Moment = 12;
 	pub const MILLISECS_PER_BLOCK: Moment = SECS_PER_BLOCK * 1000;
@@ -10,6 +14,10 @@ pub mod time {
 	pub const DAYS: BlockNumber = HOURS * 24;
 
 	pub const SLOT_DURATION: Moment = MILLISECS_PER_BLOCK;
+
+	pub fn deposit(items: u32, bytes: u32) -> Balance {
+		items as Balance * 15 * cent(ZERO) + (bytes as Balance) * 6 * cent(ZERO)
+	}
 }
 
 pub mod fee {

@@ -237,6 +237,10 @@ fn testnet_genesis(
 		council: Default::default(),
 		treasury: Default::default(),
 		tokens: Default::default(),
+		democracy: Default::default(),
+		technical_committee: Default::default(),
+		elections: Default::default(),
+		technical_membership: Default::default(),
 		control: Default::default(),
 		asset_registry: Default::default(),
 	}
