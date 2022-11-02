@@ -373,6 +373,7 @@ pub fn testnet_genesis(
 			min_join_bond: 1 * DOLLARS,
 			..Default::default()
 		},
+		asset_registry: Default::default(),
 		tokens: TokensConfig { balances: Default::default() },
 		control: ControlConfig { orgs: Default::default() }
 	}

@@ -108,11 +108,16 @@ pallet-uniques = { default-features = false, git = "https://github.com/paritytec
 pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.28" }
 pallet-whitelist = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.28" }
 
+xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.28", default-features = false }
+xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.28", default-features = false }
+xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.28", default-features = false }
+
 primitives = { path = "../../../modules/primitives", version = "2.0.0", package = "zero-primitives", default-features = false }
 
-orml-tokens = { path = "../../../modules/orml/tokens", default-features = false }
-orml-traits = { path = "../../../modules/orml/traits", default-features = false }
-orml-currencies = { path = "../../../modules/orml/currencies", default-features = false }
+orml-asset-registry = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
+orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
+orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
+orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
 
 pallet-rmrk-core = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-rmrk-equip = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
@@ -209,9 +214,14 @@ std = [
 	"pallet-child-bounties/std",
 	"pallet-alliance/std",
 
+	"xcm/std",
+	"xcm-executor/std",
+	"xcm-builder/std",
+
 	"orml-tokens/std",
 	"orml-currencies/std",
 	"orml-traits/std",
+	"orml-asset-registry/std",
 
 	"pallet-rmrk-core/std",
 	"pallet-rmrk-market/std",
