@@ -66,6 +66,12 @@ sp-std = { git = "https://github.com/paritytech/substrate", default-features = f
 sp-transaction-pool = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
 sp-version = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.28" }
 
+# Contracts
+pallet-contracts = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.28" }
+pallet-contracts-primitives = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.28" }
+pallet-contracts-rpc-runtime-api = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.28" }
+# pallet-contracts-rpc = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.28" }
+
 # Polkadot
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.28" }
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.28" }
@@ -98,10 +104,10 @@ orml-xcm = { path = "../../../modules/orml/xcm", default-features = false }
 orml-xcm-support = { path = "../../../modules/orml/xcm-support", default-features = false }
 orml-xtokens = { path = "../../../modules/orml/xtokens", default-features = false }
 
+rmrk-traits = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-rmrk-core = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-rmrk-equip = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-rmrk-market = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
-rmrk-traits = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-rmrk-rpc-runtime-api = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 
 gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
@@ -138,6 +144,9 @@ std = [
 	"pallet-collator-selection/std",
 	"pallet-child-bounties/std",
 	"pallet-collective/std",
+	"pallet-contracts-primitives/std",
+	"pallet-contracts-rpc-runtime-api/std",
+	"pallet-contracts/std",
 	"pallet-democracy/std",
 	"pallet-elections-phragmen/std",
 	"pallet-identity/std",
@@ -186,10 +195,10 @@ std = [
 	"orml-xcm/std",
 	"orml-xtokens/std",
 
+	"rmrk-traits/std",
 	"pallet-rmrk-core/std",
 	"pallet-rmrk-market/std",
 	"pallet-rmrk-equip/std",
-	"rmrk-traits/std",
 	"pallet-rmrk-rpc-runtime-api/std",
 
 	"gamedao-sense/std",
@@ -197,6 +206,7 @@ std = [
 	"gamedao-flow/std",
 	"gamedao-control/std",
 	"gamedao-signal/std",
+
 ]
 
 runtime-benchmarks = [
@@ -209,6 +219,7 @@ runtime-benchmarks = [
 	"pallet-bounties/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
 	"pallet-collective/runtime-benchmarks",
+	"pallet-contracts/runtime-benchmarks",
 	"pallet-child-bounties/runtime-benchmarks",
 	"pallet-democracy/runtime-benchmarks",
 	"pallet-identity/runtime-benchmarks",

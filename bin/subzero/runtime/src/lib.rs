@@ -7,6 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
+mod contracts;
 mod weights;
 pub mod xcm_config;
 
@@ -67,6 +68,12 @@ pub use primitives::{
 	},
 	dollar, millicent, Amount, ReserveIdentifier,
 };
+
+// use pallet_contracts::{
+// 	migration,
+// 	weights::{SubstrateWeight, WeightInfo},
+// 	Config, DefaultAddressGenerator, DefaultContractAccessWeight, Frame, Schedule,
+// };
 
 use orml_asset_registry::SequentialId;
 use orml_currencies::BasicCurrencyAdapter;
@@ -129,8 +136,14 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+pub type Executive = frame_executive::Executive<
+		Runtime,
+		Block,
+		frame_system::ChainContext<Runtime>,
+		Runtime,
+		AllPalletsWithSystem,
+		contracts::Migrations,
+	>;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -1075,6 +1088,62 @@ impl gamedao_sense::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
+// pub use parachains_common::AVERAGE_ON_INITIALIZE_RATIO;
+
+// // Prints debug output of the `contracts` pallet to stdout if the node is
+// // started with `-lruntime::contracts=debug`.
+// pub const CONTRACTS_DEBUG_OUTPUT: bool = true;
+
+// parameter_types! {
+// 	pub const DepositPerItem: Balance = deposit(1, 0);
+// 	pub const DepositPerByte: Balance = deposit(0, 1);
+// 	// The lazy deletion runs inside on_initialize.
+// 	pub DeletionWeightLimit: Weight = AVERAGE_ON_INITIALIZE_RATIO *
+// 		RuntimeBlockWeights::get().max_block;
+// 	// The weight needed for decoding the queue should be less or equal than a fifth
+// 	// of the overall weight dedicated to the lazy deletion.
+// 	pub DeletionQueueDepth: u32 = ((DeletionWeightLimit::get() / (
+// 			<Runtime as Config>::WeightInfo::on_initialize_per_queue_item(1) -
+// 			<Runtime as Config>::WeightInfo::on_initialize_per_queue_item(0)
+// 		)) / 5) as u32;
+// 	pub MySchedule: Schedule<Runtime> = Default::default();
+// }
+
+// impl pallet_contracts::Config for Runtime {
+// 	type Time = Timestamp;
+// 	type Randomness = RandomnessCollectiveFlip;
+// 	type Currency = Balances;
+// 	type Event = Event;
+// 	type Call = Call;
+// 	/// The safest default is to allow no calls at all.
+// 	///
+// 	/// Runtimes should whitelist dispatchables that are allowed to be called from contracts
+// 	/// and make sure they are stable. Dispatchables exposed to contracts are not allowed to
+// 	/// change because that would break already deployed contracts. The `Call` structure itself
+// 	/// is not allowed to change the indices of existing pallets, too.
+// 	type CallFilter = Nothing;
+// 	type DepositPerItem = DepositPerItem;
+// 	type DepositPerByte = DepositPerByte;
+// 	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
+// 	type WeightInfo = SubstrateWeight<Self>;
+// 	type ChainExtension = ();
+// 	type DeletionQueueDepth = DeletionQueueDepth;
+// 	type DeletionWeightLimit = DeletionWeightLimit;
+// 	type Schedule = MySchedule;
+// 	type CallStack = [Frame<Self>; 31];
+// 	type AddressGenerator = DefaultAddressGenerator;
+// 	type ContractAccessWeight = DefaultContractAccessWeight<RuntimeBlockWeights>;
+// 	type MaxCodeLen = ConstU32<{ 128 * 1024 }>;
+// 	type RelaxedMaxCodeLen = ConstU32<{ 256 * 1024 }>;
+// }
+
+// pub struct Migrations;
+// impl OnRuntimeUpgrade for Migrations {
+// 	fn on_runtime_upgrade() -> Weight {
+// 		migration::migrate::<Runtime>()
+// 	}
+// }
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -1095,7 +1164,7 @@ construct_runtime!(
 		ChildBounties: pallet_child_bounties = 10,
 		Scheduler: pallet_scheduler = 11,
 		Preimage: pallet_preimage = 12,
-		Sudo: pallet_sudo = 13,
+
 		Proxy: pallet_proxy = 14,
 		Democracy: pallet_democracy = 15,
 		Elections: pallet_elections_phragmen::{Pallet, Call, Storage, Config<T>, Event<T>} = 16,
@@ -1111,6 +1180,8 @@ construct_runtime!(
 		RmrkEquip: pallet_rmrk_equip::{Pallet, Call, Event<T>, Storage} = 30,
 		RmrkCore: pallet_rmrk_core::{Pallet, Call, Event<T>, Storage} = 31,
 		RmrkMarket: pallet_rmrk_market::{Pallet, Call, Storage, Event<T>} = 32,
+
+		// uniques is the core, so should be before rmrk
 		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>} = 33,
 
 		// Collator support. The order of these 4 are important and shall not change.
@@ -1143,6 +1214,12 @@ construct_runtime!(
 		Sense: gamedao_sense = 71,
 		Control: gamedao_control = 72,
 		Signal: gamedao_signal = 73,
+
+		// Smart Contracts
+		Contracts: pallet_contracts::{Pallet, Call, Storage, Event<T>} = 80,
+
+		// TODO: to be removed, suggest to add it at the end
+		Sudo: pallet_sudo = 9000,
 	}
 );
 
@@ -1159,6 +1236,7 @@ mod benches {
 		[pallet_timestamp, Timestamp]
 		[pallet_collator_selection, CollatorSelection]
 		[cumulus_pallet_xcmp_queue, XcmpQueue]
+		[pallet_contracts, Contracts]
 	);
 }
 
@@ -1289,6 +1367,83 @@ impl_runtime_apis! {
 			ParachainSystem::collect_collation_info(header)
 		}
 	}
+
+	impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash> for Runtime {
+		fn call(
+			origin: AccountId,
+			dest: AccountId,
+			value: Balance,
+			gas_limit: u64,
+			storage_deposit_limit: Option<Balance>,
+			input_data: Vec<u8>,
+		) -> pallet_contracts_primitives::ContractExecResult<Balance> {
+			Contracts::bare_call(
+				origin,
+				dest,
+				value,
+				gas_limit,
+				storage_deposit_limit,
+				input_data,
+				contracts::CONTRACTS_DEBUG_OUTPUT,
+			)
+		}
+
+		fn instantiate(
+			origin: AccountId,
+			value: Balance,
+			gas_limit: u64,
+			storage_deposit_limit: Option<Balance>,
+			code: pallet_contracts_primitives::Code<Hash>,
+			data: Vec<u8>,
+			salt: Vec<u8>,
+		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance> {
+			Contracts::bare_instantiate(
+				origin,
+				value,
+				gas_limit,
+				storage_deposit_limit,
+				code,
+				data,
+				salt,
+				contracts::CONTRACTS_DEBUG_OUTPUT,
+			)
+		}
+
+		fn upload_code(
+			origin: AccountId,
+			code: Vec<u8>,
+			storage_deposit_limit: Option<Balance>,
+		) -> pallet_contracts_primitives::CodeUploadResult<Hash, Balance> {
+			Contracts::bare_upload_code(origin, code, storage_deposit_limit)
+		}
+
+		fn get_storage(
+			address: AccountId,
+			key: [u8; 32],
+		) -> pallet_contracts_primitives::GetStorageResult {
+			Contracts::get_storage(address, key)
+		}
+	}
+
+
+
+	#[cfg(feature = "runtime-benchmarks")]
+	impl frame_benchmarking::Benchmark<Block> for Runtime {
+		fn benchmark_metadata(extra: bool) -> (
+			Vec<frame_benchmarking::BenchmarkList>,
+			Vec<frame_support::traits::StorageInfo>,
+		) {
+			use frame_benchmarking::{Benchmarking, BenchmarkList};
+			use frame_support::traits::StorageInfoTrait;
+			use frame_system_benchmarking::Pallet as SystemBench;
+			use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
+
+			let mut list = Vec::<BenchmarkList>::new();
+			list_benchmarks!(list, extra);
+
+			let storage_info = AllPalletsWithSystem::storage_info();
+			return (list, storage_info)
+		}
 
 	#[cfg(feature = "try-runtime")]
 	impl frame_try_runtime::TryRuntime<Block> for Runtime {
