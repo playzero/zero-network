@@ -95,6 +95,7 @@ pub fn config_endowed(code: Option<&[u8]>, extra_endowed: Vec<AccountId>) -> Gen
 		alliance: Default::default(),
 		alliance_motion: Default::default(),
 		nomination_pools: Default::default(),
+		asset_registry: Default::default(),
 		tokens: Default::default(),
 		control: Default::default()
 	}

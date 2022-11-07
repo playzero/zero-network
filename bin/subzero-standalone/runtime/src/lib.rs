@@ -33,7 +33,7 @@ use frame_support::{
 	traits::{
 		tokens::nonfungibles::*,
 		AsEnsureOriginWithArg, ConstU8, ConstU16, ConstU32, Contains, Currency, EitherOfDiverse,
-		EnsureOrigin, EnsureOriginWithArg, EqualPrivilegeOnly, Everything, Imbalance,
+		EnsureOrigin, EnsureOriginWithArg, EqualPrivilegeOnly, Imbalance,
 		InstanceFilter, KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote,
 	},
 	weights::{
@@ -48,7 +48,7 @@ use frame_system::{
 	EnsureRoot, EnsureRootWithSuccess, EnsureSigned,
 };
 pub use primitives::{
-	currency::{ZERO, PLAY, GAME, CurrencyId},
+	currency::{ZERO, PLAY, GAME, CurrencyId, CustomMetadata},
 	dollar, cent, millicent,
 	AccountId, ReserveIdentifier, Signature, TokenSymbol
 };
@@ -93,6 +93,7 @@ pub use pallet_sudo::Call as SudoCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 
+use orml_asset_registry::SequentialId;
 use orml_traits::parameter_type_with_key;
 use orml_currencies::BasicCurrencyAdapter;
 
@@ -1637,6 +1638,30 @@ impl pallet_alliance::Config for Runtime {
 	type WeightInfo = pallet_alliance::weights::SubstrateWeight<Runtime>;
 }
 
+pub struct AssetAuthority;
+impl EnsureOriginWithArg<Origin, Option<u32>> for AssetAuthority {
+	type Success = ();
+
+	fn try_origin(origin: Origin, _asset_id: &Option<u32>) -> Result<Self::Success, Origin> {
+		EnsureRoot::try_origin(origin)
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn successful_origin(_asset_id: &Option<u32>) -> Origin {
+		EnsureRoot::successful_origin()
+	}
+}
+
+impl orml_asset_registry::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type CustomMetadata = ();
+	type AssetProcessor = SequentialId<Runtime>;
+	type AssetId = u32;
+	type AuthorityOrigin = AssetAuthority;
+	type WeightInfo = ();
+}
+
 parameter_type_with_key! {
 	pub ExistentialDeposits: |currency_id: CurrencyId| -> Balance {
 		match currency_id {
@@ -1837,6 +1862,7 @@ construct_runtime!(
 		RankedCollective: pallet_ranked_collective,
 
 		// ORML pallets:
+		AssetRegistry: orml_asset_registry::{Pallet, Storage, Call, Event<T>, Config<T>},
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 		Currencies: orml_currencies::{Pallet, Call},
 

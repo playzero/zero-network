@@ -152,11 +152,9 @@ pub enum AssetIds {
 }
 
 #[derive(Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, TypeInfo)]
-pub struct AssetMetadata<Balance> {
-	// SBP-M2 review: unbounded vectors are high security issues
-	// You should have limited length for name&symbol
-	pub name: Vec<u8>,
-	pub symbol: Vec<u8>,
+pub struct AssetMetadata<Balance, BoundedString> {
+	pub name: BoundedString,
+	pub symbol: BoundedString,
 	pub decimals: u8,
 	pub minimal_balance: Balance,
 }
