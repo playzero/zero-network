@@ -44,14 +44,15 @@ RUN mv /usr/share/ca* /tmp && \
 	ln -s /subzero/.local/share/subzero /data
 
 COPY --from=builder /subzero/target/$PROFILE/subzero /usr/local/bin
+COPY --from=builder /subzero/.docker/chainspec /chainspec
 
 # checks
 RUN ldd /usr/local/bin/subzero && \
 	/usr/local/bin/subzero --version
 
 # Shrinking
-RUN rm -rf /usr/lib/python* && \
-	rm -rf /usr/bin /usr/sbin /usr/share/man
+# RUN rm -rf /usr/lib/python* && \
+# 	rm -rf /usr/bin /usr/sbin /usr/share/man
 
 USER subzero
 EXPOSE 30333 9933 9944 9615

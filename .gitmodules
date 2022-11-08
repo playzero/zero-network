@@ -1,6 +1,3 @@
-[submodule "orml"]
-	path = modules/orml
-	url = https://github.com/open-web3-stack/open-runtime-module-library.git
 [submodule "gamedao-protocol"]
 	path = modules/gamedao-protocol
-	url = git@github.com:gamedaoco/gamedao-protocol.git
+	url = https://github.com/gamedaoco/gamedao-protocol.git
