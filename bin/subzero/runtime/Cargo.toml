@@ -1,6 +1,6 @@
 [package]
 name = "subzero-runtime"
-version = "3.2.62"
+version = "3.2.63"
 authors = ["ZERO <play@zero.io>"]
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 homepage = "https://zero.io"
