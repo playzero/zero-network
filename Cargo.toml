@@ -4,8 +4,12 @@ cargo-features = ["resolver"]
 resolver = "2"
 
 members = [
+
 	"bin/subzero/node",
 	"bin/subzero/runtime",
+
+	"bin/subzero-ext/node",
+	"bin/subzero-ext/runtime",
 
 	# "bin/zero/node",
 	# "bin/zero/runtime",
@@ -84,3 +88,11 @@ inherits = "release"
 
 lto = "fat"
 codegen-units = 1
+
+# add these and replace with your dev branch if you want to test things out
+[patch."https://github.com/gamedaoco/gamedao-protocol"]
+gamedao-control = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
+gamedao-traits = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
+gamedao-flow = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
+gamedao-signal = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
+gamedao-sense = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
