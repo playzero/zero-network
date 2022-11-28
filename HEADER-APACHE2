@@ -1,6 +1,11 @@
-// This file is part of Substrate.
-
-// Copyright (C) 2021 Parity Technologies (UK) Ltd.
+//      _______  ________  ________  ________   ______   _______   _______
+//    ╱╱       ╲╱        ╲╱        ╲╱        ╲_╱      ╲╲╱       ╲╲╱       ╲╲
+//   ╱╱      __╱         ╱         ╱         ╱        ╱╱        ╱╱        ╱╱
+//  ╱       ╱ ╱         ╱         ╱        _╱         ╱         ╱         ╱
+//  ╲________╱╲___╱____╱╲__╱__╱__╱╲________╱╲________╱╲___╱____╱╲________╱
+//
+// This file is part of GameDAO Protocol.
+// Copyright (C) 2018-2022 GameDAO AG.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");

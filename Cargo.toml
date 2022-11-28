@@ -91,8 +91,13 @@ codegen-units = 1
 
 # add these and replace with your dev branch if you want to test things out
 [patch."https://github.com/gamedaoco/gamedao-protocol"]
-gamedao-control = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
-gamedao-traits = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
-gamedao-flow = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
-gamedao-signal = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
-gamedao-sense = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/refactor-orml-ref" }
+# gamedao-control = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/update-member-state" }
+# gamedao-traits = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/update-member-state" }
+# gamedao-flow = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/update-member-state" }
+# gamedao-signal = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/update-member-state" }
+# gamedao-sense = { git = "https://github.com/gamedaoco//gamedao-protocol", branch = "2075/feat/update-member-state" }
+gamedao-traits = { path = "modules/gamedao-protocol/traits" }
+gamedao-control = { path = "modules/gamedao-protocol/control" }
+gamedao-signal = { path = "modules/gamedao-protocol/signal" }
+gamedao-flow = { path = "modules/gamedao-protocol/flow" }
+gamedao-sense = { path = "modules/gamedao-protocol/sense" }
