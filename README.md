@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://zero.io/img/z-ctrl-45-col.png" width="128"><br/>
+  <img src="https://zero.io/img/z-control-45-full.png" width="128"><br/>
   <b>ZERO network — for video games in the web3 era</b>
 
   <div align="center">  
