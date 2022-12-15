@@ -22,7 +22,7 @@ FROM docker.io/library/ubuntu:20.04
 
 LABEL maintainer="devops@zero.io"
 
-COPY --from=builder /alphaville/target/$PROFILE/alphaville /usr/local/bin
+COPY --from=builder /alphaville/target/release/alphaville /usr/local/bin
 
 RUN useradd -m -u 1000 -U -s /bin/sh -d /alphaville alphaville && \
 	mkdir -p /data /alphaville/.local/share/alphaville && \
