@@ -15,7 +15,8 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 WORKDIR /alphaville
 COPY . /alphaville
 
-RUN cargo build --locked --release
+RUN	export PATH="$PATH:$HOME/.cargo/bin" && \
+	cargo build -p alphaville --release
 
 FROM docker.io/library/ubuntu:20.04
 
