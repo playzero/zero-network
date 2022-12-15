@@ -132,8 +132,8 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 /// Runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("subzero"),
-	impl_name: create_runtime_str!("standalone"),
+	spec_name: create_runtime_str!("zero"),
+	impl_name: create_runtime_str!("alphaville"),
 	authoring_version: 75,
 	// Per convention: if the runtime behavior changes, increment spec_version
 	// and set impl_version to 0. If only runtime

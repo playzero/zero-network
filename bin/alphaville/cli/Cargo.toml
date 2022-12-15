@@ -2,7 +2,7 @@
 name = "alphaville"
 version = "3.2.62"
 authors = ["ZERO <play@zero.io>"]
-description = "for video games and beyond"
+description = "build video games and beyond"
 build = "build.rs"
 edition = "2021"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"

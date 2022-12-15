@@ -35,7 +35,7 @@ use std::sync::Arc;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"S U B Z E R O".into()
+		"zero alphaville".into()
 	}
 
 	fn impl_version() -> String {
@@ -66,10 +66,10 @@ impl SubstrateCli for Cli {
 			// 			.into(),
 			// 	),
 			"dev" => Box::new(chain_spec::development_config()),
-			"local" => Box::new(chain_spec::local_testnet_config()),
-			// default to alphaville when running without param to be compatible to old behaviour
-			"" | "subzero" | "alphaville" => Box::new(chain_spec::alphaville_config()?),
-			"staging" => Box::new(chain_spec::staging_testnet_config()),
+			// "local" => Box::new(chain_spec::local_testnet_config()),
+			// default to alphaville when running without param to be compatible with old behaviour
+			"" | "alphaville" => Box::new(chain_spec::alphaville_config()?),
+			// "staging" => Box::new(chain_spec::staging_testnet_config()),
 			path =>
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 		};
