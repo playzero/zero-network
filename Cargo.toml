@@ -4,14 +4,19 @@ cargo-features = ["resolver"]
 resolver = "2"
 
 members = [
+
+	# standalone network / dev environment:
+	# cargo build -p alphaville
+	"bin/alphaville/cli",
+	"bin/alphaville/runtime",
+
+	# kusama parachain collator / archiver / full node
 	"bin/subzero/node",
 	"bin/subzero/runtime",
 
 	# "bin/zero/node",
 	# "bin/zero/runtime",
 
-	# "bin/subzero-standalone/cli",
-	# "bin/subzero-standalone/runtime",
 ]
 
 # The list of dependencies below (which can be both direct and indirect dependencies) are crates
