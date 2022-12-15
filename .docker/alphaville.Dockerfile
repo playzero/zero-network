@@ -29,7 +29,7 @@ RUN useradd -m -u 1000 -U -s /bin/sh -d /alphaville alphaville && \
 	chown -R alphaville:alphaville /data && \
 	ln -s /data /alphaville/.local/share/alphaville && \
 	rm -rf /usr/bin /usr/sbin && \
-	ldd /usr/local/bin/alphaville && \
+	#ldd /usr/local/bin/alphaville && \
 	/usr/local/bin/alphaville --version
 
 USER alphaville
