@@ -1,3 +1,6 @@
+# build alphaville docker
+alphaville-docker:
+	docker build -t playzero/alphaville:local -f .docker/alphaville.Dockerfile .
 
 reset:
 	cargo clean
