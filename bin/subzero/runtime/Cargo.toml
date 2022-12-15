@@ -75,20 +75,21 @@ xcm-builder = { git = "https://github.com/paritytech/polkadot", default-features
 xcm-executor = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.28" }
 
 # Cumulus
-cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-cumulus-pallet-dmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-cumulus-pallet-session-benchmarking = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false}
-cumulus-pallet-xcm = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-cumulus-primitives-core = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-cumulus-primitives-timestamp = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
-parachain-info = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.28", default-features = false }
+cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+cumulus-pallet-dmp-queue = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+cumulus-pallet-session-benchmarking = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28", version = "3.0.0"}
+cumulus-pallet-xcm = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+cumulus-primitives-core = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+cumulus-primitives-timestamp = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
+parachain-info = { git = "https://github.com/paritytech/cumulus", default-features = false,  branch = "polkadot-v0.9.28" }
 
 primitives = { version = "2.0.0", package = "zero-primitives", default-features = false, path = "../../../modules/primitives" }
 
+# ORML
 orml-asset-registry = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
 orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
@@ -98,17 +99,12 @@ orml-xcm = { git = "https://github.com/open-web3-stack/open-runtime-module-libra
 orml-xcm-support = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
 orml-xtokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.28", default-features = false }
 
+# RMRK
 pallet-rmrk-core = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-rmrk-equip = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-rmrk-market = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 rmrk-traits = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
 pallet-rmrk-rpc-runtime-api = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, branch = "polkadot-v0.9.28" }
-
-gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
-gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-features = false }
-gamedao-control = { path = "../../../modules/gamedao-protocol/control", default-features = false }
-gamedao-signal = { path = "../../../modules/gamedao-protocol/signal", default-features = false }
-gamedao-sense = { path = "../../../modules/gamedao-protocol/sense", default-features = false }
 
 [features]
 default = [
@@ -191,12 +187,6 @@ std = [
 	"pallet-rmrk-equip/std",
 	"rmrk-traits/std",
 	"pallet-rmrk-rpc-runtime-api/std",
-
-	"gamedao-sense/std",
-	"gamedao-traits/std",
-	"gamedao-flow/std",
-	"gamedao-control/std",
-	"gamedao-signal/std",
 ]
 
 runtime-benchmarks = [
@@ -210,7 +200,6 @@ runtime-benchmarks = [
 	"pallet-collator-selection/runtime-benchmarks",
 	"pallet-collective/runtime-benchmarks",
 	"pallet-child-bounties/runtime-benchmarks",
-	"pallet-democracy/runtime-benchmarks",
 	"pallet-identity/runtime-benchmarks",
 	"pallet-treasury/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
@@ -220,12 +209,6 @@ runtime-benchmarks = [
 	"xcm-builder/runtime-benchmarks",
 	"cumulus-pallet-session-benchmarking/runtime-benchmarks",
 	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
-
-	"gamedao-traits/runtime-benchmarks",
-	"gamedao-sense/runtime-benchmarks",
-	"gamedao-control/runtime-benchmarks",
-	"gamedao-flow/runtime-benchmarks",
-	"gamedao-signal/runtime-benchmarks",
 ]
 
 try-runtime = [

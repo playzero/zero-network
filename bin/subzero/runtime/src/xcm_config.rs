@@ -16,8 +16,8 @@ use frame_support::{
 	weights::Weight,
 };
 use sp_runtime::{
-	traits::ConstU32,
-	WeakBoundedVec
+       traits::ConstU32,
+       WeakBoundedVec
 };
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
@@ -97,7 +97,6 @@ pub type Barrier = (
 	AllowSubscriptionsFrom<Everything>
 );
 
-// todo: move this to common runtimes module
 pub fn local_currency_location(key: CurrencyId) -> MultiLocation {
 	MultiLocation::new(
 		0,
@@ -247,12 +246,12 @@ pub type LocalAssetTransactor = MultiCurrencyAdapter<
 
 pub fn native_currency_location(para_id: u32, id: CurrencyId) -> MultiLocation {
 	MultiLocation::new(
-		1,
-		X2(
-			Parachain(para_id), GeneralKey(
-				WeakBoundedVec::<u8, ConstU32<32>>::force_from(id.encode(), None)
-			)
-		)
+        1,
+        X2(
+                Parachain(para_id), GeneralKey(
+                        WeakBoundedVec::<u8, ConstU32<32>>::force_from(id.encode(), None)
+                )
+        )
 	)
 }
 
@@ -272,8 +271,8 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 	fn convert(location: MultiLocation) -> Option<CurrencyId> {
 
 		fn decode_currency_id(key: WeakBoundedVec::<u8, ConstU32<32>>) -> Option<CurrencyId> {
-			let key = &key.into_inner()[..];
-			if let Ok(currency_id) = CurrencyId::decode(&mut &*key) {
+        	let key = &key.into_inner()[..];
+        	if let Ok(currency_id) = CurrencyId::decode(&mut &*key) {
 				// check `currency_id` is cross-chain asset
 				match currency_id {
 					ZERO | GAME | PLAY => Some(currency_id),

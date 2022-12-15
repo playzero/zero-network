@@ -6,9 +6,9 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-pub mod constants;
 mod weights;
 pub mod xcm_config;
+pub mod constants;
 
 use codec::{Decode, Encode, MaxEncodedLen};
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
@@ -39,11 +39,12 @@ use frame_support::{
 	weights::{
 		constants::WEIGHT_PER_SECOND, ConstantMultiplier, DispatchClass, Weight,
 	},
-	BoundedVec, PalletId,
+	BoundedVec,
+	PalletId,
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
-	EnsureRoot, EnsureSigned,
+	EnsureRoot, EnsureSigned
 };
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{DispatchError, MultiAddress, Perbill, Permill};
@@ -61,11 +62,9 @@ use xcm::latest::prelude::BodyId;
 
 pub use constants::{fee::*, time::*};
 pub use primitives::{
-	cent,
-	currency::{
-		AssetIdMapping, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol, DOT, GAME, PLAY, ZERO,
-	},
-	dollar, millicent, Amount, ReserveIdentifier,
+	currency::{ZERO, PLAY, GAME, DOT, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
+	dollar, cent, millicent,
+	Amount, ReserveIdentifier
 };
 
 use orml_asset_registry::SequentialId;
@@ -129,8 +128,13 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+>;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -158,7 +162,7 @@ impl_opaque_keys! {
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("subzero"),
-	impl_name: create_runtime_str!("dev"),
+	impl_name: create_runtime_str!("live"),
 	authoring_version: 75,
 	spec_version: 63,
 	impl_version: 0,
@@ -189,10 +193,7 @@ const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
-	NativeVersion {
-		runtime_version: VERSION,
-		can_author_with: Default::default(),
-	}
+	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
 parameter_types! {
@@ -231,22 +232,22 @@ impl Contains<Call> for BaseFilter {
 		// Disable direct calls to pallet_uniques
 		!matches!(
 			call,
-			Call::Uniques(pallet_uniques::Call::approve_transfer { .. })
-				| Call::Uniques(pallet_uniques::Call::burn { .. })
-				| Call::Uniques(pallet_uniques::Call::cancel_approval { .. })
-				| Call::Uniques(pallet_uniques::Call::clear_collection_metadata { .. })
-				| Call::Uniques(pallet_uniques::Call::clear_metadata { .. })
-				| Call::Uniques(pallet_uniques::Call::create { .. })
-				| Call::Uniques(pallet_uniques::Call::destroy { .. })
-				| Call::Uniques(pallet_uniques::Call::force_item_status { .. })
-				| Call::Uniques(pallet_uniques::Call::force_create { .. })
-				| Call::Uniques(pallet_uniques::Call::freeze_collection { .. })
-				| Call::Uniques(pallet_uniques::Call::mint { .. })
-				| Call::Uniques(pallet_uniques::Call::redeposit { .. })
-				| Call::Uniques(pallet_uniques::Call::set_collection_metadata { .. })
-				| Call::Uniques(pallet_uniques::Call::thaw_collection { .. })
-				| Call::Uniques(pallet_uniques::Call::transfer { .. })
-				| Call::Uniques(pallet_uniques::Call::transfer_ownership { .. })
+			Call::Uniques(pallet_uniques::Call::approve_transfer { .. }) |
+				Call::Uniques(pallet_uniques::Call::burn { .. }) |
+				Call::Uniques(pallet_uniques::Call::cancel_approval { .. }) |
+				Call::Uniques(pallet_uniques::Call::clear_collection_metadata { .. }) |
+				Call::Uniques(pallet_uniques::Call::clear_metadata { .. }) |
+				Call::Uniques(pallet_uniques::Call::create { .. }) |
+				Call::Uniques(pallet_uniques::Call::destroy { .. }) |
+				Call::Uniques(pallet_uniques::Call::force_item_status { .. }) |
+				Call::Uniques(pallet_uniques::Call::force_create { .. }) |
+				Call::Uniques(pallet_uniques::Call::freeze_collection { .. }) |
+				Call::Uniques(pallet_uniques::Call::mint { .. }) |
+				Call::Uniques(pallet_uniques::Call::redeposit { .. }) |
+				Call::Uniques(pallet_uniques::Call::set_collection_metadata { .. }) |
+				Call::Uniques(pallet_uniques::Call::thaw_collection { .. }) |
+				Call::Uniques(pallet_uniques::Call::transfer { .. }) |
+				Call::Uniques(pallet_uniques::Call::transfer_ownership { .. })
 		)
 	}
 }
@@ -552,7 +553,6 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
 	pub BountyValueMinimum: Balance = 5 * dollar(ZERO);
 	pub BountyDepositBase: Balance = 1 * dollar(ZERO);
 	pub const CuratorDepositMultiplier: Permill = Permill::from_percent(50);
@@ -766,9 +766,6 @@ parameter_types! {
 	pub ProposalBondMinimum: Balance = 1 * dollar(ZERO);
 	pub const SpendPeriod: BlockNumber = 1 * DAYS;
 	pub const Burn: Permill = Permill::from_percent(50);
-	// pub const TipCountdown: BlockNumber = 1 * DAYS;
-	// pub const TipFindersFee: Percent = Percent::from_percent(20);
-	// pub TipReportDepositBase: Balance = 1 * dollar(ZERO);
 	pub DataDepositPerByte: Balance = 1 * cent(ZERO);
 	pub const MaximumReasonLength: u32 = 300;
 }
@@ -799,9 +796,9 @@ impl pallet_treasury::Config for Runtime {
 }
 
 parameter_types! {
-	pub BasicDeposit: Balance = 10 * dollar(ZERO);	   // 258 bytes on-chain
-	pub FieldDeposit: Balance = 250 * cent(ZERO);		// 66 bytes on-chain
-	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);   // 53 bytes on-chain
+	pub BasicDeposit: Balance = 10 * dollar(ZERO);	// 258 bytes on-chain
+	pub FieldDeposit: Balance = 250 * cent(ZERO);	// 66 bytes on-chain
+	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);	// 53 bytes on-chain
 }
 
 impl pallet_identity::Config for Runtime {
@@ -876,8 +873,6 @@ parameter_types! {
 }
 
 // We allow root only to execute privileged collator selection operations.
-// SBP-M2 review: you should have an entity like a council
-// instead of providing the whole power to the single user (Root account)
 pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
 
 impl pallet_collator_selection::Config for Runtime {
@@ -932,8 +927,6 @@ parameter_type_with_key! {
 }
 
 /// Allow asset registration only from root origin
-// SBP-M2 review: root account has too much power
-// Need for a council
 pub struct AssetAuthority;
 impl EnsureOriginWithArg<Origin, Option<u32>> for AssetAuthority {
 	type Success = ();
@@ -995,86 +988,6 @@ impl orml_currencies::Config for Runtime {
 	type WeightInfo = ();
 }
 
-parameter_types! {
-	pub MinProposalDeposit: Balance = 100 * dollar(GAME);
-	pub SlashingMajority: Permill = Permill::from_rational(2u32, 3u32);
-	pub GameDAOGetsFromSlashing: Permill = Permill::from_rational(1u32, 10u32);
-	pub const MaxMembersPerOrg: u32 = 1000;
-	pub const ProposalDurationLimits: (BlockNumber, BlockNumber) = (100, 864000);
-}
-
-impl gamedao_signal::Config for Runtime {
-	type WeightInfo = gamedao_signal::weights::SubstrateWeight<Runtime>;
-	type Event = Event;
-	type Currency = Currencies;
-	type CurrencyId = CurrencyId;
-	type PaymentTokenId = GetStableCurrencyId;
-	type ProtocolTokenId = GetProtocolCurrencyId;
-	type Balance = Balance;
-	type Flow = Flow;
-	type Control = Control;
-	type MinProposalDeposit = MinProposalDeposit;
-	type GameDAOTreasury = GameDAOTreasuryAccountId;
-	type SlashingMajority = SlashingMajority;
-	type GameDAOGetsFromSlashing = GameDAOGetsFromSlashing;
-	type MaxMembers = MaxMembersPerOrg;
-	type ProposalDurationLimits = ProposalDurationLimits;
-	type MaxProposalsPerBlock = ConstU32<100>;
-	type StringLimit = StringLimit;
-}
-
-parameter_types! {
-	pub OrgMinimumDeposit: Balance = 1 * dollar(GAME);
-}
-
-impl gamedao_control::Config for Runtime {
-	type Balance = Balance;
-	type CurrencyId = CurrencyId;
-	type WeightInfo = gamedao_control::weights::SubstrateWeight<Runtime>;
-	type Event = Event;
-	type Currency = Currencies;
-	type MaxMembers = MaxMembersPerOrg;
-	type ProtocolTokenId = GetProtocolCurrencyId;
-	type PaymentTokenId = GetStableCurrencyId;
-	type MinimumDeposit = OrgMinimumDeposit;
-	type PalletId = ControlPalletId;
-	type StringLimit = StringLimit;
-}
-
-parameter_types! {
-	pub MinContribution: Balance = 1 * dollar(PLAY);
-	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
-	pub MinCampaignDeposit: Permill = Permill::from_rational(1u32, 10u32); // 10%
-	pub const CampaignDurationLimits: (BlockNumber, BlockNumber) = (24 * HOURS, 60 * DAYS);
-}
-
-impl gamedao_flow::Config for Runtime {
-	type Event = Event;
-	type Balance = Balance;
-	type CurrencyId = CurrencyId;
-	type WeightInfo = gamedao_flow::weights::SubstrateWeight<Runtime>;
-	type Currency = Currencies;
-	type Control = Control;
-	type GameDAOTreasury = GameDAOTreasuryAccountId;
-	type MinNameLength = ConstU32<4>;
-	type MaxCampaignsPerBlock = ConstU32<10>;
-	type MaxCampaignContributors = ConstU32<10000>;
-	type MaxContributorsProcessing = ConstU32<100>;
-	type MinContribution = MinContribution;
-	type MinCampaignDeposit = MinCampaignDeposit;
-	type ProtocolTokenId = GetProtocolCurrencyId;
-	type PaymentTokenId = GetStableCurrencyId;
-	type CampaignFee = CampaignFee;
-	type StringLimit = StringLimit;
-	type CampaignDurationLimits = CampaignDurationLimits;
-}
-
-impl gamedao_sense::Config for Runtime {
-	type Event = Event;
-	type WeightInfo = gamedao_sense::weights::SubstrateWeight<Runtime>;
-	type StringLimit = StringLimit;
-}
-
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -1084,6 +997,9 @@ construct_runtime!(
 	{
 		// System support stuff.
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>} = 0,
+		ParachainSystem: cumulus_pallet_parachain_system::{
+			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
+		} = 1,
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 2,
 		Utility: pallet_utility::{Pallet, Call, Storage, Event} = 3,
 		Multisig: pallet_multisig = 4,
@@ -1126,10 +1042,6 @@ construct_runtime!(
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 52,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
 
-		ParachainSystem: cumulus_pallet_parachain_system::{
-			Pallet, Call, Config, Storage, Inherent, Event<T>,
-		} = 1,
-
 		// ORML:
 		AssetRegistry: orml_asset_registry::{Pallet, Storage, Call, Event<T>, Config<T>} = 60,
 		Currencies: orml_currencies::{Pallet, Call} = 61,
@@ -1137,12 +1049,6 @@ construct_runtime!(
 		Tokens: orml_tokens::{Pallet, Storage, Call, Event<T>, Config<T>} = 63,
 		UnknownTokens: orml_unknown_tokens::{Pallet, Storage, Event} = 64,
 		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 65,
-
-		// GameDAO protocol:
-		Flow: gamedao_flow = 70,
-		Sense: gamedao_sense = 71,
-		Control: gamedao_control = 72,
-		Signal: gamedao_signal = 73,
 	}
 );
 
@@ -1173,16 +1079,14 @@ fn option_filter_keys_to_set<StringLimit: frame_support::traits::Get<u32>>(
 		Some(filter_keys) => {
 			let tree = filter_keys
 				.into_iter()
-				.map(
-					|filter_keys| -> pallet_rmrk_rpc_runtime_api::Result<BoundedVec<u8, StringLimit>> {
-						filter_keys
-							.try_into()
-							.map_err(|_| DispatchError::Other("Can't read filter key"))
-					},
-				)
+				.map(|filter_keys| -> pallet_rmrk_rpc_runtime_api::Result<BoundedVec<u8, StringLimit>> {
+					filter_keys
+						.try_into()
+						.map_err(|_| DispatchError::Other("Can't read filter key"))
+				})
 				.collect::<pallet_rmrk_rpc_runtime_api::Result<BTreeSet<_>>>()?;
 			Ok(Some(tree))
-		}
+		},
 		None => Ok(None),
 	}
 }
@@ -1474,12 +1378,13 @@ impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
 			.read_slot()
 			.expect("Could not read the relay chain slot from the proof");
 
-		let inherent_data = cumulus_primitives_timestamp::InherentDataProvider::from_relay_chain_slot_and_duration(
-			relay_chain_slot,
-			sp_std::time::Duration::from_secs(6),
-		)
-		.create_inherent_data()
-		.expect("Could not create the timestamp inherent data");
+		let inherent_data =
+			cumulus_primitives_timestamp::InherentDataProvider::from_relay_chain_slot_and_duration(
+				relay_chain_slot,
+				sp_std::time::Duration::from_secs(6),
+			)
+			.create_inherent_data()
+			.expect("Could not create the timestamp inherent data");
 
 		inherent_data.check_extrinsics(block)
 	}
