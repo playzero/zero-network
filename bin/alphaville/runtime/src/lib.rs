@@ -1799,6 +1799,16 @@ impl gamedao_sense::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
+impl gamedao_battlepass::Config for Runtime {
+	type Event = Event;
+	type Control = Control;
+	type Rmrk = RmrkCore;
+	type StringLimit = StringLimit;
+	type SymbolLimit = ConstU32<100>;
+	type PartsLimit = ConstU32<25>;
+	type MaxResourcesOnMint = ConstU32<100>;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1877,6 +1887,7 @@ construct_runtime!(
 		Sense: gamedao_sense,
 		Control: gamedao_control,
 		Signal: gamedao_signal,
+		Battlepass: gamedao_battlepass,
 
 		// Zero pallets:
 		// Migration: module_migration,
@@ -1990,6 +2001,7 @@ mod benches {
 		[gamedao_control, Control]
 		[gamedao_flow, Flow]
 		[gamedao_signal, Signal]
+		// [gamedao_battlepass, Battlepass]
 	);
 }
 
