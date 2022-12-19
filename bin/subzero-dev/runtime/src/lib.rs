@@ -1075,6 +1075,16 @@ impl gamedao_sense::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
+impl gamedao_battlepass::Config for Runtime {
+	type Event = Event;
+	type Control = Control;
+	type Rmrk = RmrkCore;
+	type StringLimit = StringLimit;
+	type SymbolLimit = ConstU32<100>;
+	type PartsLimit = ConstU32<25>;
+	type MaxResourcesOnMint = ConstU32<100>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -1143,6 +1153,7 @@ construct_runtime!(
 		Sense: gamedao_sense = 71,
 		Control: gamedao_control = 72,
 		Signal: gamedao_signal = 73,
+		Battlepass: gamedao_battlepass = 74,
 	}
 );
 

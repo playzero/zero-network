@@ -109,6 +109,7 @@ gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-featur
 gamedao-control = { path = "../../../modules/gamedao-protocol/control", default-features = false }
 gamedao-signal = { path = "../../../modules/gamedao-protocol/signal", default-features = false }
 gamedao-sense = { path = "../../../modules/gamedao-protocol/sense", default-features = false }
+gamedao-battlepass = { path = "../../../modules/gamedao-protocol/battlepass", default-features = false }
 
 [features]
 default = [
@@ -197,6 +198,7 @@ std = [
 	"gamedao-flow/std",
 	"gamedao-control/std",
 	"gamedao-signal/std",
+	"gamedao-battlepass/std",
 ]
 
 runtime-benchmarks = [
