@@ -1023,6 +1023,16 @@ impl gamedao_signal::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
+impl gamedao_battlepass::Config for Runtime {
+	type Event = Event;
+	type Control = Control;
+	type Rmrk = RmrkCore;
+	type StringLimit = StringLimit;
+	type SymbolLimit = ConstU32<10>;
+	type PartsLimit = ConstU32<25>;
+	type MaxResourcesOnMint = ConstU32<100>;
+}
+
 parameter_types! {
 	pub OrgMinimumDeposit: Balance = 1 * dollar(GAME);
 }
@@ -1143,6 +1153,7 @@ construct_runtime!(
 		Sense: gamedao_sense = 71,
 		Control: gamedao_control = 72,
 		Signal: gamedao_signal = 73,
+		BattlePass: gamedao_battlepass = 74,
 	}
 );
 
