@@ -1,3 +1,4 @@
+.keys
 **/target/
 **/*.rs.bk
 *.swp
