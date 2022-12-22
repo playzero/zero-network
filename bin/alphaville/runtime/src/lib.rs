@@ -1483,15 +1483,21 @@ impl pallet_gilt::Config for Runtime {
 	type WeightInfo = pallet_gilt::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_types! {
+	pub const PartsLimit: u32 = 25;
+	pub const CollectionSymbolLimit: u32 = 100;
+	pub const MaxResourcesOnMint: u32 = 100;
+}
+
 impl pallet_rmrk_core::Config for Runtime {
 	type Event = Event;
 	type ProtocolOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxRecursions = ConstU32<10>;
 	type ResourceSymbolLimit = ConstU32<10>;
-	type PartsLimit = ConstU32<25>;
+	type PartsLimit = PartsLimit;
 	type MaxPriorities = ConstU32<25>;
-	type CollectionSymbolLimit = ConstU32<100>;
-	type MaxResourcesOnMint = ConstU32<100>;
+	type CollectionSymbolLimit = CollectionSymbolLimit;
+	type MaxResourcesOnMint = MaxResourcesOnMint;
 }
 
 parameter_types! {
@@ -1804,9 +1810,9 @@ impl gamedao_battlepass::Config for Runtime {
 	type Control = Control;
 	type Rmrk = RmrkCore;
 	type StringLimit = StringLimit;
-	type SymbolLimit = ConstU32<100>;
-	type PartsLimit = ConstU32<25>;
-	type MaxResourcesOnMint = ConstU32<100>;
+	type SymbolLimit = CollectionSymbolLimit;
+	type PartsLimit = PartsLimit;
+	type MaxResourcesOnMint = MaxResourcesOnMint;
 }
 
 construct_runtime!(
