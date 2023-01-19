@@ -1,6 +1,6 @@
 [package]
 name = "alphaville"
-version = "3.2.62"
+version = "3.2.67"
 authors = ["ZERO <play@zero.io>"]
 description = "build video games and beyond"
 build = "build.rs"

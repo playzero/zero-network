@@ -2,9 +2,9 @@
 # because they're too often out of date,
 # preventing them from being used to build subzero/Polkadot.
 
+# FROM phusion/baseimage:jammy-1.0.1 as baseimage
 FROM phusion/baseimage:focal-1.2.0 as baseimage
 ENV DEBIAN_FRONTEND=noninteractive
-
 
 RUN apt-get update && \
 	apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold" && \
