@@ -15,10 +15,10 @@ jobs:
         run: |
           echo "::set-output name=new::$(date +'monthly-%Y-%m')"
           echo "::set-output name=old::$(date -d'1 month ago' +'monthly-%Y-%m')"
-      - name: Checkout branch "master"
+      - name: Checkout branch "dev"
         uses: actions/checkout@v2
         with:
-          ref: 'master'
+          ref: 'dev'
           fetch-depth: 0
       - name: Generate changelog
         id: changelog
