@@ -5,7 +5,6 @@
 FROM phusion/baseimage:focal-1.2.0 as baseimage
 ENV DEBIAN_FRONTEND=noninteractive
 
-
 RUN apt-get update && \
 	apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold" && \
 	apt-get install -y cmake pkg-config libssl-dev git clang
