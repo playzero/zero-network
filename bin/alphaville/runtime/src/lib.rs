@@ -1736,7 +1736,11 @@ impl gamedao_signal::Config for Runtime {
 	type ProtocolTokenId = GetProtocolCurrencyId;
 	type Balance = Balance;
 	type Flow = Flow;
+	#[cfg(feature = "runtime-benchmarks")]
+	type FlowBenchmarkHelper = Flow;
 	type Control = Control;
+	#[cfg(feature = "runtime-benchmarks")]
+	type ControlBenchmarkHelper = Control;
 	type MinProposalDeposit = MinProposalDeposit;
 	type GameDAOTreasury = GameDAOTreasuryAccountId;
 	type SlashingMajority = SlashingMajority;
@@ -1785,6 +1789,8 @@ impl gamedao_flow::Config for Runtime {
 	type WeightInfo = gamedao_flow::weights::SubstrateWeight<Runtime>;
 	type Currency = Currencies;
 	type Control = Control;
+	#[cfg(feature = "runtime-benchmarks")]
+	type ControlBenchmarkHelper = Control;
 	type GameDAOTreasury = GameDAOTreasuryAccountId;
 	type MinNameLength = ConstU32<4>;
 	type MaxCampaignsPerBlock = ConstU32<10>;
@@ -1807,12 +1813,20 @@ impl gamedao_sense::Config for Runtime {
 
 impl gamedao_battlepass::Config for Runtime {
 	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type Currency = Currencies;
 	type Control = Control;
+	#[cfg(feature = "runtime-benchmarks")]
+	type ControlBenchmarkHelper = Control;
 	type Rmrk = RmrkCore;
 	type StringLimit = StringLimit;
 	type SymbolLimit = CollectionSymbolLimit;
 	type PartsLimit = PartsLimit;
 	type MaxResourcesOnMint = MaxResourcesOnMint;
+	type NativeTokenId = GetNativeCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type WeightInfo = gamedao_battlepass::weights::SubstrateWeight<Runtime>;
 }
 
 construct_runtime!(
@@ -2007,7 +2021,7 @@ mod benches {
 		[gamedao_control, Control]
 		[gamedao_flow, Flow]
 		[gamedao_signal, Signal]
-		// [gamedao_battlepass, Battlepass]
+		[gamedao_battlepass, Battlepass]
 	);
 }
 

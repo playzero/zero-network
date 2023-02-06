@@ -44,7 +44,7 @@ use frame_support::{
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
-	EnsureRoot, EnsureSigned
+	EnsureRoot, EnsureSigned,
 };
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{DispatchError, MultiAddress, Perbill, Permill};
@@ -193,7 +193,10 @@ const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
-	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
+	NativeVersion {
+		runtime_version: VERSION,
+		can_author_with: Default::default(),
+	}
 }
 
 parameter_types! {
@@ -603,15 +606,21 @@ type EnsureRootOrThreeFourthsCouncil = EitherOfDiverse<
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 3, 4>,
 >;
 
+parameter_types! {
+	pub const PartsLimit: u32 = 25;
+	pub const CollectionSymbolLimit: u32 = 100;
+	pub const MaxResourcesOnMint: u32 = 100;
+}
+
 impl pallet_rmrk_core::Config for Runtime {
 	type Event = Event;
 	type ProtocolOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxRecursions = ConstU32<10>;
 	type ResourceSymbolLimit = ConstU32<10>;
-	type PartsLimit = ConstU32<25>;
+	type PartsLimit = PartsLimit;
 	type MaxPriorities = ConstU32<25>;
-	type CollectionSymbolLimit = ConstU32<100>;
-	type MaxResourcesOnMint = ConstU32<100>;
+	type CollectionSymbolLimit = CollectionSymbolLimit;
+	type MaxResourcesOnMint = MaxResourcesOnMint;
 }
 
 parameter_types! {
@@ -796,9 +805,9 @@ impl pallet_treasury::Config for Runtime {
 }
 
 parameter_types! {
-	pub BasicDeposit: Balance = 10 * dollar(ZERO);	// 258 bytes on-chain
-	pub FieldDeposit: Balance = 250 * cent(ZERO);	// 66 bytes on-chain
-	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);	// 53 bytes on-chain
+	pub BasicDeposit: Balance = 10 * dollar(ZERO);	   // 258 bytes on-chain
+	pub FieldDeposit: Balance = 250 * cent(ZERO);		// 66 bytes on-chain
+	pub SubAccountDeposit: Balance = 2 * dollar(ZERO);  // 53 bytes on-chain
 }
 
 impl pallet_identity::Config for Runtime {
