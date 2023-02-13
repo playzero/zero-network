@@ -20,9 +20,9 @@ use std::time::Duration;
 
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion, Throughput};
 use futures::{future, StreamExt};
-use zero_cli::service::{create_extrinsic, fetch_nonce, FullClient, TransactionPool};
-use zero_primitives::AccountId;
 use alphaville_runtime::{constants::currency::*, BalancesCall, SudoCall};
+use alphaville::service::{create_extrinsic, fetch_nonce, FullClient, TransactionPool};
+use zero_primitives::AccountId;
 use sc_client_api::execution_extensions::ExecutionStrategies;
 use sc_service::{
 	config::{
@@ -38,7 +38,7 @@ use sp_keyring::Sr25519Keyring;
 use sp_runtime::{generic::BlockId, OpaqueExtrinsic};
 use tokio::runtime::Handle;
 
-fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
+fn new_node(tokio_handle: Handle) -> alphaville::service::NewFullBase {
 	let base_path = BasePath::new_temp_dir().expect("Creates base path");
 	let root = base_path.path().to_path_buf();
 
@@ -49,7 +49,7 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		None,
 	);
 
-	let spec = Box::new(zero_cli::chain_spec::development_config());
+	let spec = Box::new(alphaville::chain_spec::development_config());
 
 	let config = Configuration {
 		impl_name: "BenchmarkImpl".into(),
@@ -66,10 +66,9 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		keystore: KeystoreConfig::InMemory,
 		keystore_remote: Default::default(),
 		database: DatabaseSource::RocksDb { path: root.join("db"), cache_size: 128 },
-		state_cache_size: 67108864,
-		state_cache_child_ratio: None,
+		trie_cache_maximum_size: Some(64 * 1024 * 1024),
 		state_pruning: Some(PruningMode::ArchiveAll),
-		blocks_pruning: BlocksPruning::All,
+		blocks_pruning: BlocksPruning::KeepAll,
 		chain_spec: spec,
 		wasm_method: WasmExecutionMethod::Interpreted,
 		// NOTE: we enforce the use of the native runtime to make the errors more debuggable
@@ -109,7 +108,7 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		wasm_runtime_overrides: None,
 	};
 
-	zero_cli::service::new_full_base(config, false, |_, _| ()).expect("Creates node")
+	alphaville::service::new_full_base(config, false, |_, _| ()).expect("Creates node")
 }
 
 fn create_accounts(num: usize) -> Vec<sr25519::Pair> {
