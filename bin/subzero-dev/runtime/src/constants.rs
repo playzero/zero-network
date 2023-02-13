@@ -22,7 +22,7 @@ pub mod time {
 
 pub mod fee {
 	use frame_support::weights::{
-		constants::{ExtrinsicBaseWeight, WEIGHT_PER_SECOND},
+		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_SECOND},
 		WeightToFeePolynomial,
 		WeightToFeeCoefficients,
 		WeightToFeeCoefficient
@@ -48,8 +48,8 @@ pub mod fee {
 	}
 
 	pub fn base_tx_per_second() -> u128 {
-		let base_weight = Balance::from(ExtrinsicBaseWeight::get());
-	    (WEIGHT_PER_SECOND as u128) / base_weight
+		let base_weight = Balance::from(ExtrinsicBaseWeight::get().ref_time());
+	    (WEIGHT_REF_TIME_PER_SECOND as u128) / base_weight
 	}
 
 	pub fn dot_per_second() -> u128 {
@@ -83,7 +83,7 @@ pub mod fee {
 		type Balance = Balance;
 		fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
 			let p = base_tx_in_token(TokenSymbol::ZERO);
-			let q = Balance::from(ExtrinsicBaseWeight::get());
+			let q = Balance::from(ExtrinsicBaseWeight::get().ref_time());
 			smallvec![WeightToFeeCoefficient {
 				degree: 1,
 				negative: false,

@@ -23,13 +23,12 @@ use crate::{
 	Cli, Subcommand,
 };
 use frame_benchmarking_cli::*;
+use alphaville_runtime::{ExistentialDeposit, RuntimeApi};
 use zero_executor::ExecutorDispatch;
 use zero_primitives::Block;
-use alphaville_runtime::{ExistentialDeposit, RuntimeApi};
 use sc_cli::{ChainSpec, Result, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
-
 
 use std::sync::Arc;
 
@@ -117,33 +116,56 @@ pub fn run() -> Result<()> {
 						cmd.run::<Block, ExecutorDispatch>(config)
 					},
 					BenchmarkCmd::Block(cmd) => {
-						let PartialComponents { client, .. } = new_partial(&config)?;
-						cmd.run(client)
+						// ensure that we keep the task manager alive
+						let partial = new_partial(&config)?;
+						cmd.run(partial.client)
 					},
+					#[cfg(not(feature = "runtime-benchmarks"))]
+					BenchmarkCmd::Storage(_) => Err(
+						"Storage benchmarking can be enabled with `--features runtime-benchmarks`."
+							.into(),
+					),
+					#[cfg(feature = "runtime-benchmarks")]
 					BenchmarkCmd::Storage(cmd) => {
-						let PartialComponents { client, backend, .. } = new_partial(&config)?;
-						let db = backend.expose_db();
-						let storage = backend.expose_storage();
+						// ensure that we keep the task manager alive
+						let partial = new_partial(&config)?;
+						let db = partial.backend.expose_db();
+						let storage = partial.backend.expose_storage();
 
-						cmd.run(config, client, db, storage)
+						cmd.run(config, partial.client, db, storage)
 					},
 					BenchmarkCmd::Overhead(cmd) => {
-						let PartialComponents { client, .. } = new_partial(&config)?;
-						let ext_builder = RemarkBuilder::new(client.clone());
-						cmd.run(config, client, inherent_benchmark_data()?, &ext_builder)
+						// ensure that we keep the task manager alive
+						let partial = new_partial(&config)?;
+						let ext_builder = RemarkBuilder::new(partial.client.clone());
+
+						cmd.run(
+							config,
+							partial.client,
+							inherent_benchmark_data()?,
+							Vec::new(),
+							&ext_builder,
+						)
 					},
 					BenchmarkCmd::Extrinsic(cmd) => {
-						let PartialComponents { client, .. } = service::new_partial(&config)?;
+						// ensure that we keep the task manager alive
+						let partial = service::new_partial(&config)?;
 						// Register the *Remark* and *TKA* builders.
 						let ext_factory = ExtrinsicFactory(vec![
-							Box::new(RemarkBuilder::new(client.clone())),
+							Box::new(RemarkBuilder::new(partial.client.clone())),
 							Box::new(TransferKeepAliveBuilder::new(
-								client.clone(),
+								partial.client.clone(),
 								Sr25519Keyring::Alice.to_account_id(),
 								ExistentialDeposit::get(),
 							)),
 						]);
-						cmd.run(client, inherent_benchmark_data()?, &ext_factory)
+
+						cmd.run(
+							partial.client,
+							inherent_benchmark_data()?,
+							Vec::new(),
+							&ext_factory,
+						)
 					},
 					BenchmarkCmd::Machine(cmd) =>
 						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
@@ -206,6 +228,7 @@ pub fn run() -> Result<()> {
 		},
 		#[cfg(feature = "try-runtime")]
 		Some(Subcommand::TryRuntime(cmd)) => {
+			use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|config| {
 				// we don't need any of the components of new_partial, just a runtime, or a task
@@ -215,7 +238,13 @@ pub fn run() -> Result<()> {
 					sc_service::TaskManager::new(config.tokio_handle.clone(), registry)
 						.map_err(|e| sc_cli::Error::Service(sc_service::Error::Prometheus(e)))?;
 
-				Ok((cmd.run::<Block, ExecutorDispatch>(config), task_manager))
+				Ok((
+					cmd.run::<Block, ExtendedHostFunctions<
+						sp_io::SubstrateHostFunctions,
+						<ExecutorDispatch as NativeExecutionDispatch>::ExtendHostFunctions,
+					>>(),
+					task_manager,
+				))
 			})
 		},
 		#[cfg(not(feature = "try-runtime"))]

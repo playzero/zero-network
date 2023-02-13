@@ -18,8 +18,8 @@
 
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion, Throughput};
 
-use zero_cli::service::{create_extrinsic, FullClient};
 use alphaville_runtime::{constants::currency::*, BalancesCall};
+use alphaville::service::{create_extrinsic, FullClient};
 use sc_block_builder::{BlockBuilderProvider, BuiltBlock, RecordProof};
 use sc_client_api::execution_extensions::ExecutionStrategies;
 use sc_consensus::{
@@ -43,7 +43,7 @@ use sp_runtime::{
 };
 use tokio::runtime::Handle;
 
-fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
+fn new_node(tokio_handle: Handle) -> alphaville::service::NewFullBase {
 	let base_path = BasePath::new_temp_dir()
 		.expect("getting the base path of a temporary path doesn't fail; qed");
 	let root = base_path.path().to_path_buf();
@@ -55,7 +55,7 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		None,
 	);
 
-	let spec = Box::new(zero_cli::chain_spec::development_config());
+	let spec = Box::new(alphaville::chain_spec::development_config());
 
 	// NOTE: We enforce the use of the WASM runtime to benchmark block production using WASM.
 	let execution_strategy = sc_client_api::ExecutionStrategy::AlwaysWasm;
@@ -72,10 +72,9 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		keystore: KeystoreConfig::InMemory,
 		keystore_remote: Default::default(),
 		database: DatabaseSource::RocksDb { path: root.join("db"), cache_size: 128 },
-		state_cache_size: 67108864,
-		state_cache_child_ratio: None,
+		trie_cache_maximum_size: Some(64 * 1024 * 1024),
 		state_pruning: Some(PruningMode::ArchiveAll),
-		blocks_pruning: BlocksPruning::All,
+		blocks_pruning: BlocksPruning::KeepAll,
 		chain_spec: spec,
 		wasm_method: WasmExecutionMethod::Compiled {
 			instantiation_strategy: WasmtimeInstantiationStrategy::PoolingCopyOnWrite,
@@ -116,14 +115,14 @@ fn new_node(tokio_handle: Handle) -> zero_cli::service::NewFullBase {
 		wasm_runtime_overrides: None,
 	};
 
-	zero_cli::service::new_full_base(config, false, |_, _| ())
+	alphaville::service::new_full_base(config, false, |_, _| ())
 		.expect("creating a full node doesn't fail")
 }
 
 fn extrinsic_set_time(now: u64) -> OpaqueExtrinsic {
 	alphaville_runtime::UncheckedExtrinsic {
 		signature: None,
-		function: alphaville_runtime::Call::Timestamp(pallet_timestamp::Call::set { now }),
+		function: alphaville_runtime::RuntimeCall::Timestamp(pallet_timestamp::Call::set { now }),
 	}
 	.into()
 }

@@ -23,10 +23,10 @@
 use codec::Encode;
 use frame_system_rpc_runtime_api::AccountNonceApi;
 use futures::prelude::*;
+use alphaville_runtime::RuntimeApi;
 use zero_executor::ExecutorDispatch;
 use zero_primitives::Block;
-use alphaville_runtime::RuntimeApi;
-use sc_client_api::{BlockBackend, ExecutorProvider};
+use sc_client_api::BlockBackend;
 use sc_consensus_babe::{self, SlotProportion};
 use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkService;
@@ -69,7 +69,7 @@ pub fn fetch_nonce(client: &FullClient, account: sp_core::sr25519::Pair) -> u32 
 pub fn create_extrinsic(
 	client: &FullClient,
 	sender: sp_core::sr25519::Pair,
-	function: impl Into<alphaville_runtime::Call>,
+	function: impl Into<alphaville_runtime::RuntimeCall>,
 	nonce: Option<u32>,
 ) -> alphaville_runtime::UncheckedExtrinsic {
 	let function = function.into();
@@ -197,7 +197,7 @@ pub fn new_partial(
 	let justification_import = grandpa_block_import.clone();
 
 	let (block_import, babe_link) = sc_consensus_babe::block_import(
-		sc_consensus_babe::Config::get(&*client)?,
+		sc_consensus_babe::configuration(&*client)?,
 		grandpa_block_import,
 		client.clone(),
 	)?;
@@ -221,11 +221,10 @@ pub fn new_partial(
 			let uncles =
 				sp_authorship::InherentDataProvider::<<Block as BlockT>::Header>::check_inherents();
 
-			Ok((timestamp, slot, uncles))
+			Ok((slot, timestamp, uncles))
 		},
 		&task_manager.spawn_essential_handle(),
 		config.prometheus_registry(),
-		sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
 
@@ -353,7 +352,7 @@ pub fn new_full_base(
 		Vec::default(),
 	));
 
-	let (network, system_rpc_tx, network_starter) =
+	let (network, system_rpc_tx, tx_handler_controller, network_starter) =
 		sc_service::build_network(sc_service::BuildNetworkParams {
 			config: &config,
 			client: client.clone(),
@@ -391,6 +390,7 @@ pub fn new_full_base(
 		transaction_pool: transaction_pool.clone(),
 		task_manager: &mut task_manager,
 		system_rpc_tx,
+		tx_handler_controller,
 		telemetry: telemetry.as_mut(),
 	})?;
 
@@ -419,9 +419,6 @@ pub fn new_full_base(
 			prometheus_registry.as_ref(),
 			telemetry.as_ref().map(|x| x.handle()),
 		);
-
-		let can_author_with =
-			sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
 		let client_clone = client.clone();
 		let slot_duration = babe_link.config().slot_duration();
@@ -455,13 +452,12 @@ pub fn new_full_base(
 							&parent,
 						)?;
 
-					Ok((timestamp, slot, uncles, storage_proof))
+					Ok((slot, timestamp, uncles, storage_proof))
 				}
 			},
 			force_authoring,
 			backoff_authoring_blocks,
 			babe_link,
-			can_author_with,
 			block_proposal_slot_portion: SlotProportion::new(0.5),
 			max_block_proposal_slot_portion: None,
 			telemetry: telemetry.as_ref().map(|x| x.handle()),
@@ -566,11 +562,11 @@ pub fn new_full(
 mod tests {
 	use crate::service::{new_full_base, NewFullBase};
 	use codec::Encode;
-	use zero_primitives::{Block, DigestItem, Signature};
 	use alphaville_runtime::{
 		constants::{currency::CENTS, time::SLOT_DURATION},
-		Address, BalancesCall, Call, UncheckedExtrinsic,
+		Address, BalancesCall, RuntimeCall, UncheckedExtrinsic,
 	};
+	use zero_primitives::{Block, DigestItem, Signature};
 	use sc_client_api::BlockBackend;
 	use sc_consensus::{BlockImport, BlockImportParams, ForkChoiceStrategy};
 	use sc_consensus_babe::{BabeIntermediate, CompatibleDigestItem, INTERMEDIATE_KEY};
@@ -590,7 +586,7 @@ mod tests {
 		RuntimeAppPublic,
 	};
 	use sp_timestamp;
-	use std::{borrow::Cow, sync::Arc};
+	use std::sync::Arc;
 
 	type AccountPublic = <Signature as Verify>::Signer;
 
@@ -680,10 +676,7 @@ mod tests {
 						.epoch_changes()
 						.shared_data()
 						.epoch_data(&epoch_descriptor, |slot| {
-							sc_consensus_babe::Epoch::genesis(
-								babe_link.config().genesis_config(),
-								slot,
-							)
+							sc_consensus_babe::Epoch::genesis(babe_link.config(), slot)
 						})
 						.unwrap();
 
@@ -697,13 +690,15 @@ mod tests {
 					slot += 1;
 				};
 
-				let inherent_data = (
+				let inherent_data = futures::executor::block_on(
+					(
 					sp_timestamp::InherentDataProvider::new(
 						std::time::Duration::from_millis(SLOT_DURATION * slot).into(),
 					),
 					sp_consensus_babe::inherents::InherentDataProvider::new(slot.into()),
 				)
-					.create_inherent_data()
+						.create_inherent_data(),
+				)
 					.expect("Creates inherent data");
 
 				digest.push(<DigestItem as CompatibleDigestItem>::babe_pre_digest(babe_pre_digest));
@@ -739,9 +734,9 @@ mod tests {
 				let mut params = BlockImportParams::new(BlockOrigin::File, new_header);
 				params.post_digests.push(item);
 				params.body = Some(new_body);
-				params.intermediates.insert(
-					Cow::from(INTERMEDIATE_KEY),
-					Box::new(BabeIntermediate::<Block> { epoch_descriptor }) as Box<_>,
+				params.insert_intermediate(
+					INTERMEDIATE_KEY,
+					BabeIntermediate::<Block> { epoch_descriptor },
 				);
 				params.fork_choice = Some(ForkChoiceStrategy::LongestChain);
 
@@ -760,8 +755,10 @@ mod tests {
 				};
 				let signer = charlie.clone();
 
-				let function =
-					Call::Balances(BalancesCall::transfer { dest: to.into(), value: amount });
+				let function = RuntimeCall::Balances(BalancesCall::transfer {
+					dest: to.into(),
+					value: amount,
+				});
 
 				let check_non_zero_sender = frame_system::CheckNonZeroSender::new();
 				let check_spec_version = frame_system::CheckSpecVersion::new();
