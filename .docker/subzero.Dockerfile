@@ -43,7 +43,7 @@ RUN mv /usr/share/ca* /tmp && \
 	ln -s /subzero/.local/share/subzero /data
 
 COPY --from=builder /subzero/target/$PROFILE/subzero /usr/local/bin
-COPY --from=builder /subzero/.docker/chainspec /chainspec
+COPY --from=builder /subzero/bin/res /chainspec/
 
 # checks
 RUN ldd /usr/local/bin/subzero && \
@@ -57,4 +57,4 @@ USER subzero
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
 
-CMD ["/usr/local/bin/subzero"]
+CMD ["/usr/local/bin/subzero --chain=/chainspec/subzero-kusama-raw.json"]
