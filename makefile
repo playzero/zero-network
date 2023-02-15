@@ -1,4 +1,5 @@
-# alphaville docker
+# alphaville
+
 alphaville-docker:
 	docker build -t playzero/alphaville:local -f .docker/alphaville.Dockerfile .
 alphaville-run:
@@ -7,9 +8,10 @@ alphaville-run:
 		playzero/alphaville:local /usr/local/bin/alphaville \
 		--dev --name alphaville --ws-external \
 		--rpc-external --rpc-cors all --rpc-methods unsafe
+
 # build subzero-dev docker
-dev-docker-build:
-	docker build -t playzero/subzero:dev -f .docker/subzero-dev.Dockerfile .
+docker-build-dev:
+	docker build -t playzero/subzero-dev:local -f .docker/subzero-dev.Dockerfile .
 
 #
 #
