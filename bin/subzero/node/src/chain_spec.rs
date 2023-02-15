@@ -192,6 +192,11 @@ pub fn local_testnet_config() -> ChainSpec {
 	)
 }
 
+pub fn subzero_config() -> Result<ChainSpec, String> {
+    ChainSpec::from_json_bytes(&include_bytes!("../../../res/subzero-kusama-raw.json")[..])
+}
+
+
 fn testnet_genesis(
 	invulnerables: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Vec<AccountId>,

@@ -7,16 +7,16 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
 	apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold" && \
-	apt-get install -y cmake pkg-config libssl-dev git clang
+	apt-get install -y cmake pkg-config libssl-dev git clang protobuf-compiler
 
 WORKDIR /subzero
 COPY . /subzero
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 	export PATH="$PATH:$HOME/.cargo/bin" && \
-	rustup toolchain install nightly-2022-06-24 && \
-	rustup target add wasm32-unknown-unknown --toolchain nightly-2022-06-24 && \
-	rustup default nightly-2022-06-24 &&\
+	rustup toolchain install nightly-2022-11-15 && \
+	rustup target add wasm32-unknown-unknown --toolchain nightly-2022-11-15 && \
+	rustup default nightly-2022-11-15 &&\
 	rustup show
 
 # ===== STAGE 2 ======
@@ -43,7 +43,7 @@ RUN mv /usr/share/ca* /tmp && \
 	ln -s /subzero/.local/share/subzero /data
 
 COPY --from=builder /subzero/target/$PROFILE/subzero /usr/local/bin
-COPY --from=builder /subzero/.docker/chainspec /chainspec
+COPY --from=builder /subzero/bin/res /chainspec
 
 # checks
 RUN ldd /usr/local/bin/subzero && \
