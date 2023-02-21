@@ -93,7 +93,7 @@ dependencies = [
 
 [[package]]
 name = "alphaville"
-version = "3.2.67"
+version = "3.2.70"
 dependencies = [
  "alphaville-runtime",
  "array-bytes 4.2.0",
@@ -180,7 +180,7 @@ dependencies = [
 
 [[package]]
 name = "alphaville-runtime"
-version = "3.2.67"
+version = "3.2.70"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -11709,7 +11709,7 @@ checksum = "6bdef32e8150c2a081110b42772ffe7d7c9032b606bc226c8260fd97e0976601"
 
 [[package]]
 name = "subzero-dev-node"
-version = "3.2.67"
+version = "3.2.70"
 dependencies = [
  "clap 4.1.4",
  "cumulus-client-cli",
@@ -11772,7 +11772,7 @@ dependencies = [
 
 [[package]]
 name = "subzero-dev-runtime"
-version = "3.2.67"
+version = "3.2.70"
 dependencies = [
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
@@ -11865,7 +11865,7 @@ dependencies = [
 
 [[package]]
 name = "subzero-node"
-version = "3.2.63"
+version = "3.2.70"
 dependencies = [
  "clap 4.1.4",
  "cumulus-client-cli",
@@ -11926,7 +11926,7 @@ dependencies = [
 
 [[package]]
 name = "subzero-runtime"
-version = "3.2.63"
+version = "3.2.70"
 dependencies = [
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
