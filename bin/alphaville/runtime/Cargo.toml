@@ -120,12 +120,6 @@ orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-li
 orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.36", default-features = false }
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.36", default-features = false }
 
-pallet-rmrk-core = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, tag = "0.3.0" }
-pallet-rmrk-equip = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, tag = "0.3.0" }
-pallet-rmrk-market = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, tag = "0.3.0" }
-rmrk-traits = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, tag = "0.3.0" }
-pallet-rmrk-rpc-runtime-api = { git = "https://github.com/rmrk-team/rmrk-substrate", default-features = false, tag = "0.3.0" }
-
 gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
 gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-features = false }
 gamedao-control = { path = "../../../modules/gamedao-protocol/control", default-features = false }
@@ -234,12 +228,6 @@ std = [
 	"orml-currencies/std",
 	"orml-traits/std",
 	"orml-asset-registry/std",
-
-	"pallet-rmrk-core/std",
-	"pallet-rmrk-market/std",
-	"pallet-rmrk-equip/std",
-	"rmrk-traits/std",
-	"pallet-rmrk-rpc-runtime-api/std",
 
 	"gamedao-sense/std",
 	"gamedao-traits/std",

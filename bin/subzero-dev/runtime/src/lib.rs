@@ -21,7 +21,7 @@ use sp_runtime::{
 	ApplyExtrinsicResult, MultiSignature, Percent
 };
 
-use sp_std::{collections::btree_set::BTreeSet, prelude::*};
+use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -31,7 +31,6 @@ use frame_support::{
 	construct_runtime, parameter_types,
 	pallet_prelude::RuntimeDebug,
 	traits::{
-		tokens::nonfungibles::*,
 		AsEnsureOriginWithArg, ConstU32, Contains, EitherOfDiverse,
 		EnsureOrigin, EnsureOriginWithArg, EqualPrivilegeOnly, InstanceFilter,
 		LockIdentifier, U128CurrencyToVote
@@ -39,7 +38,7 @@ use frame_support::{
 	weights::{
 		constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight,
 	},
-	BoundedVec, PalletId,
+	PalletId,
 	dispatch::DispatchClass,
 };
 use frame_system::{
@@ -70,13 +69,6 @@ pub use primitives::{
 use orml_asset_registry::SequentialId;
 use orml_currencies::BasicCurrencyAdapter;
 use orml_traits::{parameter_type_with_key, GetByKey};
-
-use pallet_rmrk_core::{CollectionInfoOf, InstanceInfoOf, PropertyInfoOf, ResourceInfoOf};
-use pallet_rmrk_equip::{BaseInfoOf, BoundedThemeOf, PartTypeOf};
-use rmrk_traits::{
-	primitives::{BaseId, CollectionId, NftId, ResourceId},
-	NftChild,
-};
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -609,40 +601,6 @@ type EnsureRootOrThreeFourthsCouncil = EitherOfDiverse<
 >;
 
 parameter_types! {
-	pub const ResourceSymbolLimit: u32 = 10;
-	pub const PartsLimit: u32 = 25;
-	pub const MaxPriorities: u32 = 25;
-	pub const CollectionSymbolLimit: u32 = 100;
-	pub const MaxResourcesOnMint: u32 = 100;
-	pub const NestingBudget: u32 = 20;
-}
-
-impl pallet_rmrk_core::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type ProtocolOrigin = frame_system::EnsureRoot<AccountId>;
-	type ResourceSymbolLimit = ResourceSymbolLimit;
-	type PartsLimit = PartsLimit;
-	type MaxPriorities = MaxPriorities;
-	type CollectionSymbolLimit = CollectionSymbolLimit;
-	type MaxResourcesOnMint = MaxResourcesOnMint;
-	type NestingBudget = NestingBudget;
-	type WeightInfo = pallet_rmrk_core::weights::SubstrateWeight<Runtime>;
-	type TransferHooks = ();
-}
-
-parameter_types! {
-	pub MinimumOfferAmount: Balance = cent(ZERO) / 10;
-}
-
-impl pallet_rmrk_market::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type ProtocolOrigin = frame_system::EnsureRoot<AccountId>;
-	type Currency = Balances;
-	type MinimumOfferAmount = MinimumOfferAmount;
-	type WeightInfo = pallet_rmrk_market::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
 	pub CollectionDeposit: Balance = cent(ZERO) * 10;
 	pub ItemDeposit: Balance = dollar(ZERO);
 	pub const KeyLimit: u32 = 32;
@@ -651,15 +609,6 @@ parameter_types! {
 	pub UniquesAttributeDepositBase: Balance = cent(ZERO) * 10;
 	pub UniquesDepositPerByte: Balance = cent(ZERO);
 	pub const UniquesStringLimit: u32 = 128;
-	pub const MaxPropertiesPerTheme: u32 = 100;
-	pub const MaxCollectionsEquippablePerPart: u32 = 100;
-}
-
-impl pallet_rmrk_equip::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type MaxPropertiesPerTheme = MaxPropertiesPerTheme;
-	type MaxCollectionsEquippablePerPart = MaxCollectionsEquippablePerPart;
-	type WeightInfo = pallet_rmrk_equip::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_uniques::Config for Runtime {
@@ -669,7 +618,7 @@ impl pallet_uniques::Config for Runtime {
 	type Currency = Balances;
 	type ForceOrigin = EnsureRoot<AccountId>;
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-	type Locker = pallet_rmrk_core::Pallet<Runtime>;
+	type Locker = ();
 	type CollectionDeposit = CollectionDeposit;
 	type ItemDeposit = ItemDeposit;
 	type MetadataDepositBase = UniquesMetadataDepositBase;
@@ -1102,12 +1051,8 @@ impl gamedao_battlepass::Config for Runtime {
 	type Control = Control;
 	#[cfg(feature = "runtime-benchmarks")]
 	type ControlBenchmarkHelper = Control;
-	type Rmrk = RmrkCore;
 	type BattlepassHelper = gamedao_battlepass::BpHelper;
 	type StringLimit = UniquesStringLimit;
-	type SymbolLimit = CollectionSymbolLimit;
-	type PartsLimit = PartsLimit;
-	type MaxResourcesOnMint = MaxResourcesOnMint;
 	type NativeTokenId = GetNativeCurrencyId;
 	type ProtocolTokenId = GetProtocolCurrencyId;
 	type WeightInfo = gamedao_battlepass::weights::SubstrateWeight<Runtime>;
@@ -1149,9 +1094,6 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>} = 23,
 
 		// NFT
-		RmrkEquip: pallet_rmrk_equip::{Pallet, Call, Event<T>, Storage} = 30,
-		RmrkCore: pallet_rmrk_core::{Pallet, Call, Event<T>, Storage} = 31,
-		RmrkMarket: pallet_rmrk_market::{Pallet, Call, Storage, Event<T>} = 32,
 		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>} = 33,
 
 		// Collator support. The order of these 4 are important and shall not change.
@@ -1204,25 +1146,6 @@ mod benches {
 		[gamedao_signal, Signal]
 		[gamedao_battlepass, Battlepass]
 	);
-}
-
-fn option_filter_keys_to_set<StringLimit: frame_support::traits::Get<u32>>(
-	filter_keys: Option<Vec<pallet_rmrk_rpc_runtime_api::PropertyKey>>,
-) -> pallet_rmrk_rpc_runtime_api::Result<Option<BTreeSet<BoundedVec<u8, StringLimit>>>> {
-	match filter_keys {
-		Some(filter_keys) => {
-			let tree = filter_keys
-				.into_iter()
-				.map(|filter_keys| -> pallet_rmrk_rpc_runtime_api::Result<BoundedVec<u8, StringLimit>> {
-					filter_keys
-						.try_into()
-						.map_err(|_| DispatchError::Other("Can't read filter key"))
-				})
-				.collect::<pallet_rmrk_rpc_runtime_api::Result<BTreeSet<_>>>()?;
-			Ok(Some(tree))
-		},
-		None => Ok(None),
-	}
 }
 
 impl_runtime_apis! {
@@ -1393,106 +1316,6 @@ impl_runtime_apis! {
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
-		}
-	}
-
-	impl pallet_rmrk_rpc_runtime_api::RmrkApi<
-		Block,
-		AccountId,
-		CollectionInfoOf<Runtime>,
-		InstanceInfoOf<Runtime>,
-		ResourceInfoOf<Runtime>,
-		PropertyInfoOf<Runtime>,
-		BaseInfoOf<Runtime>,
-		PartTypeOf<Runtime>,
-		BoundedThemeOf<Runtime>
-	> for Runtime
-	{
-		fn collection_by_id(id: CollectionId) -> pallet_rmrk_rpc_runtime_api::Result<Option<CollectionInfoOf<Runtime>>> {
-			Ok(RmrkCore::collections(id))
-		}
-
-		fn nft_by_id(collection_id: CollectionId, nft_id: NftId) -> pallet_rmrk_rpc_runtime_api::Result<Option<InstanceInfoOf<Runtime>>> {
-			Ok(RmrkCore::nfts(collection_id, nft_id))
-		}
-
-		fn account_tokens(account_id: AccountId, collection_id: CollectionId) -> pallet_rmrk_rpc_runtime_api::Result<Vec<NftId>> {
-			Ok(Uniques::owned_in_collection(&collection_id, &account_id).collect())
-		}
-
-		fn nft_children(collection_id: CollectionId, nft_id: NftId) -> pallet_rmrk_rpc_runtime_api::Result<Vec<NftChild<CollectionId, NftId>>> {
-			let children = RmrkCore::iterate_nft_children(collection_id, nft_id).collect();
-
-			Ok(children)
-		}
-
-		fn collection_properties(
-			collection_id: CollectionId,
-			filter_keys: Option<Vec<pallet_rmrk_rpc_runtime_api::PropertyKey>>
-		) -> pallet_rmrk_rpc_runtime_api::Result<Vec<PropertyInfoOf<Runtime>>> {
-			let nft_id = None;
-
-			let filter_keys = option_filter_keys_to_set::<<Self as pallet_uniques::Config>::KeyLimit>(
-				filter_keys
-			)?;
-
-			Ok(RmrkCore::query_properties(collection_id, nft_id, filter_keys).collect())
-		}
-
-		fn nft_properties(
-			collection_id: CollectionId,
-			nft_id: NftId,
-			filter_keys: Option<Vec<pallet_rmrk_rpc_runtime_api::PropertyKey>>
-		) -> pallet_rmrk_rpc_runtime_api::Result<Vec<PropertyInfoOf<Runtime>>> {
-			let filter_keys = option_filter_keys_to_set::<<Self as pallet_uniques::Config>::KeyLimit>(
-				filter_keys
-			)?;
-
-			Ok(RmrkCore::query_properties(collection_id, Some(nft_id), filter_keys).collect())
-		}
-
-		fn nft_resources(collection_id: CollectionId, nft_id: NftId) -> pallet_rmrk_rpc_runtime_api::Result<Vec<ResourceInfoOf<Runtime>>> {
-			Ok(RmrkCore::iterate_resources(collection_id, nft_id).collect())
-		}
-
-		fn nft_resource_priority(collection_id: CollectionId, nft_id: NftId, resource_id: ResourceId) -> pallet_rmrk_rpc_runtime_api::Result<Option<u32>> {
-			let priority = RmrkCore::priorities((collection_id, nft_id, resource_id));
-
-			Ok(priority)
-		}
-
-		fn base(base_id: BaseId) -> pallet_rmrk_rpc_runtime_api::Result<Option<BaseInfoOf<Runtime>>> {
-			Ok(RmrkEquip::bases(base_id))
-		}
-
-		fn base_parts(base_id: BaseId) -> pallet_rmrk_rpc_runtime_api::Result<Vec<PartTypeOf<Runtime>>> {
-			Ok(RmrkEquip::iterate_part_types(base_id).collect())
-		}
-
-		fn theme_names(base_id: BaseId) -> pallet_rmrk_rpc_runtime_api::Result<Vec<pallet_rmrk_rpc_runtime_api::ThemeName>> {
-			let names = RmrkEquip::iterate_theme_names(base_id)
-				.map(|name| name.into())
-				.collect();
-
-			Ok(names)
-		}
-
-		fn theme(
-			base_id: BaseId,
-			theme_name: pallet_rmrk_rpc_runtime_api::ThemeName,
-			filter_keys: Option<Vec<pallet_rmrk_rpc_runtime_api::PropertyKey>>
-		) -> pallet_rmrk_rpc_runtime_api::Result<Option<BoundedThemeOf<Runtime>>> {
-			use pallet_rmrk_equip::StringLimitOf;
-
-			let theme_name: StringLimitOf<Self> = theme_name.try_into()
-				.map_err(|_| DispatchError::Other("Can't read theme_name"))?;
-
-			let filter_keys = option_filter_keys_to_set::<<Self as pallet_uniques::Config>::StringLimit>(
-				filter_keys
-			)?;
-
-			let theme = RmrkEquip::get_theme(base_id, theme_name, filter_keys)?;
-			Ok(theme)
 		}
 	}
 }
