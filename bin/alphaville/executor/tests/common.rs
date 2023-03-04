@@ -38,9 +38,9 @@ use alphaville_runtime::{
 	constants::currency::*, Block, BuildStorage, CheckedExtrinsic, Header, Runtime,
 	UncheckedExtrinsic,
 };
-use zero_executor::ExecutorDispatch;
+use node_executor::ExecutorDispatch;
 use zero_primitives::{BlockNumber, Hash};
-use zero_testing::keyring::*;
+use node_testing::keyring::*;
 use sp_externalities::Externalities;
 
 pub const TEST_KEY_TYPE_ID: KeyTypeId = KeyTypeId(*b"test");
@@ -83,7 +83,7 @@ pub const TRANSACTION_VERSION: u32 = alphaville_runtime::VERSION.transaction_ver
 pub type TestExternalities<H> = CoreTestExternalities<H>;
 
 pub fn sign(xt: CheckedExtrinsic) -> UncheckedExtrinsic {
-	zero_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
+	node_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
 }
 
 pub fn default_transfer_call() -> pallet_balances::Call<Runtime> {
@@ -120,7 +120,7 @@ pub fn executor_call(
 pub fn new_test_ext(code: &[u8]) -> TestExternalities<BlakeTwo256> {
 	let ext = TestExternalities::new_with_code(
 		code,
-		zero_testing::genesis::config(Some(code)).build_storage().unwrap(),
+		node_testing::genesis::config(Some(code)).build_storage().unwrap(),
 	);
 	ext
 }

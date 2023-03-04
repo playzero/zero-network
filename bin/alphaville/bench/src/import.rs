@@ -33,7 +33,7 @@
 use std::borrow::Cow;
 
 use zero_primitives::Block;
-use zero_testing::bench::{BenchDb, BlockType, DatabaseType, KeyTypes, Profile};
+use node_testing::bench::{BenchDb, BlockType, DatabaseType, KeyTypes, Profile};
 use sc_client_api::backend::Backend;
 use sp_runtime::generic::BlockId;
 use sp_state_machine::InspectState;
@@ -130,7 +130,7 @@ impl core::Benchmark for ImportBenchmark {
 		// Sanity checks.
 		context
 			.client
-			.state_at(&BlockId::number(1))
+			.state_at(self.block.header.hash())
 			.expect("state_at failed for block#1")
 			.inspect_state(|| {
 				match self.block_type {

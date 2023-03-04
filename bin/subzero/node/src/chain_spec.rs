@@ -239,6 +239,7 @@ fn testnet_genesis(
 		polkadot_xcm: subzero_runtime::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
+		transaction_payment: Default::default(),
 		council: Default::default(),
 		treasury: Default::default(),
 		tokens: Default::default(),

@@ -22,9 +22,9 @@ use alphaville_runtime::{
 	constants::currency::*, Block, BuildStorage, CheckedExtrinsic, GenesisConfig, Header,
 	RuntimeCall, UncheckedExtrinsic,
 };
-use zero_executor::ExecutorDispatch;
+use node_executor::ExecutorDispatch;
 use zero_primitives::{BlockNumber, Hash};
-use zero_testing::keyring::*;
+use node_testing::keyring::*;
 use sc_executor::{
 	Externalities, NativeElseWasmExecutor, RuntimeVersionOf, WasmExecutionMethod,
 	WasmtimeInstantiationStrategy,
@@ -64,7 +64,7 @@ enum ExecutionMethod {
 }
 
 fn sign(xt: CheckedExtrinsic) -> UncheckedExtrinsic {
-	zero_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
+	node_testing::keyring::sign(xt, SPEC_VERSION, TRANSACTION_VERSION, GENESIS_HASH)
 }
 
 fn new_test_ext(genesis_config: &GenesisConfig) -> TestExternalities<BlakeTwo256> {
@@ -169,7 +169,7 @@ fn bench_execute_block(c: &mut Criterion) {
 
 	for strategy in execution_methods {
 		group.bench_function(format!("{:?}", strategy), |b| {
-			let genesis_config = zero_testing::genesis::config(Some(compact_code_unwrap()));
+			let genesis_config = node_testing::genesis::config(Some(compact_code_unwrap()));
 			let (use_native, wasm_method) = match strategy {
 				ExecutionMethod::Native => (true, WasmExecutionMethod::Interpreted),
 				ExecutionMethod::Wasm(wasm_method) => (false, wasm_method),

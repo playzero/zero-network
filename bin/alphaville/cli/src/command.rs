@@ -24,7 +24,7 @@ use crate::{
 };
 use frame_benchmarking_cli::*;
 use alphaville_runtime::{ExistentialDeposit, RuntimeApi};
-use zero_executor::ExecutorDispatch;
+use node_executor::ExecutorDispatch;
 use zero_primitives::Block;
 use sc_cli::{ChainSpec, Result, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
@@ -88,8 +88,7 @@ pub fn run() -> Result<()> {
 		None => {
 			let runner = cli.create_runner(&cli.run)?;
 			runner.run_node_until_exit(|config| async move {
-				service::new_full(config, cli.no_hardware_benchmarks)
-					.map_err(sc_cli::Error::Service)
+				service::new_full(config, cli).map_err(sc_cli::Error::Service)
 			})
 		},
 		Some(Subcommand::Inspect(cmd)) => {
