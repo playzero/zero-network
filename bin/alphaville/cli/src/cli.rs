@@ -36,6 +36,10 @@ pub struct Cli {
 	/// telemetry, if telemetry is enabled.
 	#[arg(long)]
 	pub no_hardware_benchmarks: bool,
+
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	pub storage_monitor: sc_storage_monitor::StorageMonitorParams,
 }
 
 /// Possible subcommands of the main binary.
@@ -46,7 +50,7 @@ pub enum Subcommand {
 		name = "inspect",
 		about = "Decode given block or extrinsic using current native runtime."
 	)]
-	Inspect(zero_inspect::cli::InspectCmd),
+	Inspect(node_inspect::cli::InspectCmd),
 
 	/// Sub-commands concerned with benchmarking.
 	/// The pallet benchmarking moved to the `pallet` sub-command.

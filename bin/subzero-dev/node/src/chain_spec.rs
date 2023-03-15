@@ -239,6 +239,7 @@ fn testnet_genesis(
 		polkadot_xcm: subzero_dev_runtime::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
+		transaction_payment: Default::default(),
 		council: Default::default(),
 		treasury: Default::default(),
 		tokens: Default::default(),
@@ -475,6 +476,7 @@ fn subzero_genesis(
 		polkadot_xcm: subzero_dev_runtime::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
+		transaction_payment: Default::default(),
 		council: Default::default(),
 		treasury: Default::default(),
 		tokens: orml_tokens::GenesisConfig {

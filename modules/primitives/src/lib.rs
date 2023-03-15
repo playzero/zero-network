@@ -15,7 +15,6 @@
 //! Low-level types used throughout the Substrate code.
 
 // #![warn(missing_docs)]
-
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode, MaxEncodedLen};
@@ -33,6 +32,9 @@ pub use currency::{AssetIdMapping, CurrencyId, TokenSymbol, TokenInfo};
 /// An index to a block.
 pub type BlockNumber = u32;
 
+/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
+pub type Signature = MultiSignature;
+
 /// Alias to the public key used for this chain, actually a `MultiSigner`. Like
 /// the signature, this also isn't a fixed size when encoded, as different
 /// cryptos have different size public keys.
@@ -42,8 +44,7 @@ pub type AccountPublic = <Signature as Verify>::Signer;
 /// `AccountId32`. This is always 32 bytes.
 pub type AccountId = <AccountPublic as IdentifyAccount>::AccountId;
 
-/// The type for looking up accounts. We don't expect more than 4 billion of
-/// them.
+/// The type for looking up accounts. We don't expect more than 4 billion of them.
 pub type AccountIndex = u32;
 
 /// The address format for describing accounts.
@@ -51,12 +52,6 @@ pub type Address = sp_runtime::MultiAddress<AccountId, AccountIndex>;
 
 /// Index of a transaction in the chain. 32-bit should be plenty.
 pub type Nonce = u32;
-
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
-
-/// An instant or duration in time.
-pub type Moment = u64;
 
 /// Counter for the number of eras that have passed.
 pub type EraIndex = u32;
@@ -67,8 +62,19 @@ pub type Balance = u128;
 /// Signed version of Balance
 pub type Amount = i128;
 
+/// Type used for expressing timestamp.
+pub type Moment = u64;
+
 /// Index of a transaction in the chain.
 pub type Index = u32;
+
+/// A hash of some data used by the chain.
+pub type Hash = sp_core::H256;
+
+/// A timestamp: milliseconds since the unix epoch.
+/// `u64` is enough to represent a duration of half a billion years, when the
+/// time scale is milliseconds.
+pub type Timestamp = u64;
 
 /// Digest item type.
 pub type DigestItem = generic::DigestItem;
@@ -78,14 +84,6 @@ pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 /// Block ID.
 pub type BlockId = generic::BlockId<Block>;
-
-/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
-
-/// A timestamp: milliseconds since the unix epoch.
-/// `u64` is enough to represent a duration of half a billion years, when the
-/// time scale is milliseconds.
-pub type Timestamp = u64;
 
 /// Group collection id type
 pub type GroupCollectionId = u64;

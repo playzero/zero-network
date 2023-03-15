@@ -27,7 +27,7 @@ use alphaville_runtime::{
 	TransactionPayment,
 };
 use zero_primitives::Balance;
-use zero_testing::keyring::*;
+use node_testing::keyring::*;
 use sp_runtime::{traits::One, Perbill};
 
 pub mod common;
