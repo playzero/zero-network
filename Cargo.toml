@@ -11,12 +11,12 @@ members = [
 	# "bin/alphaville/runtime",
 
 	# parachain dev environment
-	"bin/subzero-dev/node",
-	"bin/subzero-dev/runtime",
+	# "bin/subzero-dev/node",
+	# "bin/subzero-dev/runtime",
 
 	# kusama parachain collator / archiver / full node
-	# "bin/subzero/node",
-	# "bin/subzero/runtime",
+	"bin/subzero/node",
+	"bin/subzero/runtime",
 
 	# "bin/zero/node",
 	# "bin/zero/runtime",

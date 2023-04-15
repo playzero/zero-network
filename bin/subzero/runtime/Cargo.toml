@@ -42,7 +42,7 @@ pallet-membership = { git = "https://github.com/paritytech/substrate", default-f
 pallet-multisig = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
 pallet-preimage = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
 pallet-proxy = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
-pallet-randomness-collective-flip = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
+pallet-insecure-randomness-collective-flip = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
 pallet-scheduler = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
 pallet-session = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
 pallet-sudo = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
@@ -102,6 +102,14 @@ orml-xcm = { git = "https://github.com/open-web3-stack/open-runtime-module-libra
 orml-xcm-support = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.40", default-features = false }
 orml-xtokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", branch= "polkadot-v0.9.40", default-features = false }
 
+# GameDao
+gamedao-traits = { path = "../../../modules/gamedao-protocol/traits", default-features = false }
+gamedao-flow = { path = "../../../modules/gamedao-protocol/flow", default-features = false }
+gamedao-control = { path = "../../../modules/gamedao-protocol/control", default-features = false }
+gamedao-signal = { path = "../../../modules/gamedao-protocol/signal", default-features = false }
+gamedao-sense = { path = "../../../modules/gamedao-protocol/sense", default-features = false }
+gamedao-battlepass = { path = "../../../modules/gamedao-protocol/battlepass", default-features = false }
+
 [features]
 default = [
 	"std",
@@ -136,7 +144,7 @@ std = [
 	"pallet-multisig/std",
 	"pallet-preimage/std",
 	"pallet-proxy/std",
-	"pallet-randomness-collective-flip/std",
+	"pallet-insecure-randomness-collective-flip/std",
 	"pallet-scheduler/std",
 	"pallet-session/std",
 	"pallet-sudo/std",
@@ -179,6 +187,13 @@ std = [
 	"orml-xcm-support/std",
 	"orml-xcm/std",
 	"orml-xtokens/std",
+
+	"gamedao-sense/std",
+	"gamedao-traits/std",
+	"gamedao-flow/std",
+	"gamedao-control/std",
+	"gamedao-signal/std",
+	"gamedao-battlepass/std",
 ]
 
 runtime-benchmarks = [
@@ -201,6 +216,13 @@ runtime-benchmarks = [
 	"xcm-builder/runtime-benchmarks",
 	"cumulus-pallet-session-benchmarking/runtime-benchmarks",
 	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
+
+	"gamedao-traits/runtime-benchmarks",
+	"gamedao-sense/runtime-benchmarks",
+	"gamedao-control/runtime-benchmarks",
+	"gamedao-flow/runtime-benchmarks",
+	"gamedao-signal/runtime-benchmarks",
+	"gamedao-battlepass/runtime-benchmarks",
 ]
 
 try-runtime = [
