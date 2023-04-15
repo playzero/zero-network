@@ -34,6 +34,7 @@ use frame_support::{
 	parameter_types,
 	pallet_prelude::RuntimeDebug,
 	traits::{
+		tokens::nonfungibles_v2::Inspect,
 		AsEnsureOriginWithArg, ConstU32, ConstU64, ConstU8, Contains, EitherOfDiverse,
 		EnsureOrigin, EnsureOriginWithArg, EqualPrivilegeOnly, InstanceFilter,
 		LockIdentifier, U128CurrencyToVote, Nothing, ConstBool
@@ -73,6 +74,8 @@ pub use primitives::{
 
 use orml_currencies::BasicCurrencyAdapter;
 use orml_traits::{parameter_type_with_key, GetByKey};
+
+use pallet_nfts::PalletFeatures;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -670,9 +673,9 @@ parameter_types! {
 	pub ItemDeposit: Balance = dollar(ZERO);
 	pub const KeyLimit: u32 = 32;
 	pub const ValueLimit: u32 = 256;
-	pub UniquesMetadataDepositBase: Balance = cent(ZERO) * 10;
-	pub UniquesAttributeDepositBase: Balance = cent(ZERO) * 10;
-	pub UniquesDepositPerByte: Balance = cent(ZERO);
+	pub MetadataDepositBase: Balance = cent(ZERO) * 10;
+	pub AttributeDepositBase: Balance = cent(ZERO) * 10;
+	pub MetadataDepositPerByte: Balance = cent(ZERO);
 	pub const UniquesStringLimit: u32 = 128;
 }
 
@@ -686,9 +689,9 @@ impl pallet_uniques::Config for Runtime {
 	type Locker = ();
 	type CollectionDeposit = CollectionDeposit;
 	type ItemDeposit = ItemDeposit;
-	type MetadataDepositBase = UniquesMetadataDepositBase;
-	type AttributeDepositBase = UniquesAttributeDepositBase;
-	type DepositPerByte = UniquesDepositPerByte;
+	type MetadataDepositBase = MetadataDepositBase;
+	type AttributeDepositBase = AttributeDepositBase;
+	type DepositPerByte = MetadataDepositPerByte;
 	type StringLimit = UniquesStringLimit;
 	type KeyLimit = KeyLimit;
 	type ValueLimit = ValueLimit;
@@ -1053,6 +1056,44 @@ impl orml_currencies::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub Features: PalletFeatures = PalletFeatures::all_enabled();
+	pub const MaxAttributesPerCall: u32 = 10;
+	pub const ApprovalsLimit: u32 = 20;
+	pub const ItemAttributesApprovalsLimit: u32 = 20;
+	pub const MaxTips: u32 = 10;
+	pub const MaxDeadlineDuration: BlockNumber = 12 * 30 * DAYS;
+}
+
+impl pallet_nfts::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type CollectionId = u32;
+	type ItemId = u32;
+	type Currency = Balances;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type CollectionDeposit = CollectionDeposit;
+	type ItemDeposit = ItemDeposit;
+	type MetadataDepositBase = MetadataDepositBase;
+	type AttributeDepositBase = MetadataDepositBase;
+	type DepositPerByte = MetadataDepositPerByte;
+	type StringLimit = StringLimit;
+	type KeyLimit = KeyLimit;
+	type ValueLimit = ValueLimit;
+	type ApprovalsLimit = ApprovalsLimit;
+	type ItemAttributesApprovalsLimit = ItemAttributesApprovalsLimit;
+	type MaxTips = MaxTips;
+	type MaxDeadlineDuration = MaxDeadlineDuration;
+	type MaxAttributesPerCall = MaxAttributesPerCall;
+	type Features = Features;
+	type OffchainSignature = Signature;
+	type OffchainPublic = <Signature as Verify>::Signer;
+	type WeightInfo = pallet_nfts::weights::SubstrateWeight<Runtime>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type Helper = ();
+	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+	type Locker = ();
+}
+
 // GameDAO protocol pallets
 parameter_types! {
 	pub MinProposalDeposit: Balance = 100 * dollar(GAME);
@@ -1192,6 +1233,7 @@ construct_runtime!(
 
 		// NFT
 		Uniques: pallet_uniques = 33,
+		Nfts: pallet_nfts = 34,
 
 		// Collator support. The order of these 4 are important and shall not change.
 		Authorship: pallet_authorship = 40,
@@ -1440,6 +1482,50 @@ impl_runtime_apis! {
 		}
 		fn query_length_to_fee(length: u32) -> Balance {
 			TransactionPayment::length_to_fee(length)
+		}
+	}
+
+	impl pallet_nfts_runtime_api::NftsApi<Block, AccountId, u32, u32> for Runtime {
+		fn owner(collection: u32, item: u32) -> Option<AccountId> {
+			<Nfts as Inspect<AccountId>>::owner(&collection, &item)
+		}
+
+		fn collection_owner(collection: u32) -> Option<AccountId> {
+			<Nfts as Inspect<AccountId>>::collection_owner(&collection)
+		}
+
+		fn attribute(
+			collection: u32,
+			item: u32,
+			key: Vec<u8>,
+		) -> Option<Vec<u8>> {
+			<Nfts as Inspect<AccountId>>::attribute(&collection, &item, &key)
+		}
+
+		fn custom_attribute(
+			account: AccountId,
+			collection: u32,
+			item: u32,
+			key: Vec<u8>,
+		) -> Option<Vec<u8>> {
+			<Nfts as Inspect<AccountId>>::custom_attribute(
+				&account,
+				&collection,
+				&item,
+				&key,
+			)
+		}
+
+		fn system_attribute(
+			collection: u32,
+			item: u32,
+			key: Vec<u8>,
+		) -> Option<Vec<u8>> {
+			<Nfts as Inspect<AccountId>>::system_attribute(&collection, &item, &key)
+		}
+
+		fn collection_attribute(collection: u32, key: Vec<u8>) -> Option<Vec<u8>> {
+			<Nfts as Inspect<AccountId>>::collection_attribute(&collection, &key)
 		}
 	}
 
