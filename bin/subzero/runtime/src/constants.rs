@@ -31,12 +31,7 @@ pub mod time {
 pub mod fee {
 	use frame_support::weights::{
 		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_SECOND},
-		WeightToFeePolynomial,
-		WeightToFeeCoefficients,
-		WeightToFeeCoefficient
 	};
-	use smallvec::smallvec;
-	use sp_runtime::Perbill;
 	use primitives::{
 		currency::{TokenSymbol, DOT, ZERO, GAME, PLAY},
 		Balance,
@@ -76,30 +71,6 @@ pub mod fee {
 		base_tx_per_second() * base_tx_in_token(TokenSymbol::PLAY)
 	}
 
-	/// Handles converting a weight scalar to a fee value, based on the scale and granularity of the
-	/// node's balance type.
-	///
-	/// This should typically create a mapping between the following ranges:
-	///   - `[0, MAXIMUM_BLOCK_WEIGHT]`
-	///   - `[Balance::min, Balance::max]`
-	///
-	/// Yet, it can be used for any other sort of change to weight-fee. Some examples being:
-	///   - Setting it to `0` will essentially disable the weight fee.
-	///   - Setting it to `1` will cause the literal `#[weight = x]` values to be charged.
-	pub struct WeightToFee;
-	impl WeightToFeePolynomial for WeightToFee {
-		type Balance = Balance;
-		fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
-			let p = base_tx_in_token(TokenSymbol::ZERO);
-			let q = Balance::from(ExtrinsicBaseWeight::get().ref_time());
-			smallvec![WeightToFeeCoefficient {
-				degree: 1,
-				negative: false,
-				coeff_frac: Perbill::from_rational(p % q, q),
-				coeff_integer: p / q,
-			}]
-		}
-	}
 }
 
 pub mod parachains {

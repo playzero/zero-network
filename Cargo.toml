@@ -7,12 +7,12 @@ members = [
 
 	# standalone network / dev environment:
 	# cargo build -p alphaville
-	"bin/alphaville/cli",
-	"bin/alphaville/runtime",
+	# "bin/alphaville/cli",
+	# "bin/alphaville/runtime",
 
 	# parachain dev environment
-	"bin/subzero-dev/node",
-	"bin/subzero-dev/runtime",
+	# "bin/subzero-dev/node",
+	# "bin/subzero-dev/runtime",
 
 	# kusama parachain collator / archiver / full node
 	"bin/subzero/node",

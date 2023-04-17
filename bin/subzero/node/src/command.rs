@@ -23,9 +23,11 @@ use crate::{
 fn load_spec(id: &str) -> std::result::Result<Box<dyn ChainSpec>, String> {
 	Ok(match id {
 		"dev" => Box::new(chain_spec::development_config()),
+		"subzero" => Box::new(chain_spec::subzero_config()?),
+		"subzero-dev" => Box::new(chain_spec::development_subzero_config()),
+		"subzero-stage" => Box::new(chain_spec::staging_subzero_config()),
 		"template-rococo" => Box::new(chain_spec::local_testnet_config()),
-		"local" => Box::new(chain_spec::local_testnet_config()),
-		"" | "subzero" => Box::new(chain_spec::subzero_config()?),
+		"" | "local" => Box::new(chain_spec::local_testnet_config()),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
 }
@@ -230,9 +232,12 @@ pub fn run() -> Result<()> {
 		},
 		#[cfg(feature = "try-runtime")]
 		Some(Subcommand::TryRuntime(cmd)) => {
+			use subzero_dev_runtime::MILLISECS_PER_BLOCK;
+			use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
+			use try_runtime_cli::block_building_info::timestamp_with_aura_info;
+
 			let runner = cli.create_runner(cmd)?;
 
-			use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
 			type HostFunctionsOf<E> = ExtendedHostFunctions<
 				sp_io::SubstrateHostFunctions,
 				<E as NativeExecutionDispatch>::ExtendHostFunctions,
@@ -244,9 +249,16 @@ pub fn run() -> Result<()> {
 				sc_service::TaskManager::new(runner.config().tokio_handle.clone(), *registry)
 					.map_err(|e| format!("Error: {:?}", e))?;
 
+			let info_provider = timestamp_with_aura_info(MILLISECS_PER_BLOCK);
+
 			runner.async_run(|_| {
-				Ok((cmd.run::<Block, HostFunctionsOf<ParachainNativeExecutor>>(), task_manager))
-			})
+				Ok((
+					cmd.run::<Block, HostFunctionsOf<ParachainNativeExecutor>, _>(Some(
+						info_provider,
+					)),
+					task_manager,
+				))
+				})
 		},
 		#[cfg(not(feature = "try-runtime"))]
 		Some(Subcommand::TryRuntime) => Err("Try-runtime was not enabled when building the node. \

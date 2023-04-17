@@ -2,7 +2,7 @@ use super::{
 	constants::{fee::*, parachains},
 	AccountId, AllPalletsWithSystem, Balances, AssetRegistry, Balance, Convert,
 	CurrencyId::{self, ForeignAsset}, Currencies,
-	EnsureRootOrHalfCouncil, EnsureRootOrThreeFourthsCouncil,
+	EnsureRootOrThreeFourthsCouncil,
 	ParachainInfo, ParachainSystem, PolkadotXcm,
 	Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, TreasuryAccountId, UnknownTokens, XcmpQueue,
 	ZERO, PLAY, GAME, DOT,
@@ -52,10 +52,21 @@ pub type LocationToAccountId = (
 	AccountId32Aliases<RelayNetwork, AccountId>,
 );
 
+pub type LocalAssetTransactor = MultiCurrencyAdapter<
+	Currencies,
+	UnknownTokens,
+	IsNativeConcrete<CurrencyId, CurrencyIdConvert>,
+	AccountId,
+	LocationToAccountId,
+	CurrencyId,
+	CurrencyIdConvert,
+	DepositToAlternative<TreasuryAccountId, Currencies, CurrencyId, AccountId, Balance>,
+>;
+
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
 /// ready for dispatching a transaction with Xcm's `Transact`. There is an `OriginKind` which can
 /// biases the kind of local `Origin` it will become.
-pub type XcmOriginToCallOrigin = (
+pub type XcmOriginToTransactDispatchOrigin = (
 	// Sovereign account converter; this attempts to derive an `AccountId` from the origin location
 	// using `LocationToAccountId` and then turn that into the usual `Signed` origin. Useful for
 	// foreign chains who want to have a local sovereign account on this chain which they control.
@@ -72,6 +83,13 @@ pub type XcmOriginToCallOrigin = (
 	// Xcm origins can be represented natively under the Xcm pallet's Xcm origin.
 	XcmPassthrough<RuntimeOrigin>,
 );
+
+parameter_types! {
+	// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
+	pub UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
+	pub const MaxInstructions: u32 = 100;
+	pub const MaxAssetsIntoHolding: u32 = 64;
+}
 
 match_types! {
 	pub type ParentOrParentsExecutivePlurality: impl Contains<MultiLocation> = {
@@ -104,9 +122,6 @@ pub fn local_currency_location(key: CurrencyId) -> Option<MultiLocation> {
 }
 
 parameter_types! {
-	// One XCM operation is 200_000_000 weight, cross-chain transfer ~= 2x of transfer.
-	pub const UnitWeightCost: Weight = Weight::from_ref_time(200_000_000);
-	pub const MaxInstructions: u32 = 100;
 	pub DotPerSecond: (AssetId, u128, u128) = (
 		MultiLocation::parent().into(),
 		dot_per_second(), 0
@@ -166,7 +181,7 @@ impl xcm_executor::Config for XcmConfig {
 	type XcmSender = XcmRouter;
 	// How to withdraw and deposit an asset.
 	type AssetTransactor = LocalAssetTransactor;
-	type OriginConverter = XcmOriginToCallOrigin;
+	type OriginConverter = XcmOriginToTransactDispatchOrigin;
 	type IsReserve = MultiNativeAsset<AbsoluteReserveProvider>;
 	type IsTeleporter = NativeAsset;
 	type UniversalLocation = UniversalLocation;
@@ -178,7 +193,7 @@ impl xcm_executor::Config for XcmConfig {
 	type AssetClaims = PolkadotXcm;
 	type SubscriptionService = PolkadotXcm;
 	type PalletInstancesInfo = AllPalletsWithSystem;
-	type MaxAssetsIntoHolding = ConstU32<64>;
+	type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
 	type AssetLocker = ();
 	type AssetExchanger = ();
 	type FeeManager = ();
@@ -238,35 +253,6 @@ impl cumulus_pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 }
-
-impl cumulus_pallet_xcmp_queue::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type ChannelInfo = ParachainSystem;
-	type VersionWrapper = PolkadotXcm;
-	type ExecuteOverweightOrigin = EnsureRootOrHalfCouncil;
-	type ControllerOrigin = EnsureRootOrHalfCouncil;
-	type ControllerOriginConverter = XcmOriginToCallOrigin;
-	type WeightInfo = ();
-	type PriceForSiblingDelivery = ();
-}
-
-impl cumulus_pallet_dmp_queue::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type ExecuteOverweightOrigin = EnsureRootOrHalfCouncil;
-}
-
-pub type LocalAssetTransactor = MultiCurrencyAdapter<
-	Currencies,
-	UnknownTokens,
-	IsNativeConcrete<CurrencyId, CurrencyIdConvert>,
-	AccountId,
-	LocationToAccountId,
-	CurrencyId,
-	CurrencyIdConvert,
-	DepositToAlternative<TreasuryAccountId, Currencies, CurrencyId, AccountId, Balance>,
->;
 
 pub fn native_currency_location(para_id: u32, key: Vec<u8>) -> Option<MultiLocation> {
 	Some(MultiLocation::new(
