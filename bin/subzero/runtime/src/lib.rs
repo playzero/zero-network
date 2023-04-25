@@ -199,7 +199,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("subzero"),
 	impl_name: create_runtime_str!("live"),
 	authoring_version: 75,
-	spec_version: 73,
+	spec_version: 74,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -270,22 +270,46 @@ impl Contains<RuntimeCall> for BaseFilter {
 		// Disable direct calls to pallet_uniques
 		!matches!(
 			call,
-			RuntimeCall::Uniques(pallet_uniques::Call::approve_transfer { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::burn { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::cancel_approval { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::clear_collection_metadata { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::clear_metadata { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::create { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::destroy { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::force_item_status { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::force_create { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::freeze_collection { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::mint { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::redeposit { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::set_collection_metadata { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::thaw_collection { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::transfer { .. }) |
-			RuntimeCall::Uniques(pallet_uniques::Call::transfer_ownership { .. })
+			RuntimeCall::Nfts(pallet_nfts::Call::create { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::force_create { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::transfer { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_owner { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_config { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::force_set_attribute { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::set_price { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::buy_item { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::pay_tips { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::create_swap { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::cancel_swap { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::claim_swap { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::mint_pre_signed { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::set_attributes_pre_signed { .. }) |
+
+			RuntimeCall::Nfts(pallet_nfts::Call::mint { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::force_mint { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::burn { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::redeposit { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::approve_transfer { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::cancel_approval { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::clear_all_transfer_approvals { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::set_attribute { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::clear_attribute { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::approve_item_attributes { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::cancel_item_attributes_approval { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::set_metadata { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::clear_metadata { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::destroy { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::lock_item_transfer { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::unlock_item_transfer { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::lock_collection { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::transfer_ownership { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::set_team { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::lock_item_properties { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::set_collection_metadata { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::clear_collection_metadata { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::set_accept_ownership { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::set_collection_max_supply { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::update_mint_settings { .. })
 		)
 	}
 }
@@ -468,7 +492,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
 			ProxyType::NonTransfer => !matches!(
 				c,
 				RuntimeCall::Balances(..) |
-				RuntimeCall::Uniques(..) |
+				RuntimeCall::Nfts(..) |
 				RuntimeCall::Currencies(..) |
 				RuntimeCall::Tokens(..)
 			),
@@ -666,36 +690,6 @@ type EnsureRootOrThreeFourthsCouncil = EitherOfDiverse<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 3, 4>,
 >;
-
-parameter_types! {
-	pub CollectionDeposit: Balance = cent(ZERO) * 10;
-	pub ItemDeposit: Balance = dollar(ZERO);
-	pub const KeyLimit: u32 = 32;
-	pub const ValueLimit: u32 = 256;
-	pub MetadataDepositBase: Balance = cent(ZERO) * 10;
-	pub AttributeDepositBase: Balance = cent(ZERO) * 10;
-	pub MetadataDepositPerByte: Balance = cent(ZERO);
-	pub const UniquesStringLimit: u32 = 128;
-}
-
-impl pallet_uniques::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type CollectionId = u32;
-	type ItemId = u32;
-	type Currency = Balances;
-	type ForceOrigin = EnsureRoot<AccountId>;
-	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-	type Locker = ();
-	type CollectionDeposit = CollectionDeposit;
-	type ItemDeposit = ItemDeposit;
-	type MetadataDepositBase = MetadataDepositBase;
-	type AttributeDepositBase = AttributeDepositBase;
-	type DepositPerByte = MetadataDepositPerByte;
-	type StringLimit = UniquesStringLimit;
-	type KeyLimit = KeyLimit;
-	type ValueLimit = ValueLimit;
-	type WeightInfo = pallet_uniques::weights::SubstrateWeight<Runtime>;
-}
 
 impl pallet_utility::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -1062,6 +1056,12 @@ parameter_types! {
 	pub const ItemAttributesApprovalsLimit: u32 = 20;
 	pub const MaxTips: u32 = 10;
 	pub const MaxDeadlineDuration: BlockNumber = 12 * 30 * DAYS;
+	pub CollectionDeposit: Balance = cent(ZERO) * 10;
+	pub ItemDeposit: Balance = dollar(ZERO);
+	pub const KeyLimit: u32 = 32;
+	pub const ValueLimit: u32 = 256;
+	pub MetadataDepositBase: Balance = cent(ZERO) * 10;
+	pub MetadataDepositPerByte: Balance = cent(ZERO);
 }
 
 impl pallet_nfts::Config for Runtime {
@@ -1189,7 +1189,7 @@ impl gamedao_battlepass::Config for Runtime {
 	#[cfg(feature = "runtime-benchmarks")]
 	type ControlBenchmarkHelper = Control;
 	type BattlepassHelper = gamedao_battlepass::BpHelper;
-	type StringLimit = UniquesStringLimit;
+	type StringLimit = StringLimit;
 	type NativeTokenId = GetNativeCurrencyId;
 	type ProtocolTokenId = GetProtocolCurrencyId;
 	type WeightInfo = gamedao_battlepass::weights::SubstrateWeight<Runtime>;
@@ -1231,7 +1231,6 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment = 23,
 
 		// NFT
-		Uniques: pallet_uniques = 33,
 		Nfts: pallet_nfts = 34,
 
 		// Collator support. The order of these 4 are important and shall not change.
