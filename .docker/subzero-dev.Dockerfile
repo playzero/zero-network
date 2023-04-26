@@ -15,9 +15,9 @@ COPY . /subzero
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 	export PATH="$PATH:$HOME/.cargo/bin" && \
-	rustup toolchain install nightly-2022-11-15 && \
-	rustup target add wasm32-unknown-unknown --toolchain nightly-2022-11-15 && \
-	rustup default nightly-2022-11-15 &&\
+	rustup toolchain install nightly-2023-01-01 && \
+	rustup target add wasm32-unknown-unknown --toolchain nightly-2023-01-01 && \
+	rustup default nightly-2023-01-01 &&\
 	rustup show
 
 # ===== STAGE 2 ======
@@ -43,12 +43,12 @@ RUN mv /usr/share/ca* /tmp && \
 	chown -R subzero:subzero /subzero/.local && \
 	ln -s /subzero/.local/share/subzero /data
 
-COPY --from=builder /subzero/target/$PROFILE/subzero-dev /usr/local/bin
+COPY --from=builder /subzero/target/$PROFILE/subzero /usr/local/bin
 COPY --from=builder /subzero/.docker/chainspec /chainspec
 
 # checks
-RUN ldd /usr/local/bin/subzero-dev && \
-	/usr/local/bin/subzero-dev --version
+RUN ldd /usr/local/bin/subzero && \
+	/usr/local/bin/subzero --version
 
 # Shrinking
 # RUN rm -rf /usr/lib/python* && \
@@ -58,4 +58,4 @@ USER subzero
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
 
-CMD ["/usr/local/bin/subzero-dev"]
+CMD ["/usr/local/bin/subzero"]
