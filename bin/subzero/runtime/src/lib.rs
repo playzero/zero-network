@@ -267,46 +267,46 @@ parameter_types! {
 pub struct BaseFilter;
 impl Contains<RuntimeCall> for BaseFilter {
 	fn contains(call: &RuntimeCall) -> bool {
-		// Disable direct calls to pallet_uniques
+		// Disable direct calls to pallet_nfts
 		!matches!(
 			call,
 			RuntimeCall::Nfts(pallet_nfts::Call::create { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::force_create { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::transfer { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::force_create { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::transfer { .. }) |
 			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_owner { .. }) |
 			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_config { .. }) |
 			// RuntimeCall::Nfts(pallet_nfts::Call::force_set_attribute { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::set_price { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::buy_item { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::pay_tips { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::create_swap { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::cancel_swap { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::claim_swap { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::set_price { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::buy_item { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::pay_tips { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::create_swap { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::cancel_swap { .. }) |
+			RuntimeCall::Nfts(pallet_nfts::Call::claim_swap { .. }) |
 			// RuntimeCall::Nfts(pallet_nfts::Call::mint_pre_signed { .. }) |
 			// RuntimeCall::Nfts(pallet_nfts::Call::set_attributes_pre_signed { .. }) |
 
 			RuntimeCall::Nfts(pallet_nfts::Call::mint { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::force_mint { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::force_mint { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::burn { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::redeposit { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::approve_transfer { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::cancel_approval { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::clear_all_transfer_approvals { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::set_attribute { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::clear_attribute { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::set_attribute { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::clear_attribute { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::approve_item_attributes { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::cancel_item_attributes_approval { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::set_metadata { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::clear_metadata { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::set_metadata { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::clear_metadata { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::destroy { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::lock_item_transfer { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::unlock_item_transfer { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::lock_collection { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::lock_item_transfer { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::unlock_item_transfer { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::lock_collection { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::transfer_ownership { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::set_team { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::lock_item_properties { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::set_collection_metadata { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::clear_collection_metadata { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::lock_item_properties { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::set_collection_metadata { .. }) |
+			// RuntimeCall::Nfts(pallet_nfts::Call::clear_collection_metadata { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::set_accept_ownership { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::set_collection_max_supply { .. }) |
 			RuntimeCall::Nfts(pallet_nfts::Call::update_mint_settings { .. })
