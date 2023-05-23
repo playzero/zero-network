@@ -33,7 +33,7 @@ pub mod fee {
 		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_SECOND},
 	};
 	use primitives::{
-		currency::{TokenSymbol, DOT, ZERO, GAME, PLAY},
+		currency::{TokenSymbol, DOT, ZERO, GAME, PLAY, KSM},
 		Balance,
 		cent
 	};
@@ -42,7 +42,7 @@ pub mod fee {
 		match token {
 			TokenSymbol::DOT => cent(DOT) * 30 / 10000,
 			// KSM:DOT = 0.2:1
-			TokenSymbol::KSM => cent(DOT) * 60 / 100000,
+			TokenSymbol::KSM => cent(KSM) * 60 / 100000,
 			// ZERO:DOT = 6:1
 			TokenSymbol::ZERO => cent(ZERO) * 18 / 1000,
 			// GAME:DOT = 6:1
