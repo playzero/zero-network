@@ -264,55 +264,55 @@ parameter_types! {
 	pub const SS58Prefix: u16 = 25;
 }
 
-pub struct BaseFilter;
-impl Contains<RuntimeCall> for BaseFilter {
-	fn contains(call: &RuntimeCall) -> bool {
-		// Disable direct calls to pallet_nfts
-		!matches!(
-			call,
-			RuntimeCall::Nfts(pallet_nfts::Call::create { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::force_create { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::transfer { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_owner { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_config { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::force_set_attribute { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::set_price { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::buy_item { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::pay_tips { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::create_swap { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::cancel_swap { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::claim_swap { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::mint_pre_signed { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::set_attributes_pre_signed { .. }) |
+// pub struct BaseFilter;
+// impl Contains<RuntimeCall> for BaseFilter {
+// 	fn contains(call: &RuntimeCall) -> bool {
+// 		// Disable direct calls to pallet_nfts
+// 		!matches!(
+// 			call,
+// 			RuntimeCall::Nfts(pallet_nfts::Call::create { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_create { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::transfer { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_owner { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_config { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_set_attribute { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::set_price { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::buy_item { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::pay_tips { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::create_swap { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::cancel_swap { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::claim_swap { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::mint_pre_signed { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::set_attributes_pre_signed { .. }) |
 
-			RuntimeCall::Nfts(pallet_nfts::Call::mint { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::force_mint { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::burn { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::redeposit { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::approve_transfer { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::cancel_approval { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::clear_all_transfer_approvals { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::set_attribute { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::clear_attribute { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::approve_item_attributes { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::cancel_item_attributes_approval { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::set_metadata { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::clear_metadata { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::destroy { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::lock_item_transfer { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::unlock_item_transfer { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::lock_collection { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::transfer_ownership { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::set_team { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::lock_item_properties { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::set_collection_metadata { .. }) |
-			// RuntimeCall::Nfts(pallet_nfts::Call::clear_collection_metadata { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::set_accept_ownership { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::set_collection_max_supply { .. }) |
-			RuntimeCall::Nfts(pallet_nfts::Call::update_mint_settings { .. })
-		)
-	}
-}
+// 			RuntimeCall::Nfts(pallet_nfts::Call::mint { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_mint { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::burn { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::redeposit { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::approve_transfer { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::cancel_approval { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::clear_all_transfer_approvals { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::set_attribute { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::clear_attribute { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::approve_item_attributes { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::cancel_item_attributes_approval { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::set_metadata { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::clear_metadata { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::destroy { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::lock_item_transfer { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::unlock_item_transfer { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::lock_collection { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::transfer_ownership { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::set_team { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::lock_item_properties { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::set_collection_metadata { .. }) |
+// 			// RuntimeCall::Nfts(pallet_nfts::Call::clear_collection_metadata { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::set_accept_ownership { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::set_collection_max_supply { .. }) |
+// 			RuntimeCall::Nfts(pallet_nfts::Call::update_mint_settings { .. })
+// 		)
+// 	}
+// }
 
 // Configure FRAME pallets to include in runtime.
 
@@ -352,7 +352,7 @@ impl frame_system::Config for Runtime {
 	/// The weight of database operations that the runtime can invoke.
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
-	type BaseCallFilter = BaseFilter;
+	// type BaseCallFilter = BaseFilter;
 	/// Weight information for the extrinsics of this pallet.
 	type SystemWeightInfo = ();
 	/// Block & extrinsics weights: base values and limits.
@@ -1180,20 +1180,20 @@ impl gamedao_sense::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
-impl gamedao_battlepass::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Balance = Balance;
-	type CurrencyId = CurrencyId;
-	type Currency = Currencies;
-	type Control = Control;
-	#[cfg(feature = "runtime-benchmarks")]
-	type ControlBenchmarkHelper = Control;
-	type BattlepassHelper = gamedao_battlepass::BpHelper;
-	type StringLimit = StringLimit;
-	type NativeTokenId = GetNativeCurrencyId;
-	type ProtocolTokenId = GetProtocolCurrencyId;
-	type WeightInfo = gamedao_battlepass::weights::SubstrateWeight<Runtime>;
-}
+// impl gamedao_battlepass::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type Balance = Balance;
+// 	type CurrencyId = CurrencyId;
+// 	type Currency = Currencies;
+// 	type Control = Control;
+// 	#[cfg(feature = "runtime-benchmarks")]
+// 	type ControlBenchmarkHelper = Control;
+// 	type BattlepassHelper = gamedao_battlepass::BpHelper;
+// 	type StringLimit = StringLimit;
+// 	type NativeTokenId = GetNativeCurrencyId;
+// 	type ProtocolTokenId = GetProtocolCurrencyId;
+// 	type WeightInfo = gamedao_battlepass::weights::SubstrateWeight<Runtime>;
+// }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -1259,7 +1259,7 @@ construct_runtime!(
 		Sense: gamedao_sense = 71,
 		Control: gamedao_control = 72,
 		Signal: gamedao_signal = 73,
-		Battlepass: gamedao_battlepass = 74,
+		// Battlepass: gamedao_battlepass = 74,
 	}
 );
 
@@ -1277,7 +1277,7 @@ mod benches {
 		[gamedao_sense, Sense]
 		[gamedao_control, Control]
 		[gamedao_signal, Signal]
-		[gamedao_battlepass, Battlepass]
+		// [gamedao_battlepass, Battlepass]
 	);
 }
 
