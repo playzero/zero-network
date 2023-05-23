@@ -67,7 +67,7 @@ use xcm_executor::XcmExecutor;
 
 pub use constants::{fee::*, time::*};
 pub use primitives::{
-	currency::{ZERO, PLAY, GAME, DOT, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
+	currency::{ZERO, PLAY, GAME, DOT, KSM, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
 	dollar, cent, millicent,
 	Amount, ReserveIdentifier
 };
@@ -353,6 +353,7 @@ impl frame_system::Config for Runtime {
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
 	// type BaseCallFilter = BaseFilter;
+	type BaseCallFilter = ();
 	/// Weight information for the extrinsics of this pallet.
 	type SystemWeightInfo = ();
 	/// Block & extrinsics weights: base values and limits.
@@ -980,6 +981,7 @@ parameter_type_with_key! {
 				TokenSymbol::PLAY => 10 * cent(*currency_id),
 				TokenSymbol::GAME => 10 * cent(*currency_id),
 				TokenSymbol::DOT => cent(*currency_id),
+				_ => cent(*currency_id),
 			},
 			CurrencyId::ForeignAsset(id) => {
 				AssetRegistry::metadata(&id)

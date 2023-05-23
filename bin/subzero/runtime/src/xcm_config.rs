@@ -5,7 +5,7 @@ use super::{
 	EnsureRootOrThreeFourthsCouncil,
 	ParachainInfo, ParachainSystem, PolkadotXcm,
 	Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, TreasuryAccountId, UnknownTokens, XcmpQueue,
-	ZERO, PLAY, GAME, DOT,
+	ZERO, PLAY, GAME, DOT, KSM
 };
 use codec::{Decode, Encode};
 use cumulus_primitives_core::ParaId;
@@ -265,7 +265,8 @@ pub struct CurrencyIdConvert;
 impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	fn convert(id: CurrencyId) -> Option<MultiLocation> {
 		match id {
-			DOT => Some(MultiLocation::parent()),
+			DOT | KSM
+				=> Some(MultiLocation::parent()),
 			ZERO | GAME | PLAY
 				=> native_currency_location(ParachainInfo::get().into(), id.encode()),
 			ForeignAsset(id)

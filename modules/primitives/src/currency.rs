@@ -99,6 +99,7 @@ create_currency_id! {
 		PLAY("Play", 10) = 1,
 		GAME("Game", 10) = 2,
 		DOT("Polkadot", 10) = 12,
+        KSM("Kusama", 12) = 130,
 	}
 }
 
