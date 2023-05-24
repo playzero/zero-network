@@ -17,13 +17,13 @@
       18,
       10,
       10,
-      10
+      12
     ],
     "tokenSymbol": [
       "ZERO",
       "PLAY",
       "GAME",
-      "DOT"
+      "KSM"
     ]
   },
   "relay_chain": "kusama",

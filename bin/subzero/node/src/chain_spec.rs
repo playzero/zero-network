@@ -12,7 +12,7 @@ use gamedao_control::types::{OrgType, AccessModel, FeeModel};
 use orml_tokens;
 
 use primitives::{
-	currency::{ZERO, PLAY, GAME, DOT, TokenInfo, CurrencyId},
+	currency::{ZERO, PLAY, GAME, KSM, TokenInfo, CurrencyId},
 	cent, dollar, Balance
 };
 
@@ -77,7 +77,7 @@ pub fn get_properties() -> Properties {
 	let mut properties = Properties::new();
 	let mut token_symbol: Vec<String> = vec![];
 	let mut token_decimals: Vec<u32> = vec![];
-	[ZERO, PLAY, GAME, DOT].iter().for_each(|token| {
+	[ZERO, PLAY, GAME, KSM].iter().for_each(|token| {
 		token_symbol.push(token.symbol().unwrap().to_string());
 		token_decimals.push(token.decimals().unwrap() as u32);
 	});
