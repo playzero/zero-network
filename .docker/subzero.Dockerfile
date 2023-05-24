@@ -14,9 +14,9 @@ COPY . /subzero
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 	export PATH="$PATH:$HOME/.cargo/bin" && \
-	rustup toolchain install nightly-2022-11-15 && \
-	rustup target add wasm32-unknown-unknown --toolchain nightly-2022-11-15 && \
-	rustup default nightly-2022-11-15 &&\
+	rustup toolchain install nightly-2023-01-01 && \
+	rustup target add wasm32-unknown-unknown --toolchain nightly-2023-01-01 && \
+	rustup default nightly-2023-01-01 &&\
 	rustup show
 
 # ===== STAGE 2 ======
@@ -57,4 +57,4 @@ USER subzero
 EXPOSE 30333 9933 9944 9615
 VOLUME ["/data"]
 
-CMD ["/usr/local/bin/subzero"]
+CMD ["/usr/local/bin/subzero", "--chain", "subzero"]
