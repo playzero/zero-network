@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   relaychain-alice:
-    image: parity/polkadot:v0.9.28
+    image: parity/polkadot:v0.9.40
     user: "0:0"
     ports:
       - 9944:9944
@@ -22,10 +22,11 @@ services:
       - --rpc-methods=unsafe
       - --wasm-execution=compiled
       - --execution=wasm
+      - --node-key=bf16b85cdce899363bb32e5baf1f2d58e967ac9bd97e8dd3bdc6df26e2cd35ee
     environment:
       RUST_LOG: parachain::candidate-backing=trace,parachain::candidate-selection=trace,parachain::pvf=trace,parachain::collator-protocol=trace,parachain::provisioner=trace
   relaychain-bob:
-    image: parity/polkadot:v0.9.28
+    image: parity/polkadot:v0.9.40
     user: "0:0"
     ports:
       - 9945:9944
@@ -49,8 +50,8 @@ services:
     environment:
       RUST_LOG: parachain::candidate-backing=trace,parachain::candidate-selection=trace,parachain::pvf=trace,parachain::collator-protocol=trace,parachain::provisioner=trace
   parachain-alice:
-    # image: playzero/subzero:local
-    image: subzero:local
+    image: playzero/subzero:local
+    # image: subzero:local
     user: "0:0"
     ports:
       - 9946:9944
@@ -61,12 +62,12 @@ services:
       - "./tmp:/tmp"
     command:
       - /usr/local/bin/subzero
-      - --chain=/chainspec/subzero.json
+      - --chain=/chainspec/subzero-parachain-raw.json
       - --base-path=/tmp/parachain/alice
       - --ws-external
       - --rpc-external
       - --rpc-cors=all
-      - --name=parachain-4040-0
+      - --name=parachain-2000-0
       - --collator
       - --rpc-methods=unsafe
       - --force-authoring
@@ -77,6 +78,7 @@ services:
       - --listen-addr=/ip4/0.0.0.0/tcp/30333
       - --
       - --chain=/chainspec/rococo-local.json
+      # - --bootnodes=/dns/relaychain-alice/tcp/30333/p2p/12D3KooWEkXWjRHhoMXzj3gKzewqem5Kppg65vpK8qTsRTkoKf3A
       - --wasm-execution=compiled
       - --execution=wasm
     environment:

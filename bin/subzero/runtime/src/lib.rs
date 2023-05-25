@@ -36,7 +36,7 @@ use frame_support::{
 	traits::{
 		tokens::nonfungibles_v2::Inspect,
 		AsEnsureOriginWithArg, ConstU32, ConstU64, ConstU8, Contains, EitherOfDiverse,
-		EnsureOrigin, EnsureOriginWithArg, EqualPrivilegeOnly, InstanceFilter,
+		Everything, EnsureOrigin, EnsureOriginWithArg, EqualPrivilegeOnly, InstanceFilter,
 		LockIdentifier, U128CurrencyToVote, Nothing, ConstBool
 	},
 	weights::{
@@ -353,7 +353,7 @@ impl frame_system::Config for Runtime {
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
 	// type BaseCallFilter = BaseFilter;
-	type BaseCallFilter = ();
+	type BaseCallFilter = Everything;
 	/// Weight information for the extrinsics of this pallet.
 	type SystemWeightInfo = ();
 	/// Block & extrinsics weights: base values and limits.
