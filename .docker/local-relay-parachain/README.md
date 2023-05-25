@@ -25,10 +25,10 @@ docker-compose -f .docker/local-relay-parachain/docker-compose.yaml up
 2. Generate parachain chainspec
 3. Generate new chain spec, wasm and genesis binaries.
 ```bash
-./target/release/subzero-collator build-spec --disable-default-bootnode > .docker/local-relay-parachain/chainspec/subzero-parachain-plain.json
-./target/release/subzero-collator build-spec --chain .docker/local-relay-parachain/chainspec/subzero-parachain-plain.json --raw --disable-default-bootnode > .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json
-./target/release/subzero-collator export-genesis-wasm --chain .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json > .docker/local-relay-parachain/wasm/subzero-wasm
-./target/release/subzero-collator export-genesis-state --chain .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json > .docker/local-relay-parachain/wasm/subzero-genesis
+./target/release/subzero build-spec --disable-default-bootnode > .docker/local-relay-parachain/chainspec/subzero-parachain-plain.json
+./target/release/subzero build-spec --chain .docker/local-relay-parachain/chainspec/subzero-parachain-plain.json --raw --disable-default-bootnode > .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json
+./target/release/subzero export-genesis-wasm --chain .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json > .docker/local-relay-parachain/wasm/subzero-wasm
+./target/release/subzero export-genesis-state --chain .docker/local-relay-parachain/chainspec/subzero-parachain-raw.json > .docker/local-relay-parachain/wasm/subzero-genesis
 ```
 
 
