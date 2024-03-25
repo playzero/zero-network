@@ -14,10 +14,10 @@ targets = ["x86_64-unknown-linux-gnu"]
 clap = { version = "4.0.9", features = ["derive"] }
 codec = { package = "parity-scale-codec", version = "3.2.2" }
 thiserror = "1.0"
-sc-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.38" }
-sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.38" }
-sc-executor = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.38" }
-sc-service = { default-features = false, git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.38" }
-sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.38" }
-sp-core = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.38" }
-sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.38" }
+sc-cli = { git = "https://github.com/paritytech/polkadot-sdk", branch = "polkadot-v0.9.38" }
+sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "polkadot-v0.9.38" }
+sc-executor = { git = "https://github.com/paritytech/polkadot-sdk", branch = "polkadot-v0.9.38" }
+sc-service = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "polkadot-v0.9.38" }
+sp-blockchain = { git = "https://github.com/paritytech/polkadot-sdk", branch = "polkadot-v0.9.38" }
+sp-core = { git = "https://github.com/paritytech/polkadot-sdk", branch = "polkadot-v0.9.38" }
+sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "polkadot-v0.9.38" }

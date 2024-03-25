@@ -324,7 +324,7 @@ impl frame_system::Config for Runtime {
 	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
 	type Lookup = AccountIdLookup<AccountId, ()>;
 	/// The index type for storing how many extrinsics an account has signed.
-	type Index = Index;
+	type Nonce = Nonce;
 	/// The index type for blocks.
 	type BlockNumber = BlockNumber;
 	/// The type for hashing blocks and tries.
@@ -490,23 +490,24 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
 	fn filter(&self, c: &RuntimeCall) -> bool {
 		match self {
 			ProxyType::Any => true,
-			ProxyType::NonTransfer => !matches!(
-				c,
-				RuntimeCall::Balances(..) |
-				RuntimeCall::Nfts(..) |
-				RuntimeCall::Currencies(..) |
-				RuntimeCall::Tokens(..)
-			),
-			ProxyType::Governance => matches!(
-				c,
-				RuntimeCall::Democracy(..) |
-				RuntimeCall::Council(..) |
-				RuntimeCall::TechnicalCommittee(..) |
-				RuntimeCall::Treasury(..) |
-				RuntimeCall::Bounties(..) | RuntimeCall::ChildBounties(..) |
-				RuntimeCall::Utility(..) |
-				RuntimeCall::Elections(..)
-			)
+			// ProxyType::NonTransfer => !matches!(
+			// 	c,
+			// 	RuntimeCall::Balances(..) |
+			// 	RuntimeCall::Nfts(..) |
+			// 	RuntimeCall::Currencies(..) |
+			// 	RuntimeCall::Tokens(..)
+			// ),
+			// ProxyType::Governance => matches!(
+			// 	c,
+			// 	RuntimeCall::Democracy(..) |
+			// 	RuntimeCall::Council(..) |
+			// 	RuntimeCall::TechnicalCommittee(..) |
+			// 	RuntimeCall::Treasury(..) |
+			// 	RuntimeCall::Bounties(..) |
+			// 	RuntimeCall::ChildBounties(..) |
+			// 	RuntimeCall::Utility(..) |
+			// 	RuntimeCall::Elections(..)
+			// )
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {
@@ -1096,91 +1097,91 @@ impl pallet_nfts::Config for Runtime {
 }
 
 // GameDAO protocol pallets
-parameter_types! {
-	pub MinProposalDeposit: Balance = 100 * dollar(GAME);
-	pub SlashingMajority: Permill = Permill::from_rational(2u32, 3u32);
-	pub GameDAOGetsFromSlashing: Permill = Permill::from_rational(1u32, 10u32);
-	pub const MaxMembersPerOrg: u32 = 1000;
-	pub const ProposalDurationLimits: (BlockNumber, BlockNumber) = (100, 864000);
-}
+// parameter_types! {
+// 	pub MinProposalDeposit: Balance = 100 * dollar(GAME);
+// 	pub SlashingMajority: Permill = Permill::from_rational(2u32, 3u32);
+// 	pub GameDAOGetsFromSlashing: Permill = Permill::from_rational(1u32, 10u32);
+// 	pub const MaxMembersPerOrg: u32 = 1000;
+// 	pub const ProposalDurationLimits: (BlockNumber, BlockNumber) = (100, 864000);
+// }
 
-impl gamedao_signal::Config for Runtime {
-	type WeightInfo = gamedao_signal::weights::SubstrateWeight<Runtime>;
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Currencies;
-	type CurrencyId = CurrencyId;
-	type PaymentTokenId = GetStableCurrencyId;
-	type ProtocolTokenId = GetProtocolCurrencyId;
-	type Balance = Balance;
-	type Flow = Flow;
-	#[cfg(feature = "runtime-benchmarks")]
-	type FlowBenchmarkHelper = Flow;
-	type Control = Control;
-	#[cfg(feature = "runtime-benchmarks")]
-	type ControlBenchmarkHelper = Control;
-	type MinProposalDeposit = MinProposalDeposit;
-	type GameDAOTreasury = GameDAOTreasuryAccountId;
-	type SlashingMajority = SlashingMajority;
-	type GameDAOGetsFromSlashing = GameDAOGetsFromSlashing;
-	type MaxMembers = MaxMembersPerOrg;
-	type ProposalDurationLimits = ProposalDurationLimits;
-	type MaxProposalsPerBlock = ConstU32<100>;
-	type StringLimit = StringLimit;
-}
+// impl gamedao_signal::Config for Runtime {
+// 	type WeightInfo = gamedao_signal::weights::SubstrateWeight<Runtime>;
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type Currency = Currencies;
+// 	type CurrencyId = CurrencyId;
+// 	type PaymentTokenId = GetStableCurrencyId;
+// 	type ProtocolTokenId = GetProtocolCurrencyId;
+// 	type Balance = Balance;
+// 	type Flow = Flow;
+// 	#[cfg(feature = "runtime-benchmarks")]
+// 	type FlowBenchmarkHelper = Flow;
+// 	type Control = Control;
+// 	#[cfg(feature = "runtime-benchmarks")]
+// 	type ControlBenchmarkHelper = Control;
+// 	type MinProposalDeposit = MinProposalDeposit;
+// 	type GameDAOTreasury = GameDAOTreasuryAccountId;
+// 	type SlashingMajority = SlashingMajority;
+// 	type GameDAOGetsFromSlashing = GameDAOGetsFromSlashing;
+// 	type MaxMembers = MaxMembersPerOrg;
+// 	type ProposalDurationLimits = ProposalDurationLimits;
+// 	type MaxProposalsPerBlock = ConstU32<100>;
+// 	type StringLimit = StringLimit;
+// }
 
-parameter_types! {
-	pub OrgMinimumDeposit: Balance = 1 * dollar(GAME);
-}
+// parameter_types! {
+// 	pub OrgMinimumDeposit: Balance = 1 * dollar(GAME);
+// }
 
-impl gamedao_control::Config for Runtime {
-	type Balance = Balance;
-	type CurrencyId = CurrencyId;
-	type WeightInfo = gamedao_control::weights::SubstrateWeight<Runtime>;
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Currencies;
-	type MaxMembers = MaxMembersPerOrg;
-	type ProtocolTokenId = GetProtocolCurrencyId;
-	type PaymentTokenId = GetStableCurrencyId;
-	type MinimumDeposit = OrgMinimumDeposit;
-	type PalletId = ControlPalletId;
-	type StringLimit = StringLimit;
-}
+// impl gamedao_control::Config for Runtime {
+// 	type Balance = Balance;
+// 	type CurrencyId = CurrencyId;
+// 	type WeightInfo = gamedao_control::weights::SubstrateWeight<Runtime>;
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type Currency = Currencies;
+// 	type MaxMembers = MaxMembersPerOrg;
+// 	type ProtocolTokenId = GetProtocolCurrencyId;
+// 	type PaymentTokenId = GetStableCurrencyId;
+// 	type MinimumDeposit = OrgMinimumDeposit;
+// 	type PalletId = ControlPalletId;
+// 	type StringLimit = StringLimit;
+// }
 
-parameter_types! {
-	pub MinContribution: Balance = 1 * dollar(PLAY);
-	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
-	pub MinCampaignDeposit: Permill = Permill::from_rational(1u32, 10u32); // 10%
-	pub const CampaignDurationLimits: (BlockNumber, BlockNumber) = (24 * HOURS, 60 * DAYS);
-}
+// parameter_types! {
+// 	pub MinContribution: Balance = 1 * dollar(PLAY);
+// 	pub CampaignFee: Permill = Permill::from_rational(3u32, 1000u32); // 0.3%
+// 	pub MinCampaignDeposit: Permill = Permill::from_rational(1u32, 10u32); // 10%
+// 	pub const CampaignDurationLimits: (BlockNumber, BlockNumber) = (24 * HOURS, 60 * DAYS);
+// }
 
-impl gamedao_flow::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Balance = Balance;
-	type CurrencyId = CurrencyId;
-	type WeightInfo = gamedao_flow::weights::SubstrateWeight<Runtime>;
-	type Currency = Currencies;
-	type Control = Control;
-	#[cfg(feature = "runtime-benchmarks")]
-	type ControlBenchmarkHelper = Control;
-	type GameDAOTreasury = GameDAOTreasuryAccountId;
-	type MinNameLength = ConstU32<4>;
-	type MaxCampaignsPerBlock = ConstU32<10>;
-	type MaxCampaignContributors = ConstU32<10000>;
-	type MaxContributorsProcessing = ConstU32<100>;
-	type MinContribution = MinContribution;
-	type MinCampaignDeposit = MinCampaignDeposit;
-	type ProtocolTokenId = GetProtocolCurrencyId;
-	type PaymentTokenId = GetStableCurrencyId;
-	type CampaignFee = CampaignFee;
-	type StringLimit = StringLimit;
-	type CampaignDurationLimits = CampaignDurationLimits;
-}
+// impl gamedao_flow::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type Balance = Balance;
+// 	type CurrencyId = CurrencyId;
+// 	type WeightInfo = gamedao_flow::weights::SubstrateWeight<Runtime>;
+// 	type Currency = Currencies;
+// 	type Control = Control;
+// 	#[cfg(feature = "runtime-benchmarks")]
+// 	type ControlBenchmarkHelper = Control;
+// 	type GameDAOTreasury = GameDAOTreasuryAccountId;
+// 	type MinNameLength = ConstU32<4>;
+// 	type MaxCampaignsPerBlock = ConstU32<10>;
+// 	type MaxCampaignContributors = ConstU32<10000>;
+// 	type MaxContributorsProcessing = ConstU32<100>;
+// 	type MinContribution = MinContribution;
+// 	type MinCampaignDeposit = MinCampaignDeposit;
+// 	type ProtocolTokenId = GetProtocolCurrencyId;
+// 	type PaymentTokenId = GetStableCurrencyId;
+// 	type CampaignFee = CampaignFee;
+// 	type StringLimit = StringLimit;
+// 	type CampaignDurationLimits = CampaignDurationLimits;
+// }
 
-impl gamedao_sense::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = gamedao_sense::weights::SubstrateWeight<Runtime>;
-	type StringLimit = StringLimit;
-}
+// impl gamedao_sense::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type WeightInfo = gamedao_sense::weights::SubstrateWeight<Runtime>;
+// 	type StringLimit = StringLimit;
+// }
 
 // impl gamedao_battlepass::Config for Runtime {
 // 	type RuntimeEvent = RuntimeEvent;
@@ -1257,10 +1258,10 @@ construct_runtime!(
 		XTokens: orml_xtokens = 65,
 
 		// GameDAO protocol:
-		Flow: gamedao_flow = 70,
-		Sense: gamedao_sense = 71,
-		Control: gamedao_control = 72,
-		Signal: gamedao_signal = 73,
+		// Flow: gamedao_flow = 70,
+		// Sense: gamedao_sense = 71,
+		// Control: gamedao_control = 72,
+		// Signal: gamedao_signal = 73,
 		// Battlepass: gamedao_battlepass = 74,
 	}
 );
@@ -1369,8 +1370,7 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash> for Runtime
-	{
+	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash, EventRecord> for Runtime {
 		fn call(
 			origin: AccountId,
 			dest: AccountId,
@@ -1378,7 +1378,7 @@ impl_runtime_apis! {
 			gas_limit: Option<Weight>,
 			storage_deposit_limit: Option<Balance>,
 			input_data: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractExecResult<Balance> {
+		) -> pallet_contracts_primitives::ContractExecResult<Balance, EventRecord> {
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_call(
 				origin,
@@ -1400,7 +1400,7 @@ impl_runtime_apis! {
 			code: pallet_contracts_primitives::Code<Hash>,
 			data: Vec<u8>,
 			salt: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance>
+		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance, EventRecord>
 		{
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_instantiate(

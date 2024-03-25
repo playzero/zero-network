@@ -126,6 +126,14 @@ parameter_types! {
 		MultiLocation::parent().into(),
 		dot_per_second(), 0
 	);
+	pub KsmPerSecond: (AssetId, u128, u128) = (
+		MultiLocation::parent().into(),
+		dot_per_second(), 0
+	);
+	// pub UsdtPerSecond: (AssetId, u128, u128) = (
+	// 	MultiLocation::parent().into(),
+	// 	dot_per_second(), 0
+	// );
 	pub ZeroPerSecond: (AssetId, u128, u128) = (
 		local_currency_location(ZERO).unwrap().into(),
 		zero_per_second(), 0
@@ -266,6 +274,8 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	fn convert(id: CurrencyId) -> Option<MultiLocation> {
 		match id {
 			DOT => Some(MultiLocation::parent()),
+			KSM => Some(MultiLocation::parent()),
+			// USDT => Some(MultiLocation::parent()),
 			ZERO | GAME | PLAY
 				=> native_currency_location(ParachainInfo::get().into(), id.encode()),
 			ForeignAsset(id)
