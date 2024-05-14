@@ -32,7 +32,7 @@ use frame_support::{
 	construct_runtime,
 	dispatch::DispatchClass,
 	parameter_types,
-	pallet_prelude::RuntimeDebug,
+	pallet_prelude::{RuntimeDebug,TypeInfo},
 	traits::{
 		tokens::nonfungibles_v2::Inspect,
 		AsEnsureOriginWithArg, ConstU32, ConstU64, ConstU8, Contains, EitherOfDiverse,
@@ -67,7 +67,7 @@ use xcm_executor::XcmExecutor;
 
 pub use constants::{fee::*, time::*};
 pub use primitives::{
-	currency::{ZERO, PLAY, GAME, DOT, KSM, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
+	currency::{ZERO, PLAY, GAME, DOT, KSM, Signature, Address, Hash, Balance, Nonce, Block, Header, BlockNumber, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
 	dollar, cent, millicent,
 	Amount, ReserveIdentifier
 };
@@ -78,38 +78,38 @@ use orml_traits::{parameter_type_with_key, GetByKey};
 use pallet_nfts::PalletFeatures;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
+// pub type Signature = MultiSignature;
 
 /// Some way of identifying an account on the chain. We intentionally make it equivalent
 /// to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
 /// Balance of an account.
-pub type Balance = u128;
+// pub type Balance = u128;
 
 /// Index of a transaction in the chain.
-pub type Index = u32;
+// pub type Index = u32;
 
 /// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
+// pub type Hash = sp_core::H256;
 
 /// An index to a block.
-pub type BlockNumber = u32;
+// pub type BlockNumber = u32;
 
 /// The address format for describing accounts.
-pub type Address = MultiAddress<AccountId, ()>;
+// pub type Address = MultiAddress<AccountId, ()>;
 
 /// Block header type as expected by this runtime.
-pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+// pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 
 /// Block type as expected by this runtime.
-pub type Block = generic::Block<Header, UncheckedExtrinsic>;
+// pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 
 /// A Block signed with a Justification
 pub type SignedBlock = generic::SignedBlock<Block>;
 
 /// BlockId type as expected by this runtime.
-pub type BlockId = generic::BlockId<Block>;
+// pub type BlockId = generic::BlockId<Block>;
 
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
@@ -143,8 +143,15 @@ pub type Executive = frame_executive::Executive<
 // All migrations executed on runtime upgrade as a nested tuple of types implementing
 // `OnRuntimeUpgrade`.
 type Migrations = (
+	// pallet_nomination_pools::migration::v2::MigrateToV2<Runtime>,
+	// pallet_alliance::migration::Migration<Runtime>,
 	pallet_contracts::Migration<Runtime>,
 );
+
+type EventRecord = frame_system::EventRecord<
+	<Runtime as frame_system::Config>::RuntimeEvent,
+	<Runtime as frame_system::Config>::Hash,
+>;
 
 /// Handles converting a weight scalar to a fee value, based on the scale and granularity of the
 /// node's balance type.
@@ -235,12 +242,8 @@ pub fn native_version() -> NativeVersion {
 }
 
 parameter_types! {
+	pub const BlockHashCount: BlockNumber = 1200; // mortal tx can be valid up to 4 hour after signing
 	pub const Version: RuntimeVersion = VERSION;
-
-	// This part is copied from Substrate's `bin/node/runtime/src/lib.rs`.
-	//  The `RuntimeBlockLength` and `RuntimeBlockWeights` exist here because the
-	// `DeletionWeightLimit` and `DeletionQueueDepth` depend on those to parameterize
-	// the lazy contract deletion.
 	pub RuntimeBlockLength: BlockLength =
 		BlockLength::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
 	pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
@@ -262,107 +265,48 @@ parameter_types! {
 		.avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
 		.build_or_panic();
 	pub const SS58Prefix: u16 = 25;
+	pub MaxCollectivesProposalWeight: Weight = Perbill::from_percent(50) * RuntimeBlockWeights::get().max_block;
 }
 
-// pub struct BaseFilter;
-// impl Contains<RuntimeCall> for BaseFilter {
-// 	fn contains(call: &RuntimeCall) -> bool {
-// 		// Disable direct calls to pallet_nfts
-// 		!matches!(
-// 			call,
-// 			RuntimeCall::Nfts(pallet_nfts::Call::create { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_create { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::transfer { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_owner { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_collection_config { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_set_attribute { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::set_price { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::buy_item { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::pay_tips { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::create_swap { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::cancel_swap { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::claim_swap { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::mint_pre_signed { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::set_attributes_pre_signed { .. }) |
+pub struct BaseFilter;
+impl Contains<RuntimeCall> for BaseFilter {
+	fn contains(call: &RuntimeCall) -> bool {
 
-// 			RuntimeCall::Nfts(pallet_nfts::Call::mint { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::force_mint { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::burn { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::redeposit { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::approve_transfer { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::cancel_approval { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::clear_all_transfer_approvals { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::set_attribute { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::clear_attribute { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::approve_item_attributes { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::cancel_item_attributes_approval { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::set_metadata { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::clear_metadata { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::destroy { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::lock_item_transfer { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::unlock_item_transfer { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::lock_collection { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::transfer_ownership { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::set_team { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::lock_item_properties { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::set_collection_metadata { .. }) |
-// 			// RuntimeCall::Nfts(pallet_nfts::Call::clear_collection_metadata { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::set_accept_ownership { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::set_collection_max_supply { .. }) |
-// 			RuntimeCall::Nfts(pallet_nfts::Call::update_mint_settings { .. })
-// 		)
-// 	}
-// }
+		true
+	}
+}
 
 // Configure FRAME pallets to include in runtime.
 
 impl frame_system::Config for Runtime {
-	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
-	/// The aggregated dispatch type that is available for extrinsics.
 	type RuntimeCall = RuntimeCall;
-	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
-	type Lookup = AccountIdLookup<AccountId, ()>;
-	/// The index type for storing how many extrinsics an account has signed.
-	type Index = Index;
-	/// The index type for blocks.
-	type BlockNumber = BlockNumber;
-	/// The type for hashing blocks and tries.
+	// type Lookup = AccountIdLookup<AccountId, ()>;
+	type Lookup = (AccountIdLookup<AccountId, AccountIndex>);
+	type Nonce = Nonce;
+	// type Lookup = (AccountIdLookup<AccountId, AccountIndex>, EvmAccounts);
 	type Hash = Hash;
-	/// The hashing algorithm used.
 	type Hashing = BlakeTwo256;
-	/// The header type.
-	type Header = generic::Header<BlockNumber, BlakeTwo256>;
-	/// The ubiquitous event type.
+	type Block = Block;
+	// type BlockNumber = BlockNumber;
+	// type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	type RuntimeEvent = RuntimeEvent;
-	/// The ubiquitous origin type.
 	type RuntimeOrigin = RuntimeOrigin;
-	/// Maximum number of block number to block hash mappings to keep (oldest pruned first).
 	type BlockHashCount = BlockHashCount;
-	/// Runtime version.
-	type Version = Version;
-	/// Converts a module to an index of this module in the runtime.
-	type PalletInfo = PalletInfo;
-	/// The data to be stored in an account.
-	type AccountData = pallet_balances::AccountData<Balance>;
-	/// What to do if a new account is created.
-	type OnNewAccount = ();
-	/// What to do if an account is fully reaped from the system.
-	type OnKilledAccount = ();
-	/// The weight of database operations that the runtime can invoke.
-	type DbWeight = RocksDbWeight;
-	/// The basic call filter to use in dispatchable.
-	// type BaseCallFilter = BaseFilter;
-	type BaseCallFilter = Everything;
-	/// Weight information for the extrinsics of this pallet.
-	type SystemWeightInfo = ();
-	/// Block & extrinsics weights: base values and limits.
 	type BlockWeights = RuntimeBlockWeights;
-	/// The maximum length of a block (in bytes).
 	type BlockLength = RuntimeBlockLength;
-	/// This is used as an identifier of the chain. 42 is the generic substrate prefix.
+	type Version = Version;
+	type PalletInfo = PalletInfo;
+	type AccountData = pallet_balances::AccountData<Balance>;
+	type OnNewAccount = ();
+	type OnKilledAccount = (
+		// module_evm::CallKillAccount<Runtime>,
+		// module_evm_accounts::CallKillAccount<Runtime>,
+	);
+	type DbWeight = RocksDbWeight;
+	type BaseCallFilter = Everything;
+	type SystemWeightInfo = ();
 	type SS58Prefix = SS58Prefix;
-	/// The action to take on a Runtime Upgrade
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = ConstU32<16>;
 }
@@ -386,18 +330,33 @@ parameter_types! {
 	pub const MaxReserves: u32 = ReserveIdentifier::Count as u32;
 }
 
+/// A reason for placing a hold on funds.
+#[derive(
+	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, MaxEncodedLen, Debug, TypeInfo,
+)]
+pub enum HoldReason {
+	/// The NIS Pallet has reserved it for a non-fungible receipt.
+	Nis,
+	/// Used by the NFT Fractionalization Pallet.
+	NftFractionalization,
+}
+
 impl pallet_balances::Config for Runtime {
 	type MaxLocks = MaxLocks;
-	/// The type for recording an account's balance.
-	type Balance = Balance;
-	/// The ubiquitous event type.
-	type RuntimeEvent = RuntimeEvent;
-	type DustRemoval = ();
-	type ExistentialDeposit = ExistentialDeposit;
-	type AccountStore = System;
-	type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 	type MaxReserves = MaxReserves;
-	type ReserveIdentifier = ReserveIdentifier;
+	type ReserveIdentifier = [u8; 8];
+	type Balance = Balance;
+	type DustRemoval = ();
+	type RuntimeEvent = RuntimeEvent;
+	type ExistentialDeposit = ExistentialDeposit;
+	type AccountStore = frame_system::Pallet<Runtime>;
+	type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
+	type FreezeIdentifier = ();
+	type MaxFreezes = ();
+	type HoldIdentifier = HoldReason;
+	type MaxHolds = ConstU32<2>;
+	//
+	// type AccountStore = System;
 }
 
 parameter_types! {
@@ -600,15 +559,16 @@ impl pallet_democracy::Config for Runtime {
 impl pallet_insecure_randomness_collective_flip::Config for Runtime {}
 
 parameter_types! {
-	pub DepositPerItem: Balance = deposit(1, 0);
-	pub DepositPerByte: Balance = deposit(0, 1);
-	pub const DeletionQueueDepth: u32 = 128;
+	pub const DepositPerItem: Balance = deposit(1, 0);
+	pub const DepositPerByte: Balance = deposit(0, 1);
+	pub const DefaultDepositLimit: Balance = deposit(1024, 1024 * 1024);
+	// pub const DeletionQueueDepth: u32 = 128;
 	// The lazy deletion runs inside on_initialize.
-	pub DeletionWeightLimit: Weight = RuntimeBlockWeights::get()
-		.per_class
-		.get(DispatchClass::Normal)
-		.max_total
-		.unwrap_or(RuntimeBlockWeights::get().max_block);
+	// pub DeletionWeightLimit: Weight = RuntimeBlockWeights::get()
+	// 	.per_class
+	// 	.get(DispatchClass::Normal)
+	// 	.max_total
+	// 	.unwrap_or(RuntimeBlockWeights::get().max_block);
 	pub Schedule: pallet_contracts::Schedule<Runtime> = Default::default();
 }
 
@@ -627,12 +587,13 @@ impl pallet_contracts::Config for Runtime {
 	type CallFilter = Nothing;
 	type DepositPerItem = DepositPerItem;
 	type DepositPerByte = DepositPerByte;
+	type DefaultDepositLimit = DefaultDepositLimit;
 	type CallStack = [pallet_contracts::Frame<Self>; 5];
 	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
 	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
 	type ChainExtension = ();
-	type DeletionQueueDepth = DeletionQueueDepth;
-	type DeletionWeightLimit = DeletionWeightLimit;
+	// type DeletionQueueDepth = DeletionQueueDepth;
+	// type DeletionWeightLimit = DeletionWeightLimit;
 	type Schedule = Schedule;
 	type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
 	type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
@@ -644,6 +605,7 @@ impl pallet_contracts::Config for Runtime {
 impl pallet_sudo::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeCall = RuntimeCall;
+	type WeightInfo = pallet_sudo::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -716,6 +678,7 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 	type SetMembersOrigin = EnsureRoot<Self::AccountId>;
+	type MaxProposalWeight = MaxCollectivesProposalWeight;
 }
 
 parameter_types! {
@@ -735,6 +698,7 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 	type SetMembersOrigin = EnsureRoot<Self::AccountId>;
+	type MaxProposalWeight = MaxCollectivesProposalWeight;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
@@ -1312,6 +1276,12 @@ impl_runtime_apis! {
 		fn metadata() -> OpaqueMetadata {
 			OpaqueMetadata::new(Runtime::metadata().into())
 		}
+		fn metadata_at_version(version: u32) -> Option<OpaqueMetadata> {
+			Runtime::metadata_at_version(version)
+		}
+		fn metadata_versions() -> sp_std::vec::Vec<u32> {
+			Runtime::metadata_versions()
+		}
 	}
 
 	impl sp_block_builder::BlockBuilder<Block> for Runtime {
@@ -1369,7 +1339,7 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash> for Runtime
+	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash, EventRecord> for Runtime
 	{
 		fn call(
 			origin: AccountId,
@@ -1378,7 +1348,7 @@ impl_runtime_apis! {
 			gas_limit: Option<Weight>,
 			storage_deposit_limit: Option<Balance>,
 			input_data: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractExecResult<Balance> {
+		) -> pallet_contracts_primitives::ContractExecResult<Balance, EventRecord> {
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_call(
 				origin,
@@ -1387,8 +1357,9 @@ impl_runtime_apis! {
 				gas_limit,
 				storage_deposit_limit,
 				input_data,
-				true,
-				pallet_contracts::Determinism::Deterministic,
+				pallet_contracts::DebugInfo::UnsafeDebug,
+				pallet_contracts::CollectEvents::UnsafeCollect,
+				pallet_contracts::Determinism::Enforced,
 			)
 		}
 
@@ -1400,7 +1371,7 @@ impl_runtime_apis! {
 			code: pallet_contracts_primitives::Code<Hash>,
 			data: Vec<u8>,
 			salt: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance>
+		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance, EventRecord>
 		{
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_instantiate(
@@ -1411,7 +1382,8 @@ impl_runtime_apis! {
 				code,
 				data,
 				salt,
-				true
+				pallet_contracts::DebugInfo::UnsafeDebug,
+				pallet_contracts::CollectEvents::UnsafeCollect,
 			)
 		}
 
