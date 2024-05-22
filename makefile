@@ -1,3 +1,19 @@
+run-local-node:
+	./target/release/subzero \
+		--name=level-9000
+		--rpc-cors=all \
+		--unsafe-rpc-external \
+		--chain=./bin/res/subzero-kusama-raw.json \
+		--sync=fast \
+		--state-pruning=256 \
+		--telemetry-url="wss://telemetry.polkadot.io/submit/ 0" \
+		--base-path=./.tmp/local/para \
+		-- \
+		--base-path=./.tmp/local/relay \
+		--sync=fast \
+		--state-pruning=256
+
+
 # alphaville
 
 alphaville-docker:

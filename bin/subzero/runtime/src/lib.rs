@@ -57,7 +57,9 @@ use xcm_config::{XcmConfig, XcmOriginToTransactDispatchOrigin};
 pub use sp_runtime::BuildStorage;
 
 // Polkadot imports
-use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
+use polkadot_runtime_common::{
+	// BlockHashCount,
+	SlowAdjustingFeeUpdate};
 
 use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 
@@ -67,7 +69,8 @@ use xcm_executor::XcmExecutor;
 
 pub use constants::{fee::*, time::*};
 pub use primitives::{
-	currency::{ZERO, PLAY, GAME, DOT, KSM, Signature, Address, Hash, Balance, Nonce, Block, Header, BlockNumber, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
+	// Signature, Address, Hash, Balance, Nonce, Block, Header, BlockNumber,
+	currency::{ZERO, PLAY, GAME, DOT, KSM, AssetIds, CurrencyId, CustomMetadata, ForeignAssetId, TokenSymbol},
 	dollar, cent, millicent,
 	Amount, ReserveIdentifier
 };
@@ -78,38 +81,37 @@ use orml_traits::{parameter_type_with_key, GetByKey};
 use pallet_nfts::PalletFeatures;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-// pub type Signature = MultiSignature;
+pub type Signature = MultiSignature;
 
-/// Some way of identifying an account on the chain. We intentionally make it equivalent
-/// to the public key of our transaction signing scheme.
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+/// The public key of our transaction signing scheme.
+// pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+
+pub type AccountPublic = <Signature as Verify>::Signer;
+pub type AccountId = <AccountPublic as IdentifyAccount>::AccountId;
 
 /// Balance of an account.
-// pub type Balance = u128;
+pub type Balance = u128;
 
+//	TODO: CHECK WHEN INDEX TO NONCE TOOK PLACE!
 /// Index of a transaction in the chain.
-// pub type Index = u32;
+pub type Index = u32;
+/// Nonce of a transaction in the chain.
+// pub type Nonce = u32;
 
 /// A hash of some data used by the chain.
-// pub type Hash = sp_core::H256;
-
+pub type Hash = sp_core::H256;
 /// An index to a block.
-// pub type BlockNumber = u32;
-
+pub type BlockNumber = u32;
 /// The address format for describing accounts.
-// pub type Address = MultiAddress<AccountId, ()>;
-
+pub type Address = MultiAddress<AccountId, ()>;
 /// Block header type as expected by this runtime.
-// pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
-
+pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 /// Block type as expected by this runtime.
-// pub type Block = generic::Block<Header, UncheckedExtrinsic>;
-
+pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 /// A Block signed with a Justification
 pub type SignedBlock = generic::SignedBlock<Block>;
-
 /// BlockId type as expected by this runtime.
-// pub type BlockId = generic::BlockId<Block>;
+pub type BlockId = generic::BlockId<Block>;
 
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
@@ -145,7 +147,7 @@ pub type Executive = frame_executive::Executive<
 type Migrations = (
 	// pallet_nomination_pools::migration::v2::MigrateToV2<Runtime>,
 	// pallet_alliance::migration::Migration<Runtime>,
-	pallet_contracts::Migration<Runtime>,
+	// pallet_contracts::Migration<Runtime>,
 );
 
 type EventRecord = frame_system::EventRecord<
@@ -206,7 +208,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("subzero"),
 	impl_name: create_runtime_str!("live"),
 	authoring_version: 75,
-	spec_version: 75,
+	spec_version: 100,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -281,15 +283,29 @@ impl Contains<RuntimeCall> for BaseFilter {
 impl frame_system::Config for Runtime {
 	type AccountId = AccountId;
 	type RuntimeCall = RuntimeCall;
-	// type Lookup = AccountIdLookup<AccountId, ()>;
-	type Lookup = (AccountIdLookup<AccountId, AccountIndex>);
-	type Nonce = Nonce;
+
+	type Lookup = AccountIdLookup<AccountId, ()>;
+	// type Lookup = (AccountIdLookup<AccountId, AccountIndex>);
 	// type Lookup = (AccountIdLookup<AccountId, AccountIndex>, EvmAccounts);
+	// ^^^^^^^^^^^^^^^^
+
+	// TODO: CHECK
+	// type Nonce = Nonce;
+	type Index = Index;
+	// ^^^^^^^^^^^^^^^^
 	type Hash = Hash;
 	type Hashing = BlakeTwo256;
-	type Block = Block;
-	// type BlockNumber = BlockNumber;
-	// type Header = generic::Header<BlockNumber, BlakeTwo256>;
+
+	// TODO: CHECK
+	// type Block = Block;
+	// ^^^^^^^^^^^^^^^^
+	// TODO: CHECK
+	type BlockNumber = BlockNumber;
+	// ^^^^^^^^^^^^^^^^
+	// TODO: CHECK
+	type Header = generic::Header<BlockNumber, BlakeTwo256>;
+	// ^^^^^^^^^^^^^^^^
+
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeOrigin = RuntimeOrigin;
 	type BlockHashCount = BlockHashCount;
@@ -297,7 +313,10 @@ impl frame_system::Config for Runtime {
 	type BlockLength = RuntimeBlockLength;
 	type Version = Version;
 	type PalletInfo = PalletInfo;
+
+	// TODO: CHECK
 	type AccountData = pallet_balances::AccountData<Balance>;
+
 	type OnNewAccount = ();
 	type OnKilledAccount = (
 		// module_evm::CallKillAccount<Runtime>,
@@ -344,7 +363,8 @@ pub enum HoldReason {
 impl pallet_balances::Config for Runtime {
 	type MaxLocks = MaxLocks;
 	type MaxReserves = MaxReserves;
-	type ReserveIdentifier = [u8; 8];
+	// type ReserveIdentifier = [u8; 8];
+	type ReserveIdentifier = ReserveIdentifier;
 	type Balance = Balance;
 	type DustRemoval = ();
 	type RuntimeEvent = RuntimeEvent;
@@ -353,7 +373,8 @@ impl pallet_balances::Config for Runtime {
 	type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
-	type HoldIdentifier = HoldReason;
+	// type HoldIdentifier = HoldReason;
+	type HoldIdentifier = ReserveIdentifier;
 	type MaxHolds = ConstU32<2>;
 	//
 	// type AccountStore = System;
@@ -558,49 +579,46 @@ impl pallet_democracy::Config for Runtime {
 
 impl pallet_insecure_randomness_collective_flip::Config for Runtime {}
 
-parameter_types! {
-	pub const DepositPerItem: Balance = deposit(1, 0);
-	pub const DepositPerByte: Balance = deposit(0, 1);
-	pub const DefaultDepositLimit: Balance = deposit(1024, 1024 * 1024);
-	// pub const DeletionQueueDepth: u32 = 128;
-	// The lazy deletion runs inside on_initialize.
-	// pub DeletionWeightLimit: Weight = RuntimeBlockWeights::get()
-	// 	.per_class
-	// 	.get(DispatchClass::Normal)
-	// 	.max_total
-	// 	.unwrap_or(RuntimeBlockWeights::get().max_block);
-	pub Schedule: pallet_contracts::Schedule<Runtime> = Default::default();
-}
+//
+//	TODO: VERIFY CONTRACTS IMPL
+//
 
-impl pallet_contracts::Config for Runtime {
-	type Time = Timestamp;
-	type Randomness = RandomnessCollectiveFlip;
-	type Currency = Balances;
-	type RuntimeEvent = RuntimeEvent;
-	type RuntimeCall = RuntimeCall;
-	/// The safest default is to allow no calls at all.
-	///
-	/// Runtimes should whitelist dispatchables that are allowed to be called from contracts
-	/// and make sure they are stable. Dispatchables exposed to contracts are not allowed to
-	/// change because that would break already deployed contracts. The `Call` structure itself
-	/// is not allowed to change the indices of existing pallets, too.
-	type CallFilter = Nothing;
-	type DepositPerItem = DepositPerItem;
-	type DepositPerByte = DepositPerByte;
-	type DefaultDepositLimit = DefaultDepositLimit;
-	type CallStack = [pallet_contracts::Frame<Self>; 5];
-	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
-	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
-	type ChainExtension = ();
-	// type DeletionQueueDepth = DeletionQueueDepth;
-	// type DeletionWeightLimit = DeletionWeightLimit;
-	type Schedule = Schedule;
-	type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
-	type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
-	type MaxStorageKeyLen = ConstU32<128>;
-	type UnsafeUnstableInterface = ConstBool<false>;
-	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
-}
+// parameter_types! {
+// 	pub const DepositPerItem: Balance = deposit(1, 0);
+// 	pub const DepositPerByte: Balance = deposit(0, 1);
+// 	pub const DefaultDepositLimit: Balance = deposit(1024, 1024 * 1024);
+// 	pub Schedule: pallet_contracts::Schedule<Runtime> = Default::default();
+// }
+
+// impl pallet_contracts::Config for Runtime {
+// 	type Time = Timestamp;
+// 	type Randomness = RandomnessCollectiveFlip;
+// 	type Currency = Balances;
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type RuntimeCall = RuntimeCall;
+// 	/// The safest default is to allow no calls at all.
+// 	///
+// 	/// Runtimes should whitelist dispatchables that are allowed to be called from contracts
+// 	/// and make sure they are stable. Dispatchables exposed to contracts are not allowed to
+// 	/// change because that would break already deployed contracts. The `Call` structure itself
+// 	/// is not allowed to change the indices of existing pallets, too.
+// 	type CallFilter = Nothing;
+// 	type DepositPerItem = DepositPerItem;
+// 	type DepositPerByte = DepositPerByte;
+// 	type DefaultDepositLimit = DefaultDepositLimit;
+// 	type CallStack = [pallet_contracts::Frame<Self>; 5];
+// 	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
+// 	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
+// 	type ChainExtension = ();
+// 	// type DeletionQueueDepth = DeletionQueueDepth;
+// 	// type DeletionWeightLimit = DeletionWeightLimit;
+// 	type Schedule = Schedule;
+// 	type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
+// 	type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
+// 	type MaxStorageKeyLen = ConstU32<128>;
+// 	type UnsafeUnstableInterface = ConstBool<false>;
+// 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
+// }
 
 impl pallet_sudo::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -1146,20 +1164,20 @@ impl gamedao_sense::Config for Runtime {
 	type StringLimit = StringLimit;
 }
 
-// impl gamedao_battlepass::Config for Runtime {
-// 	type RuntimeEvent = RuntimeEvent;
-// 	type Balance = Balance;
-// 	type CurrencyId = CurrencyId;
-// 	type Currency = Currencies;
-// 	type Control = Control;
-// 	#[cfg(feature = "runtime-benchmarks")]
-// 	type ControlBenchmarkHelper = Control;
-// 	type BattlepassHelper = gamedao_battlepass::BpHelper;
-// 	type StringLimit = StringLimit;
-// 	type NativeTokenId = GetNativeCurrencyId;
-// 	type ProtocolTokenId = GetProtocolCurrencyId;
-// 	type WeightInfo = gamedao_battlepass::weights::SubstrateWeight<Runtime>;
-// }
+impl gamedao_battlepass::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type Currency = Currencies;
+	type Control = Control;
+	#[cfg(feature = "runtime-benchmarks")]
+	type ControlBenchmarkHelper = Control;
+	type BattlepassHelper = gamedao_battlepass::BpHelper;
+	type StringLimit = StringLimit;
+	type NativeTokenId = GetNativeCurrencyId;
+	type ProtocolTokenId = GetProtocolCurrencyId;
+	type WeightInfo = gamedao_battlepass::weights::SubstrateWeight<Runtime>;
+}
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -1188,7 +1206,9 @@ construct_runtime!(
 		Elections: pallet_elections_phragmen = 16,
 		TechnicalMembership: pallet_membership::<Instance1> = 17,
 		RandomnessCollectiveFlip: pallet_insecure_randomness_collective_flip = 18,
-		Contracts: pallet_contracts = 19,
+
+		// Contracts
+		// Contracts: pallet_contracts = 19,
 
 		// Monetary stuff.
 		Treasury: pallet_treasury = 20,
@@ -1225,7 +1245,7 @@ construct_runtime!(
 		Sense: gamedao_sense = 71,
 		Control: gamedao_control = 72,
 		Signal: gamedao_signal = 73,
-		// Battlepass: gamedao_battlepass = 74,
+		Battlepass: gamedao_battlepass = 74,
 	}
 );
 
@@ -1333,85 +1353,86 @@ impl_runtime_apis! {
 		}
 	}
 
+	// TODO: Check if change from Index to Nonce is sufficient and working
 	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
 		fn account_nonce(account: AccountId) -> Index {
 			System::account_nonce(account)
 		}
 	}
 
-	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash, EventRecord> for Runtime
-	{
-		fn call(
-			origin: AccountId,
-			dest: AccountId,
-			value: Balance,
-			gas_limit: Option<Weight>,
-			storage_deposit_limit: Option<Balance>,
-			input_data: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractExecResult<Balance, EventRecord> {
-			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
-			Contracts::bare_call(
-				origin,
-				dest,
-				value,
-				gas_limit,
-				storage_deposit_limit,
-				input_data,
-				pallet_contracts::DebugInfo::UnsafeDebug,
-				pallet_contracts::CollectEvents::UnsafeCollect,
-				pallet_contracts::Determinism::Enforced,
-			)
-		}
+	// impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash, EventRecord> for Runtime
+	// {
+	// 	fn call(
+	// 		origin: AccountId,
+	// 		dest: AccountId,
+	// 		value: Balance,
+	// 		gas_limit: Option<Weight>,
+	// 		storage_deposit_limit: Option<Balance>,
+	// 		input_data: Vec<u8>,
+	// 	) -> pallet_contracts_primitives::ContractExecResult<Balance, EventRecord> {
+	// 		let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
+	// 		Contracts::bare_call(
+	// 			origin,
+	// 			dest,
+	// 			value,
+	// 			gas_limit,
+	// 			storage_deposit_limit,
+	// 			input_data,
+	// 			pallet_contracts::DebugInfo::UnsafeDebug,
+	// 			pallet_contracts::CollectEvents::UnsafeCollect,
+	// 			pallet_contracts::Determinism::Enforced,
+	// 		)
+	// 	}
 
-		fn instantiate(
-			origin: AccountId,
-			value: Balance,
-			gas_limit: Option<Weight>,
-			storage_deposit_limit: Option<Balance>,
-			code: pallet_contracts_primitives::Code<Hash>,
-			data: Vec<u8>,
-			salt: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance, EventRecord>
-		{
-			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
-			Contracts::bare_instantiate(
-				origin,
-				value,
-				gas_limit,
-				storage_deposit_limit,
-				code,
-				data,
-				salt,
-				pallet_contracts::DebugInfo::UnsafeDebug,
-				pallet_contracts::CollectEvents::UnsafeCollect,
-			)
-		}
+	// 	fn instantiate(
+	// 		origin: AccountId,
+	// 		value: Balance,
+	// 		gas_limit: Option<Weight>,
+	// 		storage_deposit_limit: Option<Balance>,
+	// 		code: pallet_contracts_primitives::Code<Hash>,
+	// 		data: Vec<u8>,
+	// 		salt: Vec<u8>,
+	// 	) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance, EventRecord>
+	// 	{
+	// 		let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
+	// 		Contracts::bare_instantiate(
+	// 			origin,
+	// 			value,
+	// 			gas_limit,
+	// 			storage_deposit_limit,
+	// 			code,
+	// 			data,
+	// 			salt,
+	// 			pallet_contracts::DebugInfo::UnsafeDebug,
+	// 			pallet_contracts::CollectEvents::UnsafeCollect,
+	// 		)
+	// 	}
 
-		fn upload_code(
-			origin: AccountId,
-			code: Vec<u8>,
-			storage_deposit_limit: Option<Balance>,
-			determinism: pallet_contracts::Determinism,
-		) -> pallet_contracts_primitives::CodeUploadResult<Hash, Balance>
-		{
-			Contracts::bare_upload_code(
-				origin,
-				code,
-				storage_deposit_limit,
-				determinism,
-			)
-		}
+	// 	fn upload_code(
+	// 		origin: AccountId,
+	// 		code: Vec<u8>,
+	// 		storage_deposit_limit: Option<Balance>,
+	// 		determinism: pallet_contracts::Determinism,
+	// 	) -> pallet_contracts_primitives::CodeUploadResult<Hash, Balance>
+	// 	{
+	// 		Contracts::bare_upload_code(
+	// 			origin,
+	// 			code,
+	// 			storage_deposit_limit,
+	// 			determinism,
+	// 		)
+	// 	}
 
-		fn get_storage(
-			address: AccountId,
-			key: Vec<u8>,
-		) -> pallet_contracts_primitives::GetStorageResult {
-			Contracts::get_storage(
-				address,
-				key
-			)
-		}
-	}
+	// 	fn get_storage(
+	// 		address: AccountId,
+	// 		key: Vec<u8>,
+	// 	) -> pallet_contracts_primitives::GetStorageResult {
+	// 		Contracts::get_storage(
+	// 			address,
+	// 			key
+	// 		)
+	// 	}
+	// }
 
 	impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<Block, Balance> for Runtime {
 		fn query_info(

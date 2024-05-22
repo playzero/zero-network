@@ -34,7 +34,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn ChainSpec>, String> {
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Zero Network".into()
+		"Zero Canary Network".into()
 	}
 
 	fn impl_version() -> String {
@@ -43,7 +43,7 @@ impl SubstrateCli for Cli {
 
 	fn description() -> String {
 		format!(
-			"Zero Network\n\nThe command-line arguments provided first will be \
+			"Zero Canary Network\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relay chain node.\n\n\
 		{} <parachain-args> -- <relay-chain-args>",
@@ -60,7 +60,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn copyright_start_year() -> i32 {
-		2022
+		2020
 	}
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
@@ -74,7 +74,7 @@ impl SubstrateCli for Cli {
 
 impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"Zero Network".into()
+		"Zero Canary Network".into()
 	}
 
 	fn impl_version() -> String {
@@ -100,7 +100,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn copyright_start_year() -> i32 {
-		2022
+		2020
 	}
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
@@ -328,13 +328,14 @@ impl DefaultConfigurationValues for RelayChainCli {
 		30334
 	}
 
-	fn rpc_ws_listen_port() -> u16 {
+	// fn rpc_ws_listen_port() -> u16 {
+	fn rpc_listen_port() -> u16 {
 		9945
 	}
 
-	fn rpc_http_listen_port() -> u16 {
-		9934
-	}
+	// fn rpc_http_listen_port() -> u16 {
+	// 	9934
+	// }
 
 	fn prometheus_listen_port() -> u16 {
 		9616
@@ -365,17 +366,21 @@ impl CliConfiguration<Self> for RelayChainCli {
 			.or_else(|| self.base_path.clone().map(Into::into)))
 	}
 
-	fn rpc_http(&self, default_listen_port: u16) -> Result<Option<SocketAddr>> {
-		self.base.base.rpc_http(default_listen_port)
+	fn rpc_addr(&self, default_listen_port: u16) -> Result<Option<SocketAddr>> {
+		self.base.base.rpc_addr(default_listen_port)
 	}
 
-	fn rpc_ipc(&self) -> Result<Option<String>> {
-		self.base.base.rpc_ipc()
-	}
+	// fn rpc_http(&self, default_listen_port: u16) -> Result<Option<SocketAddr>> {
+	// 	self.base.base.rpc_http(default_listen_port)
+	// }
 
-	fn rpc_ws(&self, default_listen_port: u16) -> Result<Option<SocketAddr>> {
-		self.base.base.rpc_ws(default_listen_port)
-	}
+	// fn rpc_ipc(&self) -> Result<Option<String>> {
+	// 	self.base.base.rpc_ipc()
+	// }
+
+	// fn rpc_ws(&self, default_listen_port: u16) -> Result<Option<SocketAddr>> {
+	// 	self.base.base.rpc_ws(default_listen_port)
+	// }
 
 	fn prometheus_config(
 		&self,
@@ -420,8 +425,8 @@ impl CliConfiguration<Self> for RelayChainCli {
 		self.base.base.rpc_methods()
 	}
 
-	fn rpc_ws_max_connections(&self) -> Result<Option<usize>> {
-		self.base.base.rpc_ws_max_connections()
+	fn rpc_max_connections(&self) -> Result<u32> {
+		self.base.base.rpc_max_connections()
 	}
 
 	fn rpc_cors(&self, is_dev: bool) -> Result<Option<Vec<String>>> {
