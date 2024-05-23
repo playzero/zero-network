@@ -21,6 +21,13 @@ members = [
 	# "bin/zero/node",
 	# "bin/zero/runtime",
 
+	"modules/gamedao-protocol/traits",
+	"modules/gamedao-protocol/battlepass",
+	"modules/gamedao-protocol/control",
+	"modules/gamedao-protocol/signal",
+	"modules/gamedao-protocol/flow",
+	"modules/gamedao-protocol/sense",
+
 ]
 
 # The list of dependencies below (which can be both direct and indirect dependencies) are crates

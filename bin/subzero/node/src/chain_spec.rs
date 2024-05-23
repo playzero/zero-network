@@ -12,7 +12,7 @@ use gamedao_control::types::{OrgType, AccessModel, FeeModel};
 use orml_tokens;
 
 use primitives::{
-	currency::{ZERO, PLAY, GAME, KSM, TokenInfo, CurrencyId},
+	currency::{ZERO, PLAY, GAME, KSM, DOT, TokenInfo, CurrencyId},
 	cent, dollar, Balance
 };
 
@@ -266,15 +266,15 @@ pub fn development_subzero_config() -> ChainSpec {
 		"subzero-dev",
 		ChainType::Local,
 		// SECRET="..."
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//root" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//1//collator" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//1//aura" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//2//collator" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//2//aura" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//zero-treasury" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//gamedao-treasury" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//game3-treasury" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//prime" 
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//root"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//1//collator"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//1//aura"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//2//collator"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//2//aura"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//zero-treasury"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//gamedao-treasury"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//game3-treasury"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//prime"
 		move || {
 			subzero_genesis(
 				// Initial collators
@@ -348,19 +348,19 @@ pub fn staging_subzero_config() -> ChainSpec {
 		"subzero-stage",
 		ChainType::Local,
 		// SECRET="..."
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//root" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//1//collator" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//1//aura" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//2//collator" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//2//aura" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//3//collator" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//3//aura" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//4//collator" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//4//aura" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//zero-treasury" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//gamedao-treasury" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//game3-treasury" 
-		// docker run --rm parity/subkey inspect "$SECRET//subzero//prime" 
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//root"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//1//collator"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//1//aura"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//2//collator"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//2//aura"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//3//collator"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//3//aura"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//4//collator"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//4//aura"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//zero-treasury"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//gamedao-treasury"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//game3-treasury"
+		// docker run --rm parity/subkey inspect "$SECRET//subzero//prime"
 		move || {
 			subzero_genesis(
 				// Initial collators
