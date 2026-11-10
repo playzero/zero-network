@@ -15,9 +15,9 @@ COPY . /subzero
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 	export PATH="$PATH:$HOME/.cargo/bin" && \
-	rustup toolchain install nightly-2023-01-01 && \
-	rustup target add wasm32-unknown-unknown --toolchain nightly-2023-01-01 && \
-	rustup default nightly-2023-01-01 &&\
+	rustup toolchain install nightly-2023-10-01 && \
+	rustup target add wasm32-unknown-unknown --toolchain nightly-2023-10-01 && \
+	rustup default nightly-2023-10-01 &&\
 	rustup show
 
 # ===== STAGE 2 ======

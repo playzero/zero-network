@@ -17,5 +17,5 @@ path = "src/main.rs"
 name = "subkey"
 
 [dependencies]
-sc-cli = { version = "0.10.0-dev", path = "../../../client/cli" }
+sc-cli = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v0.9.40" }
 structopt = "0.3.25"

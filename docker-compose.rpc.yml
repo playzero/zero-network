@@ -1,0 +1,23 @@
+services:
+
+  rpc:
+    image: playzero/subzero-dev:3.2.100
+    user: "0:0"
+    ports:
+      - 9944:9944
+    volumes:
+      - .docker/local-relay-parachain/chainspec:/chainspec
+      - .docker/tmp/rpc:/tmp
+    command:
+      - /usr/local/bin/subzero
+      - --chain=/chainspec/subzero-parachain-raw.json
+      - --base-path=/tmp
+      - --rpc-external
+      - --rpc-cors=all
+      - --rpc-methods=unsafe
+      - --rpc-max-connections=1000
+      - --name=rpc
+      - --state-pruning=archive
+      - --bootnodes=/dns/c1/tcp/30333/p2p/12D3KooWBQB9MUka9nMcqXi3ANLUdu4FweQpMvw9VHpHveiYhsPx
+      - --
+      - --chain=/chainspec/rococo-local.json

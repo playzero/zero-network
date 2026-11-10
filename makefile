@@ -1,3 +1,19 @@
+run-local-dev:
+	./target/release/subzero \
+		--name=level-9000 \
+		--rpc-cors=all \
+		--unsafe-rpc-external \
+		--chain=./.docker/chainspec/subzero-dev.json \
+		--sync=fast-unsafe \
+		--state-pruning=256 \
+		--telemetry-url="wss://telemetry.polkadot.io/submit/ 0" \
+		--base-path=./.tmp/local/para-x \
+		-- \
+		--base-path=./.tmp/local/relay \
+		--sync=fast-unsafe \
+		--state-pruning=256 \
+        --chain=./.docker/chainspec/rococo-local.json
+
 run-local-node:
 	./target/release/subzero \
 		--name=level-9000

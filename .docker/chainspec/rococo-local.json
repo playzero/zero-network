@@ -221,7 +221,12 @@
         },
         "sudo": {
           "key": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
-        }
+        },
+		"async_backing_params": {
+			"max_candidate_depth": 3,
+			"allowed_ancestry_len": 2
+		},
+		"scheduling_lookahead": 2
       },
       "session_length_in_blocks": 10
     }

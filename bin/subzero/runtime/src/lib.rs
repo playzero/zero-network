@@ -208,7 +208,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("subzero"),
 	impl_name: create_runtime_str!("live"),
 	authoring_version: 75,
-	spec_version: 100,
+	spec_version: 101,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1193,18 +1193,24 @@ construct_runtime!(
 		ParachainInfo: parachain_info = 3,
 		Utility: pallet_utility = 4,
 		Multisig: pallet_multisig = 5,
+
 		Council: pallet_collective::<Instance1> = 6,
 		TechnicalCommittee: pallet_collective::<Instance2> = 7,
+		
 		Identity: pallet_identity = 8,
 		Bounties: pallet_bounties = 9,
 		ChildBounties: pallet_child_bounties = 10,
+		
 		Scheduler: pallet_scheduler = 11,
 		Preimage: pallet_preimage = 12,
 		Sudo: pallet_sudo = 13,
 		Proxy: pallet_proxy = 14,
+
 		Democracy: pallet_democracy = 15,
 		Elections: pallet_elections_phragmen = 16,
 		TechnicalMembership: pallet_membership::<Instance1> = 17,
+
+		//
 		RandomnessCollectiveFlip: pallet_insecure_randomness_collective_flip = 18,
 
 		// Contracts
@@ -1263,7 +1269,7 @@ mod benches {
 		[gamedao_sense, Sense]
 		[gamedao_control, Control]
 		[gamedao_signal, Signal]
-		// [gamedao_battlepass, Battlepass]
+		[gamedao_battlepass, Battlepass]
 	);
 }
 
